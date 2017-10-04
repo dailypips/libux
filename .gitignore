@@ -1,4 +1,6 @@
 *.swp
+bld/
+build/
 *.DS_Store
 *.[oa]
 *.l[oa]

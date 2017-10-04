@@ -47,6 +47,17 @@ datetime_t expect_time[EVENT_SIZE] = {
     1, 13, 24, 10, 30, 38, 1, 14, 20, 39, 17, 16
 };
 
+ux_event_t * event_tick_init(ux_event_t *e, int provider, int instrument, datetime_t exchange_timestamp, double price, long size)
+{
+    ux_event_tick_t * tick = (ux_event_tick_t *)e;
+    tick->exchange_timestamp = exchange_timestamp;
+    tick->instrument = instrument;
+    tick->provider = provider;
+    tick->price = price;
+    tick->size = size;
+    return e;
+}
+
 TEST_IMPL(ux_core_test) {
 
   ux_bus_t bus;
@@ -63,7 +74,8 @@ TEST_IMPL(ux_core_test) {
   printf("h1");
   /* prepare event */
   for (int i = 0; i < EVENT_SIZE; i++) {
-      event[i] = ux_event_new(UX_EVENT_ASK, /*instrument*/0, /*provider*/0, /*exchange_timestamp*/0, /*price*/1.0, /*size*/i);
+      event[i] = ux_event_malloc(UX_EVENT_ASK);
+      event_tick_init(event[i], i, i + 10000, 0, 1.0, i);
       event[i]->timestamp = etime[i];
   }
   printf("h2");
