@@ -62,10 +62,10 @@ BENCHMARK_IMPL(uxcore) {
 
   ASSERT(ticks == NUM_TICKS);
 
-  fprintf(stderr, "loop_count: %d ticks in %.2fs (%.0f/s)\n",
+  fprintf(stderr, "loop_count: %d ticks in %.2fs (%.0f_10K/s)\n",
           NUM_TICKS,
           ns / 1e9,
-          NUM_TICKS / (ns / 1e9));
+          NUM_TICKS / (ns / 1e9) / 10000);
   fflush(stderr);
 
   MAKE_VALGRIND_HAPPY();

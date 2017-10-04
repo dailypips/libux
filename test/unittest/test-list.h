@@ -22,7 +22,9 @@
 #include <uv.h>
 
 TEST_DECLARE(ux_core_test)
+TEST_DECLARE(ux_heap_test)
 
 TASK_LIST_START
     TEST_ENTRY(ux_core_test)
+    TEST_ENTRY(ux_heap_test)
 TASK_LIST_END

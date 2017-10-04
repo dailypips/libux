@@ -55,7 +55,7 @@ endif()
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # set binary output path if not defined by user
 if("${EXECUTABLE_OUTPUT_PATH}" STREQUAL "")
-    set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/bin")
+    set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}")
 endif()
 # set library output path if not defined by user, but always set
 # library output path to binary output path for Xcode projects
