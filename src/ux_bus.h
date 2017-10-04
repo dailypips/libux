@@ -5,8 +5,8 @@
  *                                                                            *
  * Distributed under the terms and conditions of the BSD 3-Clause License.    *
  ******************************************************************************/
-#ifndef UX_BUS_H
-#define UX_BUS_H
+#ifndef __UX_BUS_H__
+#define __UX_BUS_H__
 
 #include <stdint.h>
 #include "ux_common.h"
@@ -30,12 +30,18 @@ typedef struct ux_bus_s {
     uint64_t counter;
     datetime_t time[UX_CLOCK_LAST];
     ux_event_t *saved_event;
-    ux_queue_t attached[128];
+    ux_queue_t* attached[128];
     int attached_count;
+    int is_simulator_stop;
 }ux_bus_t;
 
 void ux_bus_init(ux_bus_t *bus, ux_bus_mode mode);
 void ux_bus_destory(ux_bus_t *bus);
+
+void ux_bus_clear(ux_bus_t *bus);
+
+void ux_bus_attach(ux_bus_t* src, ux_bus_t *dst);
+void ux_bus_detach(ux_bus_t* src, ux_bus_t *dst);
 
 void ux_bus_add_queue(ux_bus_t *bus, void *q);
 void ux_bus_remove_queue(ux_bus_t *bus, void *q);
@@ -46,4 +52,10 @@ void ux_bus_remove_timer(ux_bus_t *bus, ux_event_reminder_t* timer);
 ux_event_t* ux_bus_next_event(ux_bus_t *bus);
 int64_t ux_bus_next_timeout(ux_bus_t* bus);
 
-#endif // UX_BUS_H
+datetime_t ux_bus_get_time(ux_bus_t* bus);
+int ux_bus_set_time(ux_bus_t* bus, datetime_t time);
+
+datetime_t ux_bus_get_exchange_time(ux_bus_t* bus);
+int ux_bus_set_exchange_time(ux_bus_t* bus, datetime_t time);
+
+#endif // __UX_BUS_H__

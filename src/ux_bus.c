@@ -68,24 +68,6 @@ static int timer_less_than(const struct heap_node* ha,
     return 0;
 }
 
-void ux_bus_add_queue(ux_bus_t* bus, void* data)
-{
-    ux_queue_t* q = (ux_queue_t*)data;
-    q->bus = bus;
-    q->start_id = bus->counter++;
-    heap_insert((struct heap*)&bus->queue_heap[q->category],
-        (struct heap_node*)&q->heap_node,
-        queue_less_than);
-}
-
-void ux_bus_remove_queue(ux_bus_t* bus, void* data)
-{
-    ux_queue_t* q = (ux_queue_t*)data;
-    heap_remove((struct heap*)&bus->queue_heap[q->category],
-        (struct heap_node*)&q->heap_node,
-        queue_less_than);
-}
-
 static inline int event_is_tick(ux_event_t* e)
 {
     ux_event_type type = e->type;
@@ -103,7 +85,11 @@ static inline int heap_is_empty(min_heap* heap)
 static inline ux_queue_t* queue_heap_peek(min_heap* heap)
 {
     struct heap_node* node = heap_min((const struct heap*)heap);
+
+    assert(node != NULL);
+
     ux_queue_t* q = container_of(node, ux_queue_t, heap_node);
+
     return q;
 }
 
@@ -115,9 +101,6 @@ static ux_event_t* queue_heap_pop_event(min_heap* heap)
         return NULL;
 
     ux_queue_t* q = container_of(node, ux_queue_t, heap_node);
-
-    //unsigned int size = ux_queue_size(q);
-    //printf("queue_size = %d\n", size);
 
     heap_remove((struct heap*)heap,
         (struct heap_node*)node,
@@ -144,6 +127,8 @@ static inline ux_event_reminder_t* timer_heap_peek(min_heap* heap)
 {
     struct heap_node* node = heap_min((const struct heap*)heap);
 
+    assert(node != NULL);
+
     ux_event_reminder_t* timer = container_of(node, ux_event_reminder_t, heap_node);
 
     return timer;
@@ -169,38 +154,35 @@ static ux_event_reminder_t* timer_heap_pop(min_heap* heap)
     return timer;
 }
 
-datetime_t ux_bus_time(ux_bus_t* bus)
-{
-    return bus->time[UX_CLOCK_LOCAL];
-}
-
-void ux_bus_set_time(ux_bus_t* bus, datetime_t time)
-{
-    if (time < bus->time[UX_CLOCK_LOCAL]) {
-        LOG_OUT_OF_ORDER(bus, e);
-        return;
-    }
-    bus->time[UX_CLOCK_LOCAL] = time;
-}
-
-datetime_t ux_bus_exchange_time(ux_bus_t* bus)
-{
-    return bus->time[UX_CLOCK_EXCHANGE];
-}
-
-void ux_bus_set_exchange_time(ux_bus_t* bus, datetime_t time)
-{
-    if (time < bus->time[UX_CLOCK_EXCHANGE]) {
-        LOG_OUT_OF_ORDER(bus, e);
-        return;
-    }
-    bus->time[UX_CLOCK_EXCHANGE] = time;
-}
-
 static inline int pipe_is_empty(ux_bus_t* bus, ux_queue_category category)
 {
     return heap_is_empty(&bus->queue_heap[category]);
 }
+
+static void queue_heap_clear(min_heap *heap)
+{
+    struct heap_node* node;
+    while((node = heap_min((const struct heap*)heap)) != NULL) {
+        ux_queue_t* q = container_of(node, ux_queue_t, heap_node);
+        heap_remove((struct heap*)heap,
+            (struct heap_node*)node,
+            queue_less_than);
+        ux_queue_free(q);
+    }
+}
+
+static void timer_heap_clear(min_heap *heap)
+{
+    struct heap_node* node;
+    while((node = heap_min((const struct heap*)heap)) != NULL) {
+        ux_event_reminder_t* timer = container_of(node, ux_event_reminder_t, heap_node);
+        heap_remove((struct heap*)heap,
+            (struct heap_node*)node,
+            timer_less_than);
+        ux_event_unref((ux_event_t*)timer);
+    }
+}
+
 
 #if 0
 static void print_event(ux_event_t *e)
@@ -216,23 +198,28 @@ again:
     // market data
     if (!pipe_is_empty(bus, UX_CATEGORY_MARKET) && bus->saved_event == NULL) {
         ux_event_t* e = event_pop_form_pipe(bus, UX_CATEGORY_MARKET);
-        //print_event(e);
-        datetime_t bus_time = ux_bus_time(bus);
-        if (e->timestamp < bus_time) {
-            LOG_OUT_OF_ORDER(bus_time, e);
+
+        if (e->type == UX_EVENT_SIMULATOR_STOP) {
+            bus->is_simulator_stop = 1;
             goto again;
+        }
+
+        datetime_t bus_time = ux_bus_get_time(bus);
+        if (e->timestamp < bus_time) {
+            if (e->type != UX_EVENT_QUEUE_CLOSED && e->type != UX_EVENT_QUEUE_OPENED) {
+                if (e->type != UX_EVENT_SIMULATOR_PROGRESS) {
+                    LOG_OUT_OF_ORDER(bus_time, e);
+                    goto again;
+                }
+            }
+            e->timestamp = ux_bus_get_time(bus);
         }
         bus->saved_event = e;
     }
 
-    // execution
-    if (!pipe_is_empty(bus, UX_CATEGORY_EXECUTION)) {
-        return event_pop_form_pipe(bus, UX_CATEGORY_EXECUTION);
-    }
-
     // local clock
     if (!heap_is_empty(&bus->timer_heap[UX_CLOCK_LOCAL])) {
-        if (bus->saved_event) {
+        if (bus->saved_event != NULL) {
             ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&bus->timer_heap[UX_CLOCK_LOCAL]);
             if (r->timestamp <= bus->saved_event->timestamp) {
                 return (ux_event_t*)timer_heap_pop(&bus->timer_heap[UX_CLOCK_LOCAL]);
@@ -249,6 +236,11 @@ again:
         }
     }
 
+    // execution
+    if (!pipe_is_empty(bus, UX_CATEGORY_EXECUTION)) {
+        return event_pop_form_pipe(bus, UX_CATEGORY_EXECUTION);
+    }
+
     // service
     if (!pipe_is_empty(bus, UX_CATEGORY_SERVICE)) {
         return event_pop_form_pipe(bus, UX_CATEGORY_SERVICE);
@@ -262,6 +254,13 @@ again:
     if (bus->saved_event) {
         ux_event_t* e = bus->saved_event;
         bus->saved_event = NULL;
+        for(int i = 0; i < bus->attached_count; i++) {
+            if(e->type != UX_EVENT_QUEUE_OPENED && e->type != UX_EVENT_QUEUE_CLOSED) {
+                ux_queue_t *q = bus->attached[i];
+                ux_event_ref(e);
+                ux_queue_push(q, e);
+            }
+        }
         return e;
     }
 
@@ -278,7 +277,7 @@ static ux_event_t* bus_realtime_dequeue(ux_bus_t* bus)
     // local clock
     if (!heap_is_empty(&bus->timer_heap[UX_CLOCK_LOCAL])) {
         ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&bus->timer_heap[UX_CLOCK_LOCAL]);
-        if (r->timestamp <= ux_bus_time(bus)) {
+        if (r->timestamp <= ux_bus_get_time(bus)) {
             return (ux_event_t*)timer_heap_pop(&bus->timer_heap[UX_CLOCK_LOCAL]);
         }
     }
@@ -297,14 +296,14 @@ static ux_event_t* bus_realtime_dequeue(ux_bus_t* bus)
         return event_pop_form_pipe(bus, UX_CATEGORY_EXECUTION);
     }
 
-    // service
-    if (!pipe_is_empty(bus, UX_CATEGORY_SERVICE)) {
-        return event_pop_form_pipe(bus, UX_CATEGORY_SERVICE);
-    }
-
     // command
     if (!pipe_is_empty(bus, UX_CATEGORY_COMMAND)) {
         return event_pop_form_pipe(bus, UX_CATEGORY_COMMAND);
+    }
+
+    // service
+    if (!pipe_is_empty(bus, UX_CATEGORY_SERVICE)) {
+        return event_pop_form_pipe(bus, UX_CATEGORY_SERVICE);
     }
 
     if (bus->saved_event) {
@@ -333,12 +332,28 @@ int64_t ux_bus_next_timeout(ux_bus_t* bus)
         return 0;
 }
 
-void ux_bus_attach(ux_bus_t* bus)
+void ux_bus_attach(ux_bus_t* src, ux_bus_t *dst)
 {
+    int num = src->counter++;
+    src->attached[num] = ux_zalloc(sizeof(ux_queue_t));
+    if (src->attached[num] != NULL) {
+        ux_queue_init(src->attached[num], 10000, UX_CATEGORY_MARKET);
+            ux_bus_add_queue(dst, src->attached[num]);
+    }
 }
 
-void ux_bus_detach(ux_bus_t* bus)
+void ux_bus_detach(ux_bus_t* src, ux_bus_t *dst)
 {
+    for (int i = 0; i < src->attached_count; i++) {
+        ux_queue_t *q = src->attached[i];
+        assert(q != NULL);
+        if(q->bus == dst) {
+            ux_bus_remove_queue(dst, q); // todo: add test(remove q from heap when q not insert heap)
+            for (int j = i; j < src->attached_count - 1; j++)
+                src->attached[j] = src->attached[j + 1];
+            src->attached_count--;
+        }
+    }
 }
 
 void ux_bus_init(ux_bus_t* bus, ux_bus_mode mode)
@@ -357,12 +372,95 @@ void ux_bus_init(ux_bus_t* bus, ux_bus_mode mode)
     bus->time[UX_CLOCK_LOCAL] = MIN_DATE_TIME;
     bus->time[UX_CLOCK_EXCHANGE] = MIN_DATE_TIME;
 
-    /*for(int i = 0; i < sizeof(bus->attached)  / sizeof(ux_queue_t); i++)
-        ux_queue_init(&bus->attached[i], loop, 1000, UX_CATEGORY_MARKET);
-
-    bus->attached_count = 0;*/
+    memset(&bus->attached, '\0', sizeof(bus->attached));
+    bus->attached_count = 0;
+    bus->is_simulator_stop = 0;
 }
 
 void ux_bus_destory(ux_bus_t* bus)
 {
+    ux_bus_clear(bus);
+}
+
+void ux_bus_add_queue(ux_bus_t* bus, void* data)
+{
+    ux_queue_t* q = (ux_queue_t*)data;
+    q->bus = bus;
+    q->start_id = bus->counter++;
+    heap_insert((struct heap*)&bus->queue_heap[q->category],
+        (struct heap_node*)&q->heap_node,
+        queue_less_than);
+}
+
+void ux_bus_remove_queue(ux_bus_t* bus, void* data)
+{
+    ux_queue_t* q = (ux_queue_t*)data;
+    heap_remove((struct heap*)&bus->queue_heap[q->category],
+        (struct heap_node*)&q->heap_node,
+        queue_less_than);
+}
+
+void ux_bus_add_timer(ux_bus_t *bus, ux_event_reminder_t* timer)
+{
+    timer->bus = bus;
+    timer->start_id = bus->counter++;
+    heap_insert((struct heap*)&bus->timer_heap[timer->clock_type],
+        (struct heap_node*)&timer->heap_node,
+        timer_less_than);
+}
+
+void ux_bus_remove_timer(ux_bus_t *bus, ux_event_reminder_t* timer)
+{
+    heap_remove((struct heap*)&bus->timer_heap[timer->clock_type],
+        (struct heap_node*)&timer->heap_node,
+        timer_less_than);
+}
+
+datetime_t ux_bus_get_time(ux_bus_t* bus)
+{
+    return bus->time[UX_CLOCK_LOCAL];
+}
+
+int ux_bus_set_time(ux_bus_t* bus, datetime_t time)
+{
+    if (time < bus->time[UX_CLOCK_LOCAL]) {
+        return -1;
+    }
+    bus->time[UX_CLOCK_LOCAL] = time;
+    return 0;
+}
+
+datetime_t ux_bus_get_exchange_time(ux_bus_t* bus)
+{
+    return bus->time[UX_CLOCK_EXCHANGE];
+}
+
+int ux_bus_set_exchange_time(ux_bus_t* bus, datetime_t time)
+{
+    if (time < bus->time[UX_CLOCK_EXCHANGE]) {
+        return -1;
+    }
+    bus->time[UX_CLOCK_EXCHANGE] = time;
+    return 0;
+}
+
+void ux_bus_clear(ux_bus_t *bus)
+{
+    if (bus->saved_event != NULL) {
+        ux_event_unref(bus->saved_event);
+        bus->saved_event = NULL;
+    }
+
+    for (int i = 0; i < UX_CATEGORY_LAST; i++)
+        queue_heap_clear(&bus->queue_heap[i]);
+
+    for (int i = 0; i < UX_CLOCK_LAST; i++)
+        timer_heap_clear(&bus->timer_heap[i]);
+
+    for (int i = 0; i < bus->attached_count; i++) {
+        ux_queue_t *q = bus->attached[i];
+        ux_bus_detach(bus, q->bus);
+        ux_queue_destory(q);
+    }
+    bus->attached_count = 0;
 }

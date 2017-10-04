@@ -14,6 +14,8 @@
 #include "ux_mem.h"
 #include "ux_dispatch.h"
 
+#define free_if(x) if(x) ux_free(x);
+
 /* event class info */
 typedef void (*event_init)(ux_event_t* e, va_list args);
 typedef void (*event_destory)(ux_event_t* e);
@@ -101,7 +103,7 @@ ux_event_t* event_news_init(ux_event_t *e, int provider, int instrument, char *u
     return e;
 }
 
-#define free_if(x) if(x) ux_free(x);
+
 void event_news_destory(ux_event_t *e)
 {
      ux_event_news_t *news = (ux_event_news_t *)e;
@@ -117,6 +119,30 @@ ux_event_t* event_news_clone(ux_event_t *e)
     ux_event_news_t *news = (ux_event_news_t*)e;
     ux_event_news_t *item = (ux_event_news_t *)ux_event_malloc(UX_EVENT_NEWS);
     event_news_init((ux_event_t*)item, news->provider, news->instrument, news->urgency, news->url, news->headline, news->text);
+    return (ux_event_t*)item;
+}
+
+ux_event_t* event_exception_init(ux_event_t *e, char *source)
+{
+    ux_event_exception_t *exception = (ux_event_exception_t *)e;
+
+    exception->source = ux_strdup(source);
+
+    return e;
+}
+
+void event_exception_destory(ux_event_t *e)
+{
+     ux_event_exception_t *exception = (ux_event_exception_t *)e;
+     free_if(exception->source);
+}
+
+ux_event_t* event_exception_clone(ux_event_t *e)
+{
+    assert(e->type == UX_EVENT_EXCEPTION);
+    ux_event_exception_t *exception = (ux_event_exception_t*)e;
+    ux_event_exception_t *item = (ux_event_exception_t *)ux_event_malloc(UX_EVENT_EXCEPTION);
+    event_exception_init((ux_event_t*)item, exception->source);
     return (ux_event_t*)item;
 }
 

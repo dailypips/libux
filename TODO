@@ -1,0 +1,10 @@
+# TODO
+## Logger
+ * add plugin-base logger
+ * structured logger api
+## Bus
+* add attach/deatch other bus
+* review function
+* add extension pointer
+## Loop
+ * review all api

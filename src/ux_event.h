@@ -33,6 +33,11 @@ typedef enum {
     /* internal event */ \
     _(QUEUE_OPENED, queue_opened, NULL, NULL, NULL, default, UX_EVENT_FLAG_NONE) \
     _(QUEUE_CLOSED, queue_closed, NULL, NULL, NULL, default, UX_EVENT_FLAG_NONE) \
+    _(SIMULATOR_START, simulator_start, NULL, NULL, NULL, default, UX_EVENT_FLAG_NONE) \
+    _(SIMULATOR_STOP, simulator_stop, NULL, NULL, NULL, default, UX_EVENT_FLAG_NONE) \
+    _(SIMULATOR_PROGRESS, simulator_progress, NULL, NULL, NULL, default, UX_EVENT_FLAG_NONE) \
+    _(EXCEPTION, exception, NULL, event_exception_destory, event_exception_clone, default, UX_EVENT_FLAG_NONE)
+
 
 typedef enum {
 #define EVENTENUM(name, lname, init, destory, clone, processor, flag)	UX_EVENT_##name,
@@ -139,24 +144,34 @@ typedef struct {
     datetime_t time1;
     datetime_t time2;
     long long count;
-}ux_event_on_simulator_start_t;
+}ux_event_simulator_start_t;
 
 typedef struct {
     UX_EVENT_PUBLIC_FIELDS
-}ux_event_on_simulator_stop_t;
+}ux_event_simulator_stop_t;
+
+typedef struct {
+    UX_EVENT_PUBLIC_FIELDS
+}ux_event_simulator_progress_t;
 
 typedef struct {
     UX_EVENT_PUBLIC_FIELDS
     char *source;
-}ux_event_on_exception_t;
+}ux_event_exception_t;
 
 /* special event route */
 ux_event_t *event_reminder_init(ux_event_t *e, ux_clock_type ctype, reminder_cb callback, void *data);
 ux_event_t* event_tick_init(ux_event_t *e, int provider, int instrument, datetime_t exchange_timestamp, double price, long size);
+
 ux_event_t* event_news_init(ux_event_t *e, int provider, int instrument, char *urgency, char *url, char *headline, char *text);
 void event_news_destory(ux_event_t *e);
+ux_event_t* event_news_clone(ux_event_t *e);
+
 ux_event_t* event_fundamental_init(ux_event_t *e, int provider, int instrument);
-ux_event_t* event_on_simulator_start_init(ux_event_t *e, datetime_t time1, datetime_t time2, long long count);
-ux_event_t* event_execption_init(ux_event_t *e, char* source);
+ux_event_t* event_simulator_start_init(ux_event_t *e, datetime_t time1, datetime_t time2, long long count);
+
+ux_event_t* event_exception_init(ux_event_t *e, char *source);
+void event_exception_destory(ux_event_t *e);
+ux_event_t* event_exception_clone(ux_event_t *e);
 
 #endif // __UX_EVENT_H__

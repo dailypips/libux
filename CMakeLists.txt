@@ -116,8 +116,8 @@ if (NOT WIN32)
     add_definitions (-D_THREAD_SAFE)
     add_definitions (-D_POSIX_PTHREAD_SEMANTICS)
 
-    ux_check_func (gethrtime UX_HAVE_GETHRTIME)
-    ux_check_sym (CLOCK_MONOTONIC time.h UX_HAVE_CLOCK_MONOTONIC)
+    #ux_check_func (gethrtime UX_HAVE_GETHRTIME)
+    #ux_check_sym (CLOCK_MONOTONIC time.h UX_HAVE_CLOCK_MONOTONIC)
 endif ()
 
 ################################################################################
