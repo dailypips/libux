@@ -1,24 +1,3 @@
-/* Copyright Joyent, Inc. and other Node contributors. All rights reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to
- * deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
- */
-
 #include <uv.h>
 #include "task.h"
 #include "../src/ux_bus.h"
@@ -61,6 +40,7 @@ ux_event_t * event_tick_init(ux_event_t *e, int provider, int instrument, dateti
 TEST_IMPL(ux_core_test) {
 
   ux_bus_t bus;
+  ux_bus_t dstbus;
 
   ux_queue_t queue[QUEUE_SIZE];
 
@@ -70,6 +50,7 @@ TEST_IMPL(ux_core_test) {
       ux_queue_init(&queue[i],10000, UX_CATEGORY_MARKET);
   }
 
+  ux_bus_init(&bus, UX_BUS_SIMULATION);
   ux_bus_init(&bus, UX_BUS_SIMULATION);
   printf("h1");
   /* prepare event */
@@ -93,6 +74,8 @@ TEST_IMPL(ux_core_test) {
   ux_bus_add_queue(&bus, &queue[0]);
   ux_bus_add_queue(&bus, &queue[1]);
   ux_bus_add_queue(&bus, &queue[2]);
+
+  ux_bus_attach(&bus, &dstbus);
   printf("h4");
     ux_event_t *e;
     int j = 0;
@@ -103,10 +86,14 @@ TEST_IMPL(ux_core_test) {
   printf("h5");
   //ux_run(loop, UX_RUN_DEFAULT);
 
+  ux_bus_clear(&bus);
+  ux_bus_clear(&dstbus);
+
+
   /* clean event */
-  for(int i = 0; i < EVENT_SIZE; i++) {
+  /*for(int i = 0; i < EVENT_SIZE; i++) {
       ux_event_unref(event[i]);
-  }
+  }*/
 
   /* clear queue*/
 
