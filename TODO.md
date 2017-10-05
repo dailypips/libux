@@ -6,5 +6,6 @@
 * add attach/deatch other bus
 * review function
 * add extension pointer
+* timer api
 ## Loop
  * review all api
