@@ -125,9 +125,11 @@ static int test_event_order(ux_bus_mode mode)
         ASSERT(e->timestamp == all_time[z]);
         if (e->type == UX_EVENT_ASK)
         {
+#ifndef NDEBUG
             ASSERT_THEN(e->dummy == &queue[except[k].qindex],
                     fprintf(stderr, "event index:%d time:%" PRIu64 " except [%d] but [%d]\n", k, e->timestamp, except[k].qindex, ((ux_event_tick_t*)e)->provider);
             );
+#endif
             k++;
         }
         ux_event_unref(e);

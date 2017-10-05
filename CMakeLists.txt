@@ -8,7 +8,7 @@ set(PROJECT_BRIEF "Algorithmic Trading Library")
 
 project(${PROJECT_NAME} C)
 
-set(CMAKE_C_STANDARD 11)
+#set(CMAKE_C_STANDARD 11)
 
 # be nice to vim users
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
@@ -127,11 +127,11 @@ endif ()
 
 # set build default build type to RelWithDebInfo if not set
 if(NOT CMAKE_BUILD_TYPE)
+  if(LIBUX_ENABLE_TESTING)
+    set(CMAKE_BUILD_TYPE Debug)
+  else()
     set(CMAKE_BUILD_TYPE RelWithDebInfo)
-endif()
-
-if(LIBUX_ENABLE_TESTING)
-  set(CMAKE_BUILD_TYPE Debug)
+  endif()
 endif()
 
 # add extra flags

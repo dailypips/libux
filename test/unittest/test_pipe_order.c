@@ -90,10 +90,11 @@ static int test_pipe_event_order(ux_bus_mode mode, ux_queue_category category)
 
     while ((e = ux_bus_next_event(&bus)) != NULL) {
         ASSERT(e->timestamp == except[j].time);
-
+#ifndef NDEBUG
         ASSERT_THEN(e->dummy == &queue[except[j].qindex],
                 fprintf(stderr, "event index:%d time:%" PRIu64 " except [%d] but [%d]\n", j, e->timestamp, except[j].qindex, ((ux_event_tick_t*)e)->provider);
         );
+#endif
         ux_event_unref(e);
         j++;
     }
