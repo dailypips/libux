@@ -9,6 +9,10 @@ else()
   set(LIBUX_BUILD_TYPE STATIC)
 endif()
 
+if(LIBUX_ENABLE_AMALG)
+  set(UX_CORE_HEADER)
+  set(UX_CORE_SRC ux_amalg.c)
+else()
 set(UX_CORE_HEADER
 
 )
@@ -24,6 +28,7 @@ set(UX_CORE_SRC
         ux_loop.c
         ux_dispatch.c
 )
+endif()
 
 #if(WIN32)
 #  list(APPEND UX_CORE_SRC log_windows.c time_windows.c string_util_windows.c string_windows.c)

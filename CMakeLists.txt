@@ -30,6 +30,7 @@ include(GNUInstallDirs)
 option(LIBUX_ENABLE_TESTING "Enable unit test" ON)
 option(LIBUX_ENABLE_SHARED_BUILD "Enable build lib as shared library" ON)
 option(BUILD_TEST_SEPARATION "Enable build separation test" OFF)
+option(LIBUX_ENABLE_AMALG "Enable amalg build" OFF)
 ################################################################################
 #                              get version                                     #
 ################################################################################

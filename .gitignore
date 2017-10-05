@@ -1,6 +1,7 @@
 *.swp
 bld/
 build/
+doxygen/
 *.DS_Store
 *.[oa]
 *.l[oa]
