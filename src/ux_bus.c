@@ -68,7 +68,7 @@ static int timer_less_than(const struct heap_node* ha,
     return 0;
 }
 
-static inline int event_is_tick(ux_event_t* e)
+static UX_AINLINE int event_is_tick(ux_event_t* e)
 {
     ux_event_type type = e->type;
     if (type == UX_EVENT_ASK || type == UX_EVENT_BID || type == UX_EVENT_TRADE)
@@ -77,12 +77,12 @@ static inline int event_is_tick(ux_event_t* e)
         return 0;
 }
 
-static inline int heap_is_empty(min_heap* heap)
+static UX_AINLINE int heap_is_empty(min_heap* heap)
 {
     return heap_min((const struct heap*)heap) == NULL;
 }
 
-static inline ux_queue_t* queue_heap_peek(min_heap* heap)
+static UX_INLINE ux_queue_t* queue_heap_peek(min_heap* heap)
 {
     struct heap_node* node = heap_min((const struct heap*)heap);
 
@@ -118,12 +118,12 @@ static ux_event_t* queue_heap_pop_event(min_heap* heap)
     return e;
 }
 
-static inline ux_event_t* event_pop_form_pipe(ux_bus_t* bus, ux_queue_category category)
+static UX_INLINE ux_event_t* event_pop_form_pipe(ux_bus_t* bus, ux_queue_category category)
 {
     return queue_heap_pop_event(&bus->queue_heap[category]);
 }
 
-static inline ux_event_reminder_t* timer_heap_peek(min_heap* heap)
+static UX_INLINE ux_event_reminder_t* timer_heap_peek(min_heap* heap)
 {
     struct heap_node* node = heap_min((const struct heap*)heap);
 
@@ -154,7 +154,7 @@ static ux_event_reminder_t* timer_heap_pop(min_heap* heap)
     return timer;
 }
 
-static inline int pipe_is_empty(ux_bus_t* bus, ux_queue_category category)
+static UX_INLINE int pipe_is_empty(ux_bus_t* bus, ux_queue_category category)
 {
     return heap_is_empty(&bus->queue_heap[category]);
 }
@@ -167,7 +167,7 @@ static void queue_heap_clear(min_heap *heap)
         heap_remove((struct heap*)heap,
             (struct heap_node*)node,
             queue_less_than);
-        ux_queue_free(q);
+        ux_queue_unref(q);
     }
 }
 
@@ -182,15 +182,6 @@ static void timer_heap_clear(min_heap *heap)
         ux_event_unref((ux_event_t*)timer);
     }
 }
-
-
-#if 0
-static void print_event(ux_event_t *e)
-{
-    ux_event_tick_t* tick = (ux_event_tick_t*)e;
-    printf("-->time = %llu index = %d\n", e->timestamp, tick->provider);
-}
-#endif
 
 static ux_event_t* bus_simualtion_dequeue(ux_bus_t* bus)
 {

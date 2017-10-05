@@ -35,27 +35,27 @@ typedef struct ux_bus_s {
     int is_simulator_stop;
 }ux_bus_t;
 
-void ux_bus_init(ux_bus_t *bus, ux_bus_mode mode);
-void ux_bus_destory(ux_bus_t *bus);
+UX_FUNC void ux_bus_init(ux_bus_t *bus, ux_bus_mode mode);
+UX_FUNC void ux_bus_destory(ux_bus_t *bus);
 
-void ux_bus_clear(ux_bus_t *bus);
+UX_FUNC void ux_bus_clear(ux_bus_t *bus);
 
-void ux_bus_attach(ux_bus_t* src, ux_bus_t *dst);
-void ux_bus_detach(ux_bus_t* src, ux_bus_t *dst);
+UX_FUNC void ux_bus_attach(ux_bus_t* src, ux_bus_t *dst);
+UX_FUNC void ux_bus_detach(ux_bus_t* src, ux_bus_t *dst);
 
-void ux_bus_add_queue(ux_bus_t *bus, void *q);
-void ux_bus_remove_queue(ux_bus_t *bus, void *q);
+UX_FUNC void ux_bus_add_queue(ux_bus_t *bus, void *q);
+UX_FUNC void ux_bus_remove_queue(ux_bus_t *bus, void *q);
 
-void ux_bus_add_timer(ux_bus_t *bus, ux_event_reminder_t* timer);
-void ux_bus_remove_timer(ux_bus_t *bus, ux_event_reminder_t* timer);
+UX_FUNC void ux_bus_add_timer(ux_bus_t *bus, ux_event_reminder_t* timer);
+UX_FUNC void ux_bus_remove_timer(ux_bus_t *bus, ux_event_reminder_t* timer);
 
-ux_event_t* ux_bus_next_event(ux_bus_t *bus);
-int64_t ux_bus_next_timeout(ux_bus_t* bus);
+UX_FUNC ux_event_t* ux_bus_next_event(ux_bus_t *bus);
+UX_FUNC int64_t ux_bus_next_timeout(ux_bus_t* bus);
 
-datetime_t ux_bus_get_time(ux_bus_t* bus);
-int ux_bus_set_time(ux_bus_t* bus, datetime_t time);
+UX_FUNC datetime_t ux_bus_get_time(ux_bus_t* bus);
+UX_FUNC int ux_bus_set_time(ux_bus_t* bus, datetime_t time);
 
-datetime_t ux_bus_get_exchange_time(ux_bus_t* bus);
-int ux_bus_set_exchange_time(ux_bus_t* bus, datetime_t time);
+UX_FUNC datetime_t ux_bus_get_exchange_time(ux_bus_t* bus);
+UX_FUNC int ux_bus_set_exchange_time(ux_bus_t* bus, datetime_t time);
 
 #endif // __UX_BUS_H__

@@ -2,7 +2,7 @@
 #include "task.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <uv.h>
+#include <inttypes.h>
 
 #define QUEUE_SIZE 3
 #define EVENT_SIZE QUEUE_SIZE * 10
@@ -20,10 +20,17 @@ datetime_t etime[EVENT_SIZE] = {
 
 };
 
-datetime_t expect_time[EVENT_SIZE] = {
-    8, 10, 34, 19, 11, 33, 25, 39, 4, 30,
-    1, 6, 13, 3, 28, 24, 8, 10,
-    1, 13, 24, 10, 30, 38, 1, 14, 20, 39, 17, 16
+typedef struct {
+    datetime_t time;
+    int qindex;
+}result_except_t;
+
+result_except_t except[EVENT_SIZE] = {
+    {1, 1}, {1, 2}, {6, 1}, {8, 0}, {10, 0}, {13, 2}, {13, 1}, {3, 1},
+    {24, 2}, {10, 2}, {28, 1}, {24, 1}, {8, 1}, {10, 1},
+    {30, 2}, {34, 0}, {19, 0}, {11, 0}, {33, 0}, {25, 0},
+    {38, 2}, {1, 2}, {14, 2}, {20, 2}, {39, 0}, {4, 0}, {30, 0},
+    {39, 2}, {17, 2}, {16, 2}
 };
 
 ux_event_t* event_tick_init(ux_event_t* e, int provider, int instrument, datetime_t exchange_timestamp, double price, long size)
@@ -37,11 +44,10 @@ ux_event_t* event_tick_init(ux_event_t* e, int provider, int instrument, datetim
     return e;
 }
 
-TEST_IMPL(ux_core_test)
+TEST_IMPL(ux_bus_event_order)
 {
 
     ux_bus_t bus;
-    ux_bus_t dstbus;
 
     ux_queue_t queue[QUEUE_SIZE];
 
@@ -52,7 +58,7 @@ TEST_IMPL(ux_core_test)
     }
 
     ux_bus_init(&bus, UX_BUS_SIMULATION);
-    ux_bus_init(&dstbus, UX_BUS_SIMULATION);
+
 
     /* prepare event */
     for (int i = 0; i < EVENT_SIZE; i++) {
@@ -61,36 +67,54 @@ TEST_IMPL(ux_core_test)
         event[i]->timestamp = etime[i];
     }
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++) {
         ux_queue_push(&queue[0], event[i]);
+        ((ux_event_tick_t*)event[i])->provider = 0;
+    }
 
-    for (int i = 10; i < 18; i++)
+    for (int i = 10; i < 18; i++) {
         ux_queue_push(&queue[1], event[i]);
+        ((ux_event_tick_t*)event[i])->provider = 1;
+    }
 
-    for (int i = 18; i < 30; i++)
+    for (int i = 18; i < 30; i++) {
         ux_queue_push(&queue[2], event[i]);
+        ((ux_event_tick_t*)event[i])->provider = 2;
+    }
 
     ux_bus_add_queue(&bus, &queue[0]);
     ux_bus_add_queue(&bus, &queue[1]);
     ux_bus_add_queue(&bus, &queue[2]);
 
-    ux_bus_attach(&bus, &dstbus);
+    /* test event order */
     ux_event_t* e;
     int j = 0;
+
     while ((e = ux_bus_next_event(&bus)) != NULL) {
-        assert(e->timestamp == expect_time[j]);
+        ASSERT(e->timestamp == except[j].time);
+        if (except[j].qindex != ((ux_event_tick_t*)e)->provider) {
+            fprintf(stderr,"event index:%d time:%"PRIu64" except [%d] but [%d]\n", j, e->timestamp, except[j].qindex, ((ux_event_tick_t*)e)->provider);
+        }
+        ASSERT(e->dummy == &queue[except[j].qindex]);
+        ux_event_unref(e);
         j++;
     }
 
-    ux_bus_clear(&bus);
-    ux_bus_clear(&dstbus);
-
-    /* clean event */
+    ASSERT(j == EVENT_SIZE);
+    /* ASSERT event lifetime */
     for (int i = 0; i < EVENT_SIZE; i++) {
-        assert(event[i]->refcount == 0);
+        ASSERT(event[i]->refcount == 0);
     }
 
-    /* clear queue*/
+    /* clear bus*/
+
+    ux_bus_destory(&bus);
+
+    return 0;
+}
+
+TEST_IMPL(ux_bus_attach)
+{
 
     return 0;
 }

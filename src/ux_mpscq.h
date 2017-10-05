@@ -21,7 +21,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-
+#include "ux_common.h"
 #include "ux_atomic.h"
 
 // Multiple-producer single-consumer lock free queue, based upon the
@@ -41,14 +41,14 @@ typedef struct ux_mpscq_t {
   ux_mpscq_node stub;
 } ux_mpscq_t;
 
-void ux_mpscq_init(ux_mpscq_t *q);
-void ux_mpscq_destroy(ux_mpscq_t *q);
+UX_FUNC void ux_mpscq_init(ux_mpscq_t *q);
+UX_FUNC void ux_mpscq_destroy(ux_mpscq_t *q);
 // Push a node
-void ux_mpscq_push(ux_mpscq_t *q, ux_mpscq_node *n);
+UX_FUNC void ux_mpscq_push(ux_mpscq_t *q, ux_mpscq_node *n);
 // Pop a node (returns NULL if no node is ready - which doesn't indicate that
 // the queue is empty!!)
-ux_mpscq_node *ux_mpscq_pop(ux_mpscq_t *q);
+UX_FUNC ux_mpscq_node *ux_mpscq_pop(ux_mpscq_t *q);
 // Pop a node; sets *empty to true if the queue is empty, or false if it is not
-ux_mpscq_node *ux_mpscq_pop_and_check_end(ux_mpscq_t *q, bool *empty);
+UX_FUNC ux_mpscq_node *ux_mpscq_pop_and_check_end(ux_mpscq_t *q, bool *empty);
 
 #endif /* __UX_MPSCQ_H__ */

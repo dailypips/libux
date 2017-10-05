@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 project(core C)
 
+if(LIBUX_ENABLE_SHARED_BUILD)
+  add_definitions(-DUX_BUILD_SHARED -DUX_BUILD_LIBRARY)
+  set(LIBUX_BUILD_TYPE SHARED)
+else()
+  add_definitions(-DUX_BUILD_LIBRARY)
+  set(LIBUX_BUILD_TYPE STATIC)
+endif()
+
 set(UX_CORE_HEADER
 
 )
@@ -23,5 +31,5 @@ set(UX_CORE_SRC
 #  list(APPEND UX_CORE_SRC log_posix.c time_posix.c string_posix.c)
 #endif()
 
-add_library(uxcore SHARED  ${UX_CORE_HEADER} ${UX_CORE_SRC})
+add_library(uxcore ${LIBUX_BUILD_TYPE}  ${UX_CORE_HEADER} ${UX_CORE_SRC})
 target_link_libraries(uxcore ${UX_EXTERNAL_LIBRARIES})

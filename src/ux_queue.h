@@ -7,6 +7,12 @@
 #include "ux_spscq.h"
 #include "ux_mpscq.h"
 
+/*
+ * ux_queue_t
+ * 单生产者单消费者队列
+ * 队列内容的生命周期管理
+ * 队列并不管理内容的生命周期！！
+ */
 typedef struct ux_queue_s ux_queue_t;
 
 typedef void (*ux_queue_event_handle)(ux_queue_t* q);
@@ -14,6 +20,7 @@ typedef void (*ux_queue_event_handle)(ux_queue_t* q);
 struct ux_queue_s {
     void *data;
     /* private */
+    ux_atomic_t refcount;
     ux_spscq_t spsc;
     /* only access by consumer */
     void *bus;
@@ -26,47 +33,28 @@ struct ux_queue_s {
     uint64_t start_id;
 };
 
-ux_queue_t* ux_queue_init(ux_queue_t* q, unsigned int size, ux_queue_category category);
+UX_FUNC ux_queue_t* ux_queue_init(ux_queue_t* q, unsigned int size, ux_queue_category category);
 
-void ux_queue_destory(ux_queue_t *q);
+UX_FUNC void ux_queue_destory(ux_queue_t *q);
 
-void ux_queue_free(ux_queue_t *q);
+UX_FUNC void ux_queue_ref(ux_queue_t *q);
 
-static inline unsigned int ux_queue_size(ux_queue_t *q)
-{
-    return spsc_queue_size(&q->spsc);
-}
+UX_FUNC void ux_queue_unref(ux_queue_t *q);
 
-static inline unsigned int ux_queue_capacity(ux_queue_t *q)
-{
-    return spsc_queue_capacity(&q->spsc);
-}
+UX_EXPORT int ux_queue_push(ux_queue_t *q, void *e);
 
-static inline void *ux_queue_pop(ux_queue_t *q)
-{
-    return spsc_queue_pop(&q->spsc);
-}
+//UX_EXPORT void ux_queue_close(ux_queue_t *q);
 
-static inline void *ux_queue_peek(const ux_queue_t *q)
-{
-    return spsc_queue_peek(&q->spsc);
-}
+UX_FUNC unsigned int ux_queue_size(ux_queue_t *q);
 
-static inline int ux_queue_is_empty(ux_queue_t *q)
-{
-    return spsc_queue_is_empty(&q->spsc);
-}
+UX_FUNC unsigned int ux_queue_capacity(ux_queue_t *q);
 
-static inline int ux_queue_is_full(ux_queue_t *q)
-{
-    return spsc_queue_is_full(&q->spsc);
-}
+UX_FUNC void *ux_queue_pop(ux_queue_t *q);
 
-int ux_queue_push(ux_queue_t *q, void *e);
+UX_FUNC void *ux_queue_peek(const ux_queue_t *q);
 
-ux_queue_event_handle ux_queue_set_on_event(ux_queue_t *q, ux_queue_event_handle on_event);
+UX_FUNC int ux_queue_is_empty(ux_queue_t *q);
 
-//extern void _queue_on_event_callback(ux_queue_t *q, int flag);
-
+UX_FUNC int ux_queue_is_full(ux_queue_t *q);
 
 #endif // __UX_EVENT_QUEUE_H__

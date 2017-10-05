@@ -13,7 +13,7 @@
 
 ux_queue_t* ux_queue_init(ux_queue_t* q, unsigned int size, ux_queue_category category)
 {
-    int ret = spsc_queue_init(&q->spsc, size);
+    int ret = spscq_init(&q->spsc, size);
     if (ret < 0) {
         return NULL;
     }
@@ -21,35 +21,34 @@ ux_queue_t* ux_queue_init(ux_queue_t* q, unsigned int size, ux_queue_category ca
     q->on_event = NULL;
     q->category = category;
     return q;
-    return q;
 }
 
 void ux_queue_destory(ux_queue_t* q)
 {
-    //TODO: unref all events in queue
     ux_event_t* e;
     while ((e = ux_queue_pop(q)))
         ux_event_unref(e);
 
-    spsc_queue_destroy(&q->spsc);
+    spscq_destroy(&q->spsc);
 }
 
-void ux_queue_free(ux_queue_t* q)
+static void ux_queue_free(ux_queue_t* q)
 {
     ux_queue_destory(q);
     ux_free(q);
 }
 
-/* only access by consumer
- * so don't using lock or atomic
- */
-ux_queue_event_handle ux_queue_set_on_event(ux_queue_t* q, ux_queue_event_handle on_event)
+void ux_queue_ref(ux_queue_t *q)
 {
-    //ux_queue_event_handle old = ux_atomic_full_xchg(&q->on_event, (ux_atomic_t)(on_event));
-    //return old;
-    ux_queue_event_handle old = q->on_event;
-    q->on_event = on_event;
-    return old;
+  assert(q != NULL);
+  ux_atomic_full_fetch_add(&q->refcount, 1);
+}
+
+void ux_queue_unref(ux_queue_t *q)
+{
+   assert(q != NULL);
+   if(ux_atomic_full_fetch_add(&q->refcount, -1) == 1)
+       ux_queue_free(q);
 }
 
 /* 这里要改
@@ -66,10 +65,12 @@ ux_queue_event_handle ux_queue_set_on_event(ux_queue_t* q, ux_queue_event_handle
 int ux_queue_push(ux_queue_t* q, void* e)
 {
     int is_empty = 0;
-    if (spsc_queue_is_empty(&q->spsc))
+    if (spscq_is_empty(&q->spsc))
         is_empty = 1;
 
-    int ret = spsc_queue_push(&q->spsc, e);
+    ((ux_event_t*)e)->dummy = q;
+
+    int ret = spscq_push(&q->spsc, e);
 
     if (is_empty && q->on_event) {
         UX_ASSERT(ret == 0);
@@ -77,4 +78,34 @@ int ux_queue_push(ux_queue_t* q, void* e)
     }
 
     return ret;
+}
+
+unsigned int ux_queue_size(ux_queue_t *q)
+{
+    return spscq_size(&q->spsc);
+}
+
+unsigned int ux_queue_capacity(ux_queue_t *q)
+{
+    return spscq_capacity(&q->spsc);
+}
+
+void *ux_queue_pop(ux_queue_t *q)
+{
+    return spscq_pop(&q->spsc);
+}
+
+void *ux_queue_peek(const ux_queue_t *q)
+{
+    return spscq_peek(&q->spsc);
+}
+
+int ux_queue_is_empty(ux_queue_t *q)
+{
+    return spscq_is_empty(&q->spsc);
+}
+
+int ux_queue_is_full(ux_queue_t *q)
+{
+    return spscq_is_full(&q->spsc);
 }

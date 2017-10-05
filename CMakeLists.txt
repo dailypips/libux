@@ -28,7 +28,7 @@ include(GNUInstallDirs)
 #                              set project options                             #
 ################################################################################
 option(LIBUX_ENABLE_TESTING "Enable unit test" ON)
-
+option(LIBUX_ENABLE_SHARED_BUILD "Enable build lib as shared library" ON)
 ################################################################################
 #                              get version                                     #
 ################################################################################

@@ -10,6 +10,7 @@
 
 #include "ux_spscq.h"
 #include "ux_mpscq.h"
+#include "ux_common.h"
 #include <uv.h>
 #include <stddef.h>
 #include "ux_bus.h"
@@ -40,14 +41,14 @@ typedef enum {
     UX_RUN_NOWAIT
 }ux_run_mode;
 
-void ux_loop_init(ux_loop_t *loop);
-void ux_loop_destory(ux_loop_t *loop);
-void ux_loop_run(ux_loop_t *loop, ux_run_mode mode);
-void ux_loop_stop(ux_loop_t *loop);
-void ux_loop_wakeup(ux_loop_t* loop);
+UX_EXPORT void ux_loop_init(ux_loop_t *loop);
+UX_EXPORT void ux_loop_destory(ux_loop_t *loop);
+UX_EXPORT void ux_loop_run(ux_loop_t *loop, ux_run_mode mode);
+UX_EXPORT void ux_loop_stop(ux_loop_t *loop);
+UX_EXPORT void ux_loop_wakeup(ux_loop_t* loop);
 
 /* thread safe */
-void ux_async_post(ux_loop_t *loop, ux_async_cb async_cb, void *data);
+UX_EXPORT void ux_async_post(ux_loop_t *loop, ux_async_cb async_cb, void *data);
 
 void ux_loop_add_queue(ux_loop_t *loop, void *q);
 void ux_loop_remove_queue(ux_loop_t *loop, void *q);

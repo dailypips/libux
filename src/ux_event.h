@@ -51,16 +51,17 @@ EVENTDEF(EVENTENUM)
     ux_event_type type;        \
     ux_event_flag flag;        \
     datetime_t timestamp;       \
+    void *dummy;
 
 typedef struct ux_event_s {
   UX_EVENT_PUBLIC_FIELDS
 }ux_event_t;
 
-ux_event_t* ux_event_malloc(ux_event_type type);
-ux_event_t* ux_event_ref(ux_event_t *e);
-void ux_event_unref(ux_event_t *e);
-ux_event_t* ux_event_clone(ux_event_t *e);
-void ux_event_dispatch(void *loop, ux_event_t *e);
+UX_EXPORT ux_event_t* ux_event_malloc(ux_event_type type);
+UX_EXPORT ux_event_t* ux_event_ref(ux_event_t *e);
+UX_EXPORT void ux_event_unref(ux_event_t *e);
+UX_EXPORT ux_event_t* ux_event_clone(ux_event_t *e);
+UX_FUNC   void ux_event_dispatch(void *loop, ux_event_t *e);
 
 /* reminder */
 
@@ -160,18 +161,18 @@ typedef struct {
 }ux_event_exception_t;
 
 /* special event route */
-ux_event_t *event_reminder_init(ux_event_t *e, ux_clock_type ctype, reminder_cb callback, void *data);
-ux_event_t* event_tick_init(ux_event_t *e, int provider, int instrument, datetime_t exchange_timestamp, double price, long size);
+UX_FUNC ux_event_t *event_reminder_init(ux_event_t *e, ux_clock_type ctype, reminder_cb callback, void *data);
+UX_FUNC ux_event_t* event_tick_init(ux_event_t *e, int provider, int instrument, datetime_t exchange_timestamp, double price, long size);
 
-ux_event_t* event_news_init(ux_event_t *e, int provider, int instrument, char *urgency, char *url, char *headline, char *text);
-void event_news_destory(ux_event_t *e);
-ux_event_t* event_news_clone(ux_event_t *e);
+UX_FUNC ux_event_t* event_news_init(ux_event_t *e, int provider, int instrument, char *urgency, char *url, char *headline, char *text);
+UX_FUNC void event_news_destory(ux_event_t *e);
+UX_FUNC ux_event_t* event_news_clone(ux_event_t *e);
 
-ux_event_t* event_fundamental_init(ux_event_t *e, int provider, int instrument);
-ux_event_t* event_simulator_start_init(ux_event_t *e, datetime_t time1, datetime_t time2, long long count);
+UX_FUNC ux_event_t* event_fundamental_init(ux_event_t *e, int provider, int instrument);
+UX_FUNC ux_event_t* event_simulator_start_init(ux_event_t *e, datetime_t time1, datetime_t time2, long long count);
 
-ux_event_t* event_exception_init(ux_event_t *e, char *source);
-void event_exception_destory(ux_event_t *e);
-ux_event_t* event_exception_clone(ux_event_t *e);
+UX_FUNC ux_event_t* event_exception_init(ux_event_t *e, char *source);
+UX_FUNC void event_exception_destory(ux_event_t *e);
+UX_FUNC ux_event_t* event_exception_clone(ux_event_t *e);
 
 #endif // __UX_EVENT_H__

@@ -21,10 +21,12 @@
 
 #include <uv.h>
 
-TEST_DECLARE(ux_core_test)
+TEST_DECLARE(ux_bus_attach)
+TEST_DECLARE(ux_bus_event_order)
 TEST_DECLARE(ux_heap_test)
 
 TASK_LIST_START
-    TEST_ENTRY(ux_core_test)
+    TEST_ENTRY(ux_bus_event_order)
+    TEST_ENTRY(ux_bus_attach)
     TEST_ENTRY(ux_heap_test)
 TASK_LIST_END
