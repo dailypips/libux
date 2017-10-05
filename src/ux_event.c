@@ -208,7 +208,7 @@ void ux_event_unref(ux_event_t *event)
 
 ux_event_t* ux_event_malloc(ux_event_type type)
 {
-    assert(!event_check_type(type) == 0);
+    assert(event_check_type(type) == 0);
     ux_event_t* e = ux_zalloc(_eventclassinfo[type].size);
     if (e) {
         e->type = type;

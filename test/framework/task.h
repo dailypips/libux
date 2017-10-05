@@ -105,6 +105,21 @@ typedef enum {
   }                                                       \
  } while (0)
 
+#define ASSERT_THEN(expr, blah)                           \
+ do {                                                     \
+  if (!(expr)) {                                          \
+    fprintf(stderr,                                       \
+            "Assertion failed in %s on line %d: %s\n",    \
+            __FILE__,                                     \
+            __LINE__,                                     \
+            #expr);                                       \
+    do {                                                  \
+      blah;                                               \
+    } while (0);                                          \
+                                                          \
+    abort();                                              \
+  }                                                       \
+ } while (0)
 /* This macro cleans up the main loop. This is used to avoid valgrind
  * warnings about memory being "leaked" by the main event loop.
  */
@@ -114,10 +129,17 @@ typedef enum {
     ASSERT(0 == uv_loop_close(uv_default_loop()));  \
   } while (0)
 
+#ifdef BUILD_TEST_SEPARATION
+#define TEST_IMPL(name)                                                       \
+  int main(void)
+
+#else
 /* Just sugar for wrapping the main() for a task or helper. */
 #define TEST_IMPL(name)                                                       \
   int run_test_##name(void);                                                  \
   int run_test_##name(void)
+
+#endif
 
 #define BENCHMARK_IMPL(name)                                                  \
   int run_benchmark_##name(void);                                             \

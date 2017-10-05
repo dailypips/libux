@@ -52,28 +52,14 @@ TEST_IMPL(ux_heap_test)
         (struct heap_node*)&node1.heap_node,
         node_less_than);
 
-    printf("min: %16p  ", heap.queue_heap.min);
-    printf("node [%16p] L:%16p R:%16p P:%16p   ", &node.heap_node, node.heap_node[0], node.heap_node[1], node.heap_node[2]);
-    printf("node1[%16p] L:%16p R:%16p P:%16p\n",&node1.heap_node, node1.heap_node[0], node1.heap_node[1], node1.heap_node[2]);
-    fflush(stdout);
     heap_remove((struct heap*)&heap.queue_heap,
         (struct heap_node*)&node.heap_node,
         node_less_than);
-
-    printf("min: %16p  ", heap.queue_heap.min);
-    printf("node [%16p] L:%16p R:%16p P:%16p   ", &node.heap_node, node.heap_node[0], node.heap_node[1], node.heap_node[2]);
-    printf("node1[%16p] L:%16p R:%16p P:%16p\n",&node1.heap_node, node1.heap_node[0], node1.heap_node[1], node1.heap_node[2]);
-    fflush(stdout);
 
     node.start_id = heap.counter++;
     heap_remove((struct heap*)&heap.queue_heap,
         (struct heap_node*)&node.heap_node,
         node_less_than);
-
-    printf("min: %16p  ", heap.queue_heap.min);
-    printf("node [%16p] L:%16p R:%16p P:%16p   ", &node.heap_node, node.heap_node[0], node.heap_node[1], node.heap_node[2]);
-    printf("node1[%16p] L:%16p R:%16p P:%16p\n",&node1.heap_node, node1.heap_node[0], node1.heap_node[1], node1.heap_node[2]);
-    fflush(stdout);
 
     return 0;
 }

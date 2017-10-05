@@ -29,6 +29,7 @@ include(GNUInstallDirs)
 ################################################################################
 option(LIBUX_ENABLE_TESTING "Enable unit test" ON)
 option(LIBUX_ENABLE_SHARED_BUILD "Enable build lib as shared library" ON)
+option(BUILD_TEST_SEPARATION "Enable build separation test" OFF)
 ################################################################################
 #                              get version                                     #
 ################################################################################
@@ -127,6 +128,10 @@ endif ()
 # set build default build type to RelWithDebInfo if not set
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE RelWithDebInfo)
+endif()
+
+if(LIBUX_ENABLE_TESTING)
+  set(CMAKE_BUILD_TYPE Debug)
 endif()
 
 # add extra flags

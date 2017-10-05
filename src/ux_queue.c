@@ -67,8 +67,9 @@ int ux_queue_push(ux_queue_t* q, void* e)
     int is_empty = 0;
     if (spscq_is_empty(&q->spsc))
         is_empty = 1;
-
+#ifndef NDEBUG
     ((ux_event_t*)e)->dummy = q;
+#endif
 
     int ret = spscq_push(&q->spsc, e);
 

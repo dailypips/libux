@@ -46,12 +46,20 @@ EVENTDEF(EVENTENUM)
     UX_EVENT_LAST
 } ux_event_type;
 
+#ifdef NDEBUG
 #define UX_EVENT_PUBLIC_FIELDS \
     ux_atomic_t refcount;        \
     ux_event_type type;        \
     ux_event_flag flag;        \
-    datetime_t timestamp;       \
-    void *dummy;
+    datetime_t timestamp;
+#else
+#define UX_EVENT_PUBLIC_FIELDS \
+    ux_atomic_t refcount;        \
+    ux_event_type type;        \
+    ux_event_flag flag;        \
+    datetime_t timestamp; \
+    void* dummy;
+#endif
 
 typedef struct ux_event_s {
   UX_EVENT_PUBLIC_FIELDS

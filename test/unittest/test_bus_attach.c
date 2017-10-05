@@ -1,19 +1,13 @@
 #include "../src/ux_bus.h"
 #include "task.h"
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <inttypes.h>
 
 #define QUEUE_SIZE 3
 #define EVENT_SIZE QUEUE_SIZE * 10
 
-/* random [rmin, rmax] */
-int random_range(int rmin, int rmax)
-{
-    return (rand() % (rmax - rmin + 1)) + rmin;
-}
-
-datetime_t etime[EVENT_SIZE] = {
+static datetime_t etime[EVENT_SIZE] = {
     8, 10, 34, 19, 11, 33, 25, 39, 4, 30,
     1, 6, 13, 3, 28, 24, 8, 10,
     1, 13, 24, 10, 30, 38, 1, 14, 20, 39, 17, 16
@@ -23,17 +17,17 @@ datetime_t etime[EVENT_SIZE] = {
 typedef struct {
     datetime_t time;
     int qindex;
-}result_except_t;
+} result_except_t;
 
-result_except_t except[EVENT_SIZE] = {
-    {1, 1}, {1, 2}, {6, 1}, {8, 0}, {10, 0}, {13, 2}, {13, 1}, {3, 1},
-    {24, 2}, {10, 2}, {28, 1}, {24, 1}, {8, 1}, {10, 1},
-    {30, 2}, {34, 0}, {19, 0}, {11, 0}, {33, 0}, {25, 0},
-    {38, 2}, {1, 2}, {14, 2}, {20, 2}, {39, 0}, {4, 0}, {30, 0},
-    {39, 2}, {17, 2}, {16, 2}
+static result_except_t except[EVENT_SIZE] = {
+    { 1, 1 }, { 1, 2 }, { 6, 1 }, { 8, 0 }, { 10, 0 }, { 13, 2 }, { 13, 1 }, { 3, 1 },
+    { 24, 2 }, { 10, 2 }, { 28, 1 }, { 24, 1 }, { 8, 1 }, { 10, 1 },
+    { 30, 2 }, { 34, 0 }, { 19, 0 }, { 11, 0 }, { 33, 0 }, { 25, 0 },
+    { 38, 2 }, { 1, 2 }, { 14, 2 }, { 20, 2 }, { 39, 0 }, { 4, 0 }, { 30, 0 },
+    { 39, 2 }, { 17, 2 }, { 16, 2 }
 };
 
-ux_event_t* event_tick_init(ux_event_t* e, int provider, int instrument, datetime_t exchange_timestamp, double price, long size)
+static ux_event_t* tick_init(ux_event_t* e, int provider, int instrument, datetime_t exchange_timestamp, double price, long size)
 {
     ux_event_tick_t* tick = (ux_event_tick_t*)e;
     tick->exchange_timestamp = exchange_timestamp;
@@ -44,26 +38,30 @@ ux_event_t* event_tick_init(ux_event_t* e, int provider, int instrument, datetim
     return e;
 }
 
-TEST_IMPL(ux_bus_event_order)
+static void on_push(ux_queue_t *q)
 {
+    assert(q->bus != NULL);
+    ux_bus_add_queue(q->bus, q);
+}
 
-    ux_bus_t bus;
+static int test_attach(ux_bus_mode mode)
+{
+    ux_bus_t bus1, bus2;
 
     ux_queue_t queue[QUEUE_SIZE];
-
     ux_event_t* event[EVENT_SIZE];
 
     for (int i = 0; i < QUEUE_SIZE; i++) {
         ux_queue_init(&queue[i], 10000, UX_CATEGORY_MARKET);
     }
 
-    ux_bus_init(&bus, UX_BUS_SIMULATION);
-
+    ux_bus_init(&bus1, mode);
+    ux_bus_init(&bus2, mode);
 
     /* prepare event */
     for (int i = 0; i < EVENT_SIZE; i++) {
         event[i] = ux_event_malloc(UX_EVENT_ASK);
-        event_tick_init(event[i], i, i + 10000, 0, 1.0, i);
+        tick_init(event[i], i, i + 10000, 0, 1.0, i);
         event[i]->timestamp = etime[i];
     }
 
@@ -82,21 +80,26 @@ TEST_IMPL(ux_bus_event_order)
         ((ux_event_tick_t*)event[i])->provider = 2;
     }
 
-    ux_bus_add_queue(&bus, &queue[0]);
-    ux_bus_add_queue(&bus, &queue[1]);
-    ux_bus_add_queue(&bus, &queue[2]);
+    ux_bus_add_queue(&bus1, &queue[0]);
+    ux_bus_add_queue(&bus1, &queue[1]);
+    ux_bus_add_queue(&bus1, &queue[2]);
+
+
+    ux_bus_attach(&bus1, &bus2);
+    ux_queue_t * q = bus1.attached[bus1.attached_count - 1];
+    q->on_event = on_push;
 
     /* test event order */
-    ux_event_t* e;
+    ux_event_t* e1, *e2;
     int j = 0;
 
-    while ((e = ux_bus_next_event(&bus)) != NULL) {
-        ASSERT(e->timestamp == except[j].time);
-        if (except[j].qindex != ((ux_event_tick_t*)e)->provider) {
-            fprintf(stderr,"event index:%d time:%"PRIu64" except [%d] but [%d]\n", j, e->timestamp, except[j].qindex, ((ux_event_tick_t*)e)->provider);
-        }
-        ASSERT(e->dummy == &queue[except[j].qindex]);
-        ux_event_unref(e);
+    while ((e1 = ux_bus_next_event(&bus1)) != NULL) {
+        e2 = ux_bus_next_event(&bus2);
+        ASSERT_THEN(e1 == e2,
+            fprintf(stderr, "index:%d e1: %p, e2:%p\n", j, e1, e2);
+       );
+        ux_event_unref(e1);
+        ux_event_unref(e1);
         j++;
     }
 
@@ -107,14 +110,14 @@ TEST_IMPL(ux_bus_event_order)
     }
 
     /* clear bus*/
-
-    ux_bus_destory(&bus);
-
+    ux_bus_detach(&bus1, &bus2);
+    ux_bus_destory(&bus1);
+    ux_bus_destory(&bus2);
     return 0;
 }
 
 TEST_IMPL(ux_bus_attach)
 {
-
+    test_attach(UX_BUS_SIMULATION);
     return 0;
 }

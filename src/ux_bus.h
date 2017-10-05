@@ -20,7 +20,8 @@ typedef struct {
 
 typedef enum {
     UX_BUS_SIMULATION,
-    UX_BUS_REALTIME
+    UX_BUS_REALTIME,
+    UX_BUS_MODE_LAST
 }ux_bus_mode;
 
 typedef struct ux_bus_s {
@@ -51,6 +52,7 @@ UX_FUNC void ux_bus_remove_timer(ux_bus_t *bus, ux_event_reminder_t* timer);
 
 UX_FUNC ux_event_t* ux_bus_next_event(ux_bus_t *bus);
 UX_FUNC int64_t ux_bus_next_timeout(ux_bus_t* bus);
+UX_FUNC ux_event_reminder_t* ux_bus_next_reminder(ux_bus_t* bus, ux_clock_type type);
 
 UX_FUNC datetime_t ux_bus_get_time(ux_bus_t* bus);
 UX_FUNC int ux_bus_set_time(ux_bus_t* bus, datetime_t time);
