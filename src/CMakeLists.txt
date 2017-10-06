@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 project(core C)
 
 if(LIBUX_ENABLE_SHARED_BUILD)
-  add_definitions(-DUX_BUILD_SHARED -DUX_BUILD_LIBRARY)
+  add_definitions(-DUX_BUILD_SHARED -DUX_BUILD_LIBRARY -DBUILDING_UX_SHARED)
   set(LIBUX_BUILD_TYPE SHARED)
 else()
   add_definitions(-DUX_BUILD_LIBRARY)
@@ -14,7 +14,8 @@ if(LIBUX_ENABLE_AMALG)
   set(UX_CORE_SRC ux_amalg.c)
 else()
 set(UX_CORE_HEADER
-
+  ../../include/ux.h
+  ux_internal.h
 )
 
 set(UX_CORE_SRC

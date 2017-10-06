@@ -12,7 +12,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "ux_atomic.h"
-#include "ux_mem.h"
 #include "ux_common.h"
 
 #ifdef __cplusplus

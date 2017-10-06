@@ -1,4 +1,4 @@
-#include "../src/ux_bus.h"
+#include "../src/ux_internal.h"
 #include "task.h"
 #include <inttypes.h>
 #include <stdio.h>
@@ -70,7 +70,7 @@ static void timer_init(ux_event_reminder_t* e, ux_clock_type ctype, datetime_t t
 
 static int test_event_order(ux_bus_mode mode)
 {
-    ux_bus_t bus;
+    ux_loop_t bus;
 
     ux_queue_t queue[QUEUE_SIZE];
 

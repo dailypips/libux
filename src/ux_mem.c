@@ -1,61 +1,103 @@
-#include "ux_mem.h"
-#include <stdio.h>
+#include <stdlib.h> /* malloc */
+#include <string.h> /* memset */
 
+#if defined(_WIN32)
+#include <malloc.h> /* malloc */
+#endif
 
-char *ux_strdup(const char *src) {
-  char *dst;
-  size_t len;
+#include <assert.h>
+#include <errno.h>
+#include <ux.h>
 
-  if (!src) {
-    return NULL;
-  }
+typedef struct {
+    ux_malloc_func local_malloc;
+    ux_realloc_func local_realloc;
+    ux_calloc_func local_calloc;
+    ux_free_func local_free;
+} ux__allocator_t;
 
-  len = strlen(src) + 1;
-  dst = (char *)ux_malloc(len);
+static ux__allocator_t ux__allocator = {
+    malloc,
+    realloc,
+    calloc,
+    free,
+};
 
-  memcpy(dst, src, len);
-
-  return dst;
+char* ux_strdup(const char* s)
+{
+    assert(s != NULL);
+    size_t len = strlen(s) + 1;
+    char* m = ux_malloc(len);
+    if (m == NULL)
+        return NULL;
+    return memcpy(m, s, len);
 }
 
-int ux_asprintf(char **strp, const char *format, ...) {
-  va_list args;
-  int ret;
-  char buf[64];
-  size_t strp_buflen;
+char* ux_strndup(const char* s, size_t n)
+{
+    assert(s != NULL);
+    char* m;
+    size_t len = strlen(s);
+    if (n < len)
+        len = n;
+    m = ux_malloc(len + 1);
+    if (m == NULL)
+        return NULL;
+    m[len] = '\0';
+    return memcpy(m, s, len);
+}
 
-  /* Use a constant-sized buffer to determine the length. */
-  va_start(args, format);
-  ret = vsnprintf(buf, sizeof(buf), format, args);
-  va_end(args);
-  if (ret < 0) {
-    *strp = NULL;
-    return -1;
-  }
+void* ux_malloc(size_t size)
+{
+    assert(size > 0);
+    return ux__allocator.local_malloc(size);
+}
 
-  /* Allocate a new buffer, with space for the NUL terminator. */
-  strp_buflen = (size_t)ret + 1;
-  if ((*strp = (char *)ux_malloc(strp_buflen)) == NULL) {
-    /* This shouldn't happen, because ux_malloc() calls abort(). */
-    return -1;
-  }
+void ux_free(void* ptr)
+{
+    assert(ptr != NULL);
+    int saved_errno;
 
-  /* Return early if we have all the bytes. */
-  if (strp_buflen <= sizeof(buf)) {
-    memcpy(*strp, buf, strp_buflen);
-    return ret;
-  }
+    saved_errno = errno;
+    ux__allocator.local_free(ptr);
+    errno = saved_errno;
+}
 
-  /* Try again using the larger buffer. */
-  va_start(args, format);
-  ret = vsnprintf(*strp, strp_buflen, format, args);
-  va_end(args);
-  if ((size_t)ret == strp_buflen - 1) {
-    return ret;
-  }
+void* ux_calloc(size_t count, size_t size)
+{
+    assert(count * size > 0);
+    return ux__allocator.local_calloc(count, size);
+}
 
-  /* This should never happen. */
-  ux_free(*strp);
-  *strp = NULL;
-  return -1;
+void* ux_realloc(void* ptr, size_t size)
+{
+    assert(ptr != NULL);
+    assert(size > 0);
+    return ux__allocator.local_realloc(ptr, size);
+}
+
+void* ux_zalloc(size_t size)
+{
+    assert(size > 0);
+    void* p = ux_malloc(size);
+    if (p)
+        memset(p, '\0', size);
+    return p;
+}
+
+int ux_replace_allocator(ux_malloc_func malloc_func,
+    ux_realloc_func realloc_func,
+    ux_calloc_func calloc_func,
+    ux_free_func free_func)
+{
+    if (malloc_func == NULL || realloc_func == NULL || calloc_func == NULL || free_func == NULL) {
+        return -1;
+    }
+
+    ux__allocator.local_malloc = malloc_func;
+    ux__allocator.local_realloc = realloc_func;
+    ux__allocator.local_calloc = calloc_func;
+    ux__allocator.local_free = free_func;
+
+    return 0;
 }

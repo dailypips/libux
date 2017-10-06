@@ -1,8 +1,4 @@
-#include "ux_common.h"
-#include "ux_loop.h"
-#include "ux_dispatch.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "ux_internal.h"
 
 void ux_event_default_dispatch(ux_loop_t *loop, ux_event_t *e)
 {

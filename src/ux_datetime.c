@@ -11,7 +11,7 @@
 #include <assert.h>
 #include <sys/time.h>
 #include <time.h>
-#include "ux_datetime.h"
+#include "ux_internal.h"
 
 #define TICKS_PER_SECOND UINT64_C(1000000)
 #define TICKS_PER_DAY UINT64_C(86400000000)

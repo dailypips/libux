@@ -1,4 +1,4 @@
-#include "../src/ux_bus.h"
+#include "../src/ux_internal.h"
 #include "task.h"
 #include <inttypes.h>
 #include <stdio.h>
@@ -40,13 +40,13 @@ static ux_event_t* tick_init(ux_event_t* e, int provider, int instrument, dateti
 
 static void on_push(ux_queue_t *q)
 {
-    assert(q->bus != NULL);
-    ux_bus_add_queue(q->bus, q);
+    assert(q->loop != NULL);
+    ux_bus_add_queue(q->loop, q);
 }
 
 static int test_attach(ux_bus_mode mode)
 {
-    ux_bus_t bus1, bus2;
+    ux_loop_t bus1, bus2;
 
     ux_queue_t queue[QUEUE_SIZE];
     ux_event_t* event[EVENT_SIZE];

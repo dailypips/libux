@@ -9,7 +9,7 @@
 #include "task.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "../src/ux_queue.h"
+#include "../src/ux_internal.h"
 #include "../src/ux_mpscq.h"
 #include <assert.h>
 

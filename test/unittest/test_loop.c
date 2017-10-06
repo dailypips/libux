@@ -1,7 +1,7 @@
 #include "task.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "../src/ux_loop.h"
+#include "../src/ux_internal.h"
 #include <assert.h>
 
 

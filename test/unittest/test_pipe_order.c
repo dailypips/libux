@@ -1,4 +1,4 @@
-#include "../src/ux_bus.h"
+#include "../src/ux_internal.h"
 #include "task.h"
 #include <inttypes.h>
 #include <stdio.h>
@@ -46,7 +46,7 @@ static ux_event_t* tick_init(ux_event_t* e, int provider, int instrument, dateti
 
 static int test_pipe_event_order(ux_bus_mode mode, ux_queue_category category)
 {
-    ux_bus_t bus;
+    ux_loop_t bus;
 
     ux_queue_t queue[QUEUE_SIZE];
 

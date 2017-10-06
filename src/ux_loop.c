@@ -1,17 +1,13 @@
-#include "ux_loop.h"
-#include "ux_event.h"
-#include "heap-inl.h"
-#include "ux_mpscq.h"
-#include "ux_bus.h"
+#include "ux_internal.h"
+
+static void loop_add_queue(ux_loop_t *loop, void *q)
+{
+    ux_bus_add_queue(loop, q);
+}
 
 void ux_loop_add_queue(ux_loop_t* loop, void* data)
 {
-    ux_bus_add_queue(&loop->bus, data);
-}
-
-void ux_loop_remove_queue(ux_loop_t* loop, void* data)
-{
-    ux_bus_remove_queue(&loop->bus, data);
+    ux_async_post(loop, loop_add_queue, data);
 }
 
 static inline void timewait(ux_loop_t* loop, int64_t timeout)
@@ -37,6 +33,7 @@ void ux_async_post(ux_loop_t *loop, ux_async_cb async_cb, void *data)
     async->async_cb = async_cb;
     async->data = data;
     async->loop = loop;
+
     ux_mpscq_push(&loop->async_queue, &async->mpsc_node);
     ux_loop_wakeup(loop);
 }
@@ -51,7 +48,7 @@ void ux_loop_run(ux_loop_t* loop, ux_run_mode mode)
             async_node->async_cb(loop, async_node->data);
         }
         /* step 2: pop bus */
-        ux_event_t* e = ux_bus_next_event(&loop->bus);
+        ux_event_t* e = ux_bus_next_event(loop);
 
         if (e != NULL) {
             ux_event_dispatch(loop, e);
@@ -61,7 +58,7 @@ void ux_loop_run(ux_loop_t* loop, ux_run_mode mode)
             if (mode == UX_RUN_NOWAIT)
                 break;
 
-            int64_t timeout = ux_bus_next_timeout(&loop->bus);
+            int64_t timeout = ux_bus_next_timeout(loop);
             timewait(loop, timeout);
         }
     }
@@ -79,7 +76,7 @@ void ux_loop_init(ux_loop_t *loop)
     loop->stop_flag = 0;
     ux_mpscq_init(&loop->async_queue);
 
-   ux_bus_init(&loop->bus, UX_BUS_SIMULATION);
+   ux_bus_init(loop, UX_BUS_SIMULATION);
 }
 
 void ux_loop_destory(ux_loop_t *loop)

@@ -17,7 +17,6 @@
  */
 
 #include "ux_mpscq.h"
-#include "ux_common.h"
 
 void ux_mpscq_init(ux_mpscq_t *q) {
   ux_atomic_no_barrier_store(&q->head, (ux_atomic_t)&q->stub);

@@ -6,13 +6,7 @@
  * Distributed under the terms and conditions of the BSD 3-Clause License.    *
  ******************************************************************************/
 
-#include <string.h>
-#include "ux_event.h"
-#include <stdarg.h>
-#include <assert.h>
-#include "ux_datetime.h"
-#include "ux_mem.h"
-#include "ux_dispatch.h"
+#include "ux_internal.h"
 
 #define free_if(x) if(x) ux_free(x);
 
@@ -32,7 +26,7 @@ typedef struct _ux_event_class_info_t {
 } ux_event_class_info_t;
 
 /*
-ux_event_t *event_reminder_init(ux_event_t *e, ux_clock_type ctype, reminder_cb callback, void *data)
+ux_event_t *event_reminder_init(ux_event_t *e, ux_clock_type ctype, ux_reminder_cb callback, void *data)
 {
     ux_event_reminder_t *revent = (ux_event_reminder_t *)e;
 
