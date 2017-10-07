@@ -1,16 +1,5 @@
 #include "ux_internal.h"
 
-static inline void timewait(ux_loop_t* loop, int64_t timeout)
-{
-    if(timeout < 0) return;
-    uv_mutex_lock(&loop->wait_mutex);
-    if (timeout > 0)
-        uv_cond_timedwait(&loop->wait_cond, &loop->wait_mutex, timeout);
-    else
-        uv_cond_wait(&loop->wait_cond, &loop->wait_mutex);
-    uv_mutex_unlock(&loop->wait_mutex);
-}
-
 void ux_wakeup(ux_loop_t* loop)
 {
     uv_cond_signal(&loop->wait_cond);
@@ -33,13 +22,25 @@ static void loop_dispatch_event(ux_loop_t *loop, ux_event_t *e)
         dispatcher(loop, e);
 }
 
-int64_t bus_next_timeout(ux_loop_t *loop)
+static int64_t bus_next_timeout(ux_loop_t *loop)
 {
     ux_event_reminder_t *r = bus_timer_peek(loop, UX_CLOCK_LOCAL);
+
     if (r)
-        return r->timeout - datetime_now();
+        return r->stop - ux_time_now();
+
+    return 0;
+}
+
+static inline void timewait(ux_loop_t* loop, int64_t timeout)
+{
+    if(timeout < 0) return;
+    uv_mutex_lock(&loop->wait_mutex);
+    if (timeout > 0)
+        uv_cond_timedwait(&loop->wait_cond, &loop->wait_mutex, timeout);
     else
-        return 0;
+        uv_cond_wait(&loop->wait_cond, &loop->wait_mutex);
+    uv_mutex_unlock(&loop->wait_mutex);
 }
 
 void ux_run(ux_loop_t* loop, ux_run_mode mode)

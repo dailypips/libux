@@ -50,9 +50,9 @@ static int timer_less_than(const struct heap_node* ha,
     a = container_of(ha, ux_event_reminder_t, heap_node);
     b = container_of(hb, ux_event_reminder_t, heap_node);
 
-    if (a->timeout < b->timeout)
+    if (a->stop < b->stop)
         return 1;
-    if (b->timeout < a->timeout)
+    if (b->stop < a->stop)
         return 0;
 
     if (a->start_id < b->start_id)
@@ -136,6 +136,7 @@ static ux_event_reminder_t* timer_heap_pop(min_heap* heap)
     if (timer->repeat != 0) {
         ux_loop_t *loop = timer->loop;
         timer->start_id = loop->counter++;
+        timer->stop = timer->stop + timer->repeat;
         heap_insert((struct heap*)heap,
             (struct heap_node*)node,
             timer_less_than);
@@ -205,7 +206,7 @@ next:
     if (!heap_is_empty(&loop->timer_heap[UX_CLOCK_LOCAL])) {
         if (loop->saved_event != NULL) {
             ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&loop->timer_heap[UX_CLOCK_LOCAL]);
-            if (r->timeout <= loop->saved_event->timestamp) {
+            if (r->stop <= loop->saved_event->timestamp) {
                 return (ux_event_t*)timer_heap_pop(&loop->timer_heap[UX_CLOCK_LOCAL]);
             }
         }
@@ -215,7 +216,7 @@ next:
     if (!heap_is_empty(&loop->timer_heap[UX_CLOCK_EXCHANGE])
         && loop->saved_event != NULL && event_is_tick(loop->saved_event)) {
         ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&loop->timer_heap[UX_CLOCK_EXCHANGE]);
-        if (r->timeout <= loop->saved_event->timestamp) {
+        if (r->stop <= loop->saved_event->timestamp) {
             return (ux_event_t*)timer_heap_pop(&loop->timer_heap[UX_CLOCK_EXCHANGE]);
         }
     }
@@ -261,7 +262,7 @@ static ux_event_t* bus_realtime_dequeue(ux_loop_t *loop)
     // local clock timer
     if (!heap_is_empty(&loop->timer_heap[UX_CLOCK_LOCAL])) {
         ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&loop->timer_heap[UX_CLOCK_LOCAL]);
-        if (r->timeout <= bus_get_time(loop)) {
+        if (r->stop <= bus_get_time(loop)) {
             return (ux_event_t*)timer_heap_pop(&loop->timer_heap[UX_CLOCK_LOCAL]);
         }
     }
@@ -270,7 +271,7 @@ static ux_event_t* bus_realtime_dequeue(ux_loop_t *loop)
     if (!heap_is_empty(&loop->timer_heap[UX_CLOCK_EXCHANGE]) && loop->saved_event != NULL
         && event_is_tick(loop->saved_event)) {
         ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&loop->timer_heap[UX_CLOCK_EXCHANGE]);
-        if (r->timeout <= loop->saved_event->timestamp) {
+        if (r->stop <= loop->saved_event->timestamp) {
             return (ux_event_t*)timer_heap_pop(&loop->timer_heap[UX_CLOCK_EXCHANGE]);
         }
     }
@@ -411,7 +412,7 @@ ux_time_t bus_get_time(ux_loop_t *loop)
     if (loop->mode == UX_BUS_SIMULATION)
         return loop->time[UX_CLOCK_LOCAL];
     else
-        return datetime_now();
+        return ux_time_now();
 }
 
 int bus_set_time(ux_loop_t *loop, ux_time_t time)
