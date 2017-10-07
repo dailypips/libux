@@ -48,6 +48,7 @@ extern "C" {
 #endif
 
 #include <sys/time.h> // timeval
+#include <time.h>   // struct tm
 
 /* memory module */
 typedef void* (*ux_malloc_func)(size_t size);

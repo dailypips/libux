@@ -5,10 +5,11 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <string.h>
 #include <uv.h>
 #include <ux.h>
-#include "ux_atomic.h"
 #include <assert.h>
+#include "ux_atomic.h"
 #include "ux_common.h"
 
 #ifdef __cplusplus

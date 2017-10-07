@@ -42,6 +42,7 @@ if(WIN32)
   list(APPEND UX_TEST_FRAME_HEADER framework/runner-win.h)
 else(WIN32)
   list(APPEND UX_TEST_FRAME_HEADER framework/runner-unix.h)
+    list(APPEND UX_EXTERNAL_LIBRARIES pthread)
 endif()
 
 set(UX_TEST_FRAME_SRC
