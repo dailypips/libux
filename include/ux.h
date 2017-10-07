@@ -96,6 +96,9 @@ UX_EXTERN ux_time_t datetime_now(void);
 /* atomic module */
 typedef intptr_t ux_atomic_t;
 
+/* trade module */
+typedef uint16_t ux_currency_t;
+
 /* event module */
 #define EVENTDEF(_)                                                                            \
     /* UppercaseName        LowcaseName         destory        clone           dispatch*/      \
@@ -226,8 +229,8 @@ typedef enum {
 }ux_level2_action;
 
 typedef enum {
-    UX_SIDE_BID,
-    UX_SIDE_ASK,
+    UX_L2SIDE_BID,
+    UX_L2SIDE_ASK,
 }ux_level2_side;
 
 typedef struct {
@@ -302,6 +305,155 @@ static double ux_bar_get_average(ux_event_bar_t *bar)
 {
     return (bar->high + bar->low + bar->open+ bar->close) / 4.0;
 }
+
+/* execution */
+#define UX_EVENT_EXECUTION_PUBLIC_FIELDS \
+    int provider;   \
+    int instrument; \
+    int id; \
+    int order_id; \
+    char *client_order_id; \
+    char *provider_order_id; \
+    int client_id; \
+    int is_loadded; \
+    ux_currency_t currency; \
+
+typedef struct {
+    UX_EVENT_PUBLIC_FIELDS
+    UX_EVENT_EXECUTION_PUBLIC_FIELDS
+    int portfolio;
+    double amount;
+    char *text;
+}ux_event_account_report_t;
+
+
+typedef enum {
+    UX_EXEC_NEW,
+    UX_EXEC_STOPPED,
+    UX_EXEC_REJECTED,
+    UX_EXEC_EXPIRED,
+    UX_EXEC_TRADE,
+    UX_EXEC_PENDING_CANCEL,
+    UX_EXEC_CANCELLED,
+    UX_EXEC_CANCEL_REJECT,
+    UX_EXEC_PENDING_REPLACE,
+    UX_EXEC_REPLACE,
+    UX_EXEC_REPLACE_REJECT,
+    UX_EXEC_TRADE_CORRECT,
+    UX_EXEC_TRADE_CANCEL,
+    UX_EXEC_ORDER_STATUS,
+    UX_EXEC_PENDING_NEW,
+    UX_EXEC_CLEARING_HOLD
+}ux_exec_type;
+
+typedef enum {
+    UX_ORDER_TYPE_MARKET,
+    UX_ORDER_TYPE_STOP,
+    UX_ORDER_TYPE_LIMIT,
+    UX_ORDER_TYPE_STOP_LIMIT,
+    UX_ORDER_TYPE_MARKET_CLOSE,
+    UX_ORDER_TYPE_PEGGED,
+    UX_ORDER_TYPE_TRAILING_STOP,
+    UX_ORDER_TYPE_TRAILING_STOP_LIMIT
+}ux_order_type;
+
+typedef enum {
+    UX_ORDER_STATUS_NOT_SENT,
+    UX_ORDER_STATUS_PENDING_NEW,
+    UX_ORDER_STATUS_NEW,
+    UX_ORDER_STATUS_REJECTED,
+    UX_ORDER_STATUS_PARTIALLY_FILLED,
+    UX_ORDER_STATUS_FILLED,
+    UX_ORDER_STATUS_PENDING_CANCEL,
+    UX_ORDER_STATUS_CANCELLED,
+    UX_ORDER_STATUS_EXPIRED,
+    UX_ORDER_STATUS_PENDING_REPLACE,
+    UX_ORDER_STATUS_REPLACED
+}ux_order_status;
+
+typedef enum {
+    UX_TIF_ATC,
+    UX_TIF_DAY,
+    UX_TIF_GTC,
+    UX_TIF_IOC,
+    UX_TIF_OPG,
+    UX_TIF_OC,
+    UX_TIF_FOK,
+    UX_TIF_GTX,
+    UX_TIF_GTD,
+    UX_TIF_GFS,
+    UX_TIF_AUC
+}ux_tif;
+
+typedef enum {
+    UX_SIDE_BUY,
+    UX_SIDE_SELL
+}ux_order_side;
+
+typedef struct {
+    UX_EVENT_PUBLIC_FIELDS
+    UX_EVENT_EXECUTION_PUBLIC_FIELDS
+    int route_id;
+    int algo;
+    int portfolio;
+    int strategy_id;
+    ux_time_t transact_time;
+    double min_qty;
+    double peg_difference;
+    char* exec_inst;
+    char* oca;
+    char* account;
+    char* clientID;
+    ux_exec_type exec_type;
+    ux_order_type order_type;
+    ux_order_side order_side;
+    ux_tif tif;
+    ux_time_t expire_time;
+    ux_order_status order_status;
+    double last_price;
+    double avg_price;
+    double order_qty;
+    double cum_qty;
+    double last_qty;
+    double leaves_qty;
+    double price;
+    double stop_price;
+    double commission;
+    char* text;
+    char* exec_id;
+}ux_event_execution_report_t;
+
+
+typedef enum {
+    UX_EXECUTION_COMMAND_SEND,
+    UX_EXECUTION_COMMAND_CANCEL,
+    UX_EXECUTION_COMMAND_REPLACE
+}ux_execution_command_type;
+
+typedef struct {
+    UX_EVENT_PUBLIC_FIELDS
+    UX_EVENT_EXECUTION_PUBLIC_FIELDS
+    int route_id;
+    ux_execution_command_type execution_command_type;
+    char* symbol;
+    int algo;
+    int portfolio;
+    int strategy_id;
+    ux_time_t transact_time;
+    ux_order_side order_side;
+    ux_order_type order_type;
+    ux_tif tif;
+    double price;
+    double stop_price;
+    double qty;
+    double min_qty;
+    double peg_difference;
+    char* exec_inst;
+    char* oca;
+    char* text;
+    char* account;
+    char* clientID;
+}ux_event_execution_command_t;
 
 /* system */
 typedef struct {
