@@ -31,16 +31,6 @@ typedef struct _ux_event_class_info_t {
 
 extern ux_event_class_info_t g_eventclassinfo[UX_EVENT_LAST];
 
-/*UX_FUNC void ux_event_dispatch(void *loop, ux_event_t *e);
-
-UX_FUNC void event_news_destory(ux_event_t *e);
-UX_FUNC ux_event_t* event_news_clone(ux_event_t *e);
-
-UX_FUNC ux_event_t* event_simulator_start_init(ux_event_t *e, datetime_t time1, datetime_t time2, long long count);
-
-UX_FUNC void event_exception_destory(ux_event_t *e);
-UX_FUNC ux_event_t* event_exception_clone(ux_event_t *e);*/
-
 /* queue module */
 #include "ux_spscq.h"
 #include "ux_mpscq.h"
@@ -61,25 +51,18 @@ struct ux_queue_s {
 };
 
 UX_FUNC ux_queue_t* ux_queue_init(ux_queue_t* q, unsigned int size, ux_queue_category category);
-
 UX_FUNC void ux_queue_destory(ux_queue_t *q);
 
 UX_FUNC void ux_queue_ref(ux_queue_t *q);
-
 UX_FUNC void ux_queue_unref(ux_queue_t *q);
 
-//UX_EXTERN void ux_queue_close(ux_queue_t *q);
-
 UX_FUNC unsigned int ux_queue_size(ux_queue_t *q);
-
 UX_FUNC unsigned int ux_queue_capacity(ux_queue_t *q);
 
+UX_FUNC void *ux_queue_peek(const ux_queue_t *q);
 UX_FUNC void *ux_queue_pop(ux_queue_t *q);
 
-UX_FUNC void *ux_queue_peek(const ux_queue_t *q);
-
 UX_FUNC int ux_queue_is_empty(ux_queue_t *q);
-
 UX_FUNC int ux_queue_is_full(ux_queue_t *q);
 
 typedef struct {

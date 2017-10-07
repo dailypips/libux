@@ -18,60 +18,73 @@
 
 #include "ux_mpscq.h"
 
-void mpscq_init(mpscq_t *q) {
-  ux_atomic_no_barrier_store(&q->head, (ux_atomic_t)&q->sentinel);
-  q->tail = &q->sentinel;
-  ux_atomic_no_barrier_store(&q->sentinel.next, (ux_atomic_t)NULL);
+void mpscq_init(mpscq_t* q)
+{
+    ux_atomic_no_barrier_store(&q->head, (ux_atomic_t)&q->sentinel);
+    q->tail = &q->sentinel;
+    ux_atomic_no_barrier_store(&q->sentinel.next, (ux_atomic_t)NULL);
 }
 
-void mpscq_destroy(mpscq_t *q) {
-  UX_ASSERT(ux_atomic_no_barrier_load(&q->head) == (ux_atomic_t)&q->sentinel);
-  UX_ASSERT(q->tail == &q->sentinel);
+void mpscq_destroy(mpscq_t* q)
+{
+    UX_ASSERT(ux_atomic_no_barrier_load(&q->head) == (ux_atomic_t)&q->sentinel);
+    UX_ASSERT(q->tail == &q->sentinel);
 }
 
-void mpscq_push(mpscq_t *q, mpscq_node *n) {
-  ux_atomic_no_barrier_store(&n->next, (ux_atomic_t)NULL);
-  mpscq_node *prev =
-      (mpscq_node *)ux_atomic_full_xchg(&q->head, (ux_atomic_t)n);
-  ux_atomic_rel_store(&prev->next, (ux_atomic_t)n);
+void mpscq_push(mpscq_t* q, mpscq_node* n)
+{
+    ux_atomic_no_barrier_store(&n->next, (ux_atomic_t)NULL);
+    mpscq_node* prev = (mpscq_node*)ux_atomic_full_xchg(&q->head, (ux_atomic_t)n);
+    ux_atomic_rel_store(&prev->next, (ux_atomic_t)n);
 }
 
-mpscq_node *mpscq_pop(mpscq_t *q) {
-  bool empty;
-  return mpscq_pop_and_check_end(q, &empty);
+mpscq_node* mpscq_pop(mpscq_t* q)
+{
+    bool empty;
+    return mpscq_pop_and_check_end(q, &empty);
 }
 
-mpscq_node *mpscq_pop_and_check_end(mpscq_t *q, bool *empty) {
-  mpscq_node *tail = q->tail;
-  mpscq_node *next = (mpscq_node *)ux_atomic_acq_load(&tail->next);
-  if (tail == &q->sentinel) {
-    // indicates the list is actually (ephemerally) empty
-    if (next == NULL) {
-      *empty = true;
-      return NULL;
+int mpscq_is_empty(mpscq_t* q)
+{
+    mpscq_node* tail = q->tail;
+    mpscq_node* next = (mpscq_node*)ux_atomic_acq_load(&tail->next);
+    if (tail == &q->sentinel && next == NULL)
+        return 1;
+    return 0;
+}
+
+mpscq_node* mpscq_pop_and_check_end(mpscq_t* q, bool* empty)
+{
+    mpscq_node* tail = q->tail;
+    mpscq_node* next = (mpscq_node*)ux_atomic_acq_load(&tail->next);
+    if (tail == &q->sentinel) {
+        // indicates the list is actually (ephemerally) empty
+        if (next == NULL) {
+            *empty = true;
+            return NULL;
+        }
+        q->tail = next;
+        tail = next;
+        next = (mpscq_node*)ux_atomic_acq_load(&tail->next);
     }
-    q->tail = next;
-    tail = next;
-    next = (mpscq_node *)ux_atomic_acq_load(&tail->next);
-  }
-  if (next != NULL) {
-    *empty = false;
-    q->tail = next;
-    return tail;
-  }
-  mpscq_node *head = (mpscq_node *)ux_atomic_acq_load(&q->head);
-  if (tail != head) {
-    *empty = false;
+    if (next != NULL) {
+        *empty = false;
+        q->tail = next;
+        return tail;
+    }
+    mpscq_node* head = (mpscq_node*)ux_atomic_acq_load(&q->head);
+    if (tail != head) {
+        *empty = false;
+        // indicates a retry is in order: we're still adding
+        return NULL;
+    }
+    mpscq_push(q, &q->sentinel);
+    next = (mpscq_node*)ux_atomic_acq_load(&tail->next);
+    if (next != NULL) {
+        q->tail = next;
+        return tail;
+    }
     // indicates a retry is in order: we're still adding
+    *empty = false;
     return NULL;
-  }
-  mpscq_push(q, &q->sentinel);
-  next = (mpscq_node *)ux_atomic_acq_load(&tail->next);
-  if (next != NULL) {
-    q->tail = next;
-    return tail;
-  }
-  // indicates a retry is in order: we're still adding
-  *empty = false;
-  return NULL;
 }
