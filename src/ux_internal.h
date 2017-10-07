@@ -86,6 +86,8 @@ struct ux_loop_s {
     ux_queue_t* attached[128];
     int attached_count;
     int is_simulator_stop;
+    /* stat */
+    uint64_t event_count;
 };
 
 UX_FUNC void ux_loop_init(ux_loop_t *loop);
@@ -116,12 +118,21 @@ UX_EXTERN void ux_async_post(ux_loop_t *loop, ux_async_cb async_cb, void *data);
 
 /* dispatch module */
 
-UX_FUNC event_dispatch event_get_dispatcher(ux_event_t *e);
+UX_FUNC void dispatch_event(ux_loop_t* loop, ux_event_t* e);
 
+/* default event dispatch */
 UX_FUNC void event_reminder_dispatch(ux_loop_t *loop, ux_event_t *e);
 UX_FUNC void event_ask_dispatch(ux_loop_t *loop, ux_event_t *e);
 UX_FUNC void event_bid_dispatch(ux_loop_t *loop, ux_event_t *e);
 UX_FUNC void event_trade_dispatch(ux_loop_t *loop, ux_event_t *e);
+
+/* instrument */
+UX_FUNC void instrument_init(ux_instrument_t *inst);
+UX_FUNC void instrument_destory(ux_instrument_t *inst);
+
+/* order */
+UX_FUNC void order_init(ux_order_t *order);
+UX_FUNC void order_destory(ux_order_t *order);
 
 
 #ifdef __cplusplus

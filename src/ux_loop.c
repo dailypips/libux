@@ -15,13 +15,6 @@ void ux_async_post(ux_loop_t* loop, ux_async_cb async_cb, void* data)
     ux_wakeup(loop);
 }
 
-static void loop_dispatch_event(ux_loop_t* loop, ux_event_t* e)
-{
-    event_dispatch dispatcher = g_eventclassinfo[e->type].dispatch;
-    if (dispatcher)
-        dispatcher(loop, e);
-}
-
 static int64_t bus_next_timeout(ux_loop_t* loop)
 {
     ux_event_reminder_t* r = bus_timer_peek(loop, UX_CLOCK_LOCAL);
@@ -55,7 +48,7 @@ void ux_run(ux_loop_t* loop, ux_run_mode mode)
         ux_event_t* e = bus_dequeue(loop);
 
         if (e)
-            loop_dispatch_event(loop, e);
+            dispatch_event(loop, e);
 
         if (mode == UX_RUN_NOWAIT || (mode == UX_RUN_ONCE && e))
             break;

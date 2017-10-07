@@ -473,6 +473,8 @@ void ux_loop_init(ux_loop_t *loop)
 
     memset(&loop->attached, '\0', sizeof(loop->attached));
     loop->attached_count = 0;
+
+    loop->event_count = 0;
 }
 
 void ux_loop_destory(ux_loop_t *loop)
