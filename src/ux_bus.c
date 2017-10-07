@@ -353,37 +353,6 @@ void bus_detach(ux_loop_t* src, ux_loop_t* dst)
     }
 }
 
-void bus_init(ux_loop_t *loop, ux_bus_mode mode)
-{
-    UX_ASSERT(loop != NULL);
-
-    loop->mode = mode;
-
-    mpscq_init(&loop->pending_queue);
-    for (int i = 0; i < UX_CATEGORY_LAST; i++)
-        heap_init((struct heap*)&loop->queue_heap[i]);
-
-    heap_init((struct heap*)&loop->timer_heap[UX_CLOCK_LOCAL]);
-    heap_init((struct heap*)&loop->timer_heap[UX_CLOCK_EXCHANGE]);
-
-    loop->time[UX_CLOCK_LOCAL] = MIN_DATE_TIME;
-    loop->time[UX_CLOCK_EXCHANGE] = MIN_DATE_TIME;
-
-    loop->counter = 1;
-    loop->saved_event = NULL;
-    loop->is_simulator_stop = 0;
-
-    memset(&loop->attached, '\0', sizeof(loop->attached));
-    loop->attached_count = 0;
-}
-
-void bus_destory(ux_loop_t *loop)
-{
-    UX_ASSERT(loop != NULL);
-
-    bus_clear(loop);
-}
-
 void bus_add_queue(ux_loop_t *loop, ux_queue_t* q)
 {
     UX_ASSERT(loop != NULL);
@@ -477,10 +446,44 @@ int bus_set_exchange_time(ux_loop_t *loop, ux_time_t time)
     return 0;
 }
 
-void bus_clear(ux_loop_t *loop)
+void ux_loop_init(ux_loop_t *loop)
 {
-    UX_ASSERT(loop != NULL);
+    uv_mutex_init(&loop->wait_mutex);
+    uv_cond_init(&loop->wait_cond);
+    loop->stop_flag = 0;
+    mpscq_init(&loop->async_queue);
 
+    /* bus init */
+    loop->mode = UX_BUS_SIMULATION;
+
+    mpscq_init(&loop->pending_queue);
+    for (int i = 0; i < UX_CATEGORY_LAST; i++)
+        heap_init((struct heap*)&loop->queue_heap[i]);
+
+    heap_init((struct heap*)&loop->timer_heap[UX_CLOCK_LOCAL]);
+    heap_init((struct heap*)&loop->timer_heap[UX_CLOCK_EXCHANGE]);
+
+    loop->time[UX_CLOCK_LOCAL] = MIN_DATE_TIME;
+    loop->time[UX_CLOCK_EXCHANGE] = MIN_DATE_TIME;
+
+    loop->counter = 1;
+    loop->saved_event = NULL;
+    loop->is_simulator_stop = 0;
+
+    memset(&loop->attached, '\0', sizeof(loop->attached));
+    loop->attached_count = 0;
+}
+
+void ux_loop_destory(ux_loop_t *loop)
+{
+    uv_cond_destroy(&loop->wait_cond);
+    uv_mutex_destroy(&loop->wait_mutex);
+    ux_loop_clear(loop);
+}
+
+
+void ux_loop_clear(ux_loop_t *loop)
+{
     if (loop->saved_event != NULL) {
         ux_event_unref(loop->saved_event);
         loop->saved_event = NULL;

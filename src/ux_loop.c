@@ -73,25 +73,6 @@ void ux_stop(ux_loop_t *loop)
     loop->stop_flag = 1;
 }
 
-void ux_loop_init(ux_loop_t *loop)
-{
-    uv_mutex_init(&loop->wait_mutex);
-    uv_cond_init(&loop->wait_cond);
-    loop->stop_flag = 0;
-    mpscq_init(&loop->async_queue);
-
-   bus_init(loop, UX_BUS_SIMULATION);
-}
-
-void ux_loop_destory(ux_loop_t *loop)
-{
-    uv_cond_destroy(&loop->wait_cond);
-    uv_mutex_destroy(&loop->wait_mutex);
-    bus_destory(loop);
-}
-
-
-
 ux_loop_t* ux_loop_new(void)
 {
     ux_loop_t* loop = ux_zalloc(sizeof(ux_loop_t));

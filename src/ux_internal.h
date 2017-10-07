@@ -107,11 +107,7 @@ struct ux_loop_s {
 
 UX_FUNC void ux_loop_init(ux_loop_t *loop);
 UX_FUNC void ux_loop_destory(ux_loop_t *loop);
-
-UX_FUNC void bus_init(ux_loop_t *loop, ux_bus_mode mode);
-UX_FUNC void bus_destory(ux_loop_t *loop);
-
-UX_FUNC void bus_clear(ux_loop_t *loop);
+UX_FUNC void ux_loop_clear(ux_loop_t *loop);
 
 UX_FUNC void bus_attach(ux_loop_t* src, ux_loop_t *dst);
 UX_FUNC void bus_detach(ux_loop_t* src, ux_loop_t *dst);
