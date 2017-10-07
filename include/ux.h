@@ -541,8 +541,15 @@ typedef enum {
     UX_BUS_MODE_LAST
 }ux_bus_mode;
 
+typedef enum {
+    UX_RUN_DEFAULT = 0,
+    UX_RUN_ONCE,
+    UX_RUN_NOWAIT
+}ux_run_mode;
+
 UX_EXTERN ux_loop_t* ux_loop_new(void);
 UX_EXTERN void ux_loop_free(ux_loop_t *loop);
+UX_EXTERN void ux_run(ux_loop_t*loop, ux_run_mode mode);
 UX_EXTERN void ux_stop(ux_loop_t *loop);
 UX_EXTERN void ux_wakeup(ux_loop_t* loop);
 

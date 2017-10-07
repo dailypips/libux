@@ -22,7 +22,7 @@ static inline void timewait(ux_loop_t* loop, int64_t timeout)
 }
 
 
-void ux_loop_wakeup(ux_loop_t* loop)
+void ux_wakeup(ux_loop_t* loop)
 {
     uv_cond_signal(&loop->wait_cond);
 }
@@ -34,7 +34,7 @@ void ux_async_post(ux_loop_t *loop, ux_async_cb async_cb, void *data)
     async->data = data;
 
     mpscq_push(&loop->async_queue, (mpscq_node*)&async->next);
-    ux_loop_wakeup(loop);
+    ux_wakeup(loop);
 }
 
 static void loop_dispatch_event(ux_loop_t *loop, ux_event_t *e)
@@ -44,7 +44,7 @@ static void loop_dispatch_event(ux_loop_t *loop, ux_event_t *e)
         dispatcher(loop, e);
 }
 
-void ux_loop_run(ux_loop_t* loop, ux_run_mode mode)
+void ux_run(ux_loop_t* loop, ux_run_mode mode)
 {
     while (loop->stop_flag == 0) {
         /* step 1: call all async cb */
@@ -70,7 +70,7 @@ void ux_loop_run(ux_loop_t* loop, ux_run_mode mode)
     }
 }
 
-void ux_loop_stop(ux_loop_t *loop)
+void ux_stop(ux_loop_t *loop)
 {
     loop->stop_flag = 1;
 }
@@ -89,4 +89,19 @@ void ux_loop_destory(ux_loop_t *loop)
 {
     uv_cond_destroy(&loop->wait_cond);
     uv_mutex_destroy(&loop->wait_mutex);
+}
+
+
+
+ux_loop_t* ux_loop_new(void)
+{
+    ux_loop_t* loop = ux_zalloc(sizeof(ux_loop_t));
+    ux_loop_init(loop);
+    return loop;
+}
+
+void ux_loop_free(ux_loop_t *loop)
+{
+    ux_loop_destory(loop);
+    ux_free(loop);
 }

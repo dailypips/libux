@@ -11,7 +11,7 @@ TEST_IMPL(ux_loop_test)
 
     ux_loop_init(&loop);
 
-    ux_loop_run(&loop, UX_RUN_NOWAIT);
+    ux_run(&loop, UX_RUN_NOWAIT);
 
     return 0;
 }

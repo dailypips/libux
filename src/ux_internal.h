@@ -107,17 +107,8 @@ struct ux_loop_s {
     int is_simulator_stop;
 };
 
-typedef enum {
-    UX_RUN_DEFAULT = 0,
-    UX_RUN_ONCE,
-    UX_RUN_NOWAIT
-}ux_run_mode;
-
-UX_EXTERN void ux_loop_init(ux_loop_t *loop);
-UX_EXTERN void ux_loop_destory(ux_loop_t *loop);
-UX_EXTERN void ux_loop_run(ux_loop_t *loop, ux_run_mode mode);
-UX_EXTERN void ux_loop_stop(ux_loop_t *loop);
-UX_EXTERN void ux_loop_wakeup(ux_loop_t* loop);
+UX_FUNC void ux_loop_init(ux_loop_t *loop);
+UX_FUNC void ux_loop_destory(ux_loop_t *loop);
 
 UX_FUNC void bus_init(ux_loop_t *bus, ux_bus_mode mode);
 UX_FUNC void bus_destory(ux_loop_t *bus);
