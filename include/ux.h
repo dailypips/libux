@@ -97,24 +97,24 @@ UX_EXTERN ux_time_t datetime_now(void);
 typedef intptr_t ux_atomic_t;
 
 /* event module */
-#define EVENTDEF(_)                                                                      \
-    /* UppercaseName        LowcaseName         destory     clone        dispatch*/      \
-    _(REMINDER,             reminder,           default,    default,     default)        \
-    _(ASK,                  ask,                default,    default,     default)        \
-    _(BID,                  bid,                default,    default,     default)        \
-    _(TRADE,                trade,              default,    default,     default)        \
-    _(L2SNAPSHOT,           l2snapshot,         l2snapshot, l2snapshot,  default)        \
-    _(L2UPDATE,             l2update,           l2update,   l2update,    default)        \
-    /*_(BAR,                bar,                default,    default,     bar)*/          \
-    _(NEWS,                 news,               news,       news,        default)        \
-    _(FUNDAMENTAL,          fundamental,        default,    default,     default)        \
-    /* internal event */                                                                 \
-    _(QUEUE_OPENED,         queue_opened,       default,    default,     default)        \
-    _(QUEUE_CLOSED,         queue_closed,       default,    default,     default)        \
-    _(SIMULATOR_START,      simulator_start,    default,    default,     default)        \
-    _(SIMULATOR_STOP,       simulator_stop,     default,    default,     default)        \
-    _(SIMULATOR_PROGRESS,   simulator_progress, default,    default,     default)        \
-    _(EXCEPTION,            exception,          exception,  exception,   default)
+#define EVENTDEF(_)                                                                            \
+    /* UppercaseName        LowcaseName         destory        clone           dispatch*/      \
+    _(REMINDER,             reminder,           default,       default,        default)        \
+    _(ASK,                  ask,                default,       default,        default)        \
+    _(BID,                  bid,                default,       default,        default)        \
+    _(TRADE,                trade,              default,       default,        default)        \
+    _(L2SNAPSHOT,           l2snapshot,         l2snapshot,    l2snapshot,     default)        \
+    _(L2UPDATE,             l2update,           l2update,      l2update,       default)        \
+    _(BAR,                  bar,                default,       default,        default)        \
+    _(NEWS,                 news,               news,          news,           default)        \
+    _(FUNDAMENTAL,          fundamental,        default,       default,        default)        \
+    /* internal event */                                                                       \
+    _(QUEUE_OPENED,         queue_opened,       default,       default,        default)        \
+    _(QUEUE_CLOSED,         queue_closed,       default,       default,        default)        \
+    _(SIMULATOR_START,      simulator_start,    default,       default,        default)        \
+    _(SIMULATOR_STOP,       simulator_stop,     default,       default,        default)        \
+    _(SIMULATOR_PROGRESS,   simulator_progress, default,       default,        default)        \
+    _(EXCEPTION,            exception,          exception,     exception,      default)
 
 
 typedef enum {
@@ -242,6 +242,66 @@ typedef struct {
     size_t num_entries;
     ux_level2_t *entries;
 }ux_event_l2update_t;
+
+typedef enum {
+    UX_BAR_TYPE_TIME,
+    UX_BAR_TYPE_TICK,
+    UX_BAR_TYPE_VOLUME,
+    UX_BAR_TYPE_RANGE,
+    UX_BAR_TYPE_SESSION,
+    UX_BAR_TYPE_RENKO,
+    UX_BAR_TYPE_CUSTOM
+}ux_bar_type;
+
+typedef enum {
+    UX_BAR_STATUS_INCOMPLETE,
+    UX_BAR_STATUS_COMPLETE,
+    UX_BAR_STATUS_OPEN,
+    UX_BAR_STATUS_HIGH,
+    UX_BAR_STATUS_LOW,
+    UX_BAR_STATUS_CLOSE
+}ux_bar_status;
+
+typedef struct {
+    UX_EVENT_PUBLIC_FIELDS
+    UX_EVENT_COMMON_FIELDS_WITH_EXCHANGE_TIME
+    ux_bar_type bar_type;
+    long size;
+    ux_time_t open_time;
+    double high;
+    double low;
+    double open;
+    double close;
+    long volume;
+    long open_int;
+    long tick_count;
+    ux_bar_status status;
+}ux_event_bar_t;
+
+static double ux_bar_get_range(ux_event_bar_t *bar)
+{
+    return bar->high - bar->low;
+}
+
+static double ux_bar_get_median(ux_event_bar_t *bar)
+{
+    return (bar->high + bar->low) / 2.0;
+}
+
+static double ux_bar_get_typical(ux_event_bar_t *bar)
+{
+    return (bar->high + bar->low + bar->close) / 3.0;
+}
+
+static double ux_bar_get_weighted(ux_event_bar_t *bar)
+{
+    return (bar->high + bar->low + bar->close * 2.0) / 4.0;
+}
+
+static double ux_bar_get_average(ux_event_bar_t *bar)
+{
+    return (bar->high + bar->low + bar->open+ bar->close) / 4.0;
+}
 
 /* system */
 typedef struct {
