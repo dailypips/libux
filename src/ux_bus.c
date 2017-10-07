@@ -318,7 +318,7 @@ int64_t ux_bus_next_timeout(ux_loop_t *loop)
 
 UX_FUNC ux_event_reminder_t* ux_bus_next_reminder(ux_loop_t *loop, ux_clock_type type)
 {
-    void* heap = &loop->timer_heap[type];
+    min_heap* heap = &loop->timer_heap[type];
 
     return timer_heap_pop(heap);
 }
@@ -377,12 +377,10 @@ void ux_bus_destory(ux_loop_t *loop)
     ux_bus_clear(loop);
 }
 
-void ux_bus_add_queue(ux_loop_t *loop, void* data)
+void ux_bus_add_queue(ux_loop_t *loop, ux_queue_t* q)
 {
     UX_ASSERT(loop != NULL);
-    UX_ASSERT(data != NULL);
-
-    ux_queue_t* q = (ux_queue_t*)data;
+    UX_ASSERT(q != NULL);
 
     UX_ASSERT(q->loop == loop || q->loop == NULL);
     UX_ASSERT(q->category >= 0 && q->category < UX_CATEGORY_LAST);
@@ -398,11 +396,11 @@ void ux_bus_add_queue(ux_loop_t *loop, void* data)
         queue_less_than);
 }
 
-void ux_bus_remove_queue(ux_loop_t *loop, void* data)
+void ux_bus_remove_queue(ux_loop_t *loop, ux_queue_t* q)
 {
     UX_ASSERT(loop != NULL);
+    UX_ASSERT(q != NULL);
 
-    ux_queue_t* q = (ux_queue_t*)data;
     heap_remove((struct heap*)&loop->queue_heap[q->category],
         (struct heap_node*)&q->heap_node,
         queue_less_than);

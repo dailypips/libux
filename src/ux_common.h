@@ -2,19 +2,12 @@
 #define __UX_COMMON_H__
 
 #include <assert.h>
-#include <stddef.h>
-#include <stdint.h>
 
 #define UX_ASSERT(x) assert((x))
 #define UX_PRINT_FOMAT_CHECK(x,y)
 
 #define container_of(ptr, type, member) \
   ((type *) ((char *) (ptr) - offsetof(type, member)))
-
-
-/* Needed everywhere. */
-#include <string.h>
-#include <stdlib.h>
 
 /* Various macros. */
 #ifndef UX_UNUSED

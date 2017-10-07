@@ -10,79 +10,6 @@
 
 #define free_if(x) if(x) ux_free(x);
 
-/* event class info */
-typedef void (*event_init)(ux_event_t* e, va_list args);
-typedef void (*event_destory)(ux_event_t* e);
-typedef ux_event_t* (*event_clone)(ux_event_t* e);
-typedef void (*event_dispatch)(ux_loop_t *loop, ux_event_t* e);
-
-typedef struct _ux_event_class_info_t {
-    ux_event_flag flag;
-    size_t size;
-    event_init init;
-    event_destory destory;
-    event_clone clone;
-    event_dispatch dispatch;
-} ux_event_class_info_t;
-
-/*
-ux_event_t *event_reminder_init(ux_event_t *e, ux_clock_type ctype, ux_reminder_cb callback, void *data)
-{
-    ux_event_reminder_t *revent = (ux_event_reminder_t *)e;
-
-    revent->clock_type = ctype;
-    revent->callback = callback;
-    revent->user_data = data;
-
-    return e;
-}
-
-ux_event_t *event_execption_init(ux_event_t *e, char* source)
-{
-    ux_event_on_exception_t *event = (ux_event_on_exception_t*)e;
-    event->source = ux_strdup(source);
-    return e;
-}
-
-ux_event_t *event_on_simulator_start_init(ux_event_t *e, datetime_t time1, datetime_t time2, long long count)
-{
-    ux_event_on_simulator_start_t * event = (ux_event_on_simulator_start_t*)e;
-    event->time1 = time1;
-    event->time2 = time2;
-    event->count = count;
-
-    return e;
-}
-
-
-ux_event_t * event_tick_init(ux_event_t *e, int provider, int instrument, datetime_t exchange_timestamp, double price, long size)
-{
-    ux_event_tick_t * tick = (ux_event_tick_t *)e;
-    tick->exchange_timestamp = exchange_timestamp;
-    tick->instrument = instrument;
-    tick->provider = provider;
-    tick->price = price;
-    tick->size = size;
-    return e;
-}
-
-ux_event_t* event_fundamental_init(ux_event_t *e, int provider, int instrument)
-{
-    ux_event_fundamental_t *fundamental = (ux_event_fundamental_t *)e;
-    fundamental->provider = provider;
-    fundamental->instrument = instrument;
-    return e;
-}
-
-ux_event_t* event_queue_init(ux_event_t *e, void *q)
-{
-    ux_event_queue_t *queue = (ux_event_queue_t*)e;
-    queue->timestamp = MIN_DATE_TIME;
-    queue->q = q;
-    return e;
-}
-*/
-
 ux_event_t* event_news_init(ux_event_t *e, int provider, int instrument, char *urgency, char *url, char *headline, char *text)
 {
     ux_event_news_t *news = (ux_event_news_t *)e;
@@ -140,7 +67,7 @@ ux_event_t* event_exception_clone(ux_event_t *e)
     return (ux_event_t*)item;
 }
 
-static ux_event_class_info_t _eventclassinfo[UX_EVENT_LAST] = {
+ux_event_class_info_t g_eventclassinfo[UX_EVENT_LAST] = {
 #define CLASSENUM(ename, lename, einit, edestory, eclone, edispatch, eflag)	\
     {   \
         .init = (event_init)einit, \
@@ -155,6 +82,11 @@ EVENTDEF(CLASSENUM)
 };
 
 /* public api */
+size_t ux_event_size(ux_event_type type)
+{
+    return g_eventclassinfo[e->type].size;
+}
+
 static inline int event_check_type(ux_event_type type)
 {
     if (type >= UX_EVENT_LAST)
@@ -165,7 +97,7 @@ static inline int event_check_type(ux_event_type type)
 static void
 event_free(ux_event_t *e)
 {
-    event_destory destory = _eventclassinfo[e->type].destory;
+    event_destory destory = g_eventclassinfo[e->type].destory;
     if (destory)
         destory(e);
     ux_free(e);
@@ -174,11 +106,11 @@ event_free(ux_event_t *e)
 ux_event_t *ux_event_clone(ux_event_t *e)
 {
     ux_event_t *result;
-    event_clone clone = _eventclassinfo[e->type].clone;
+    event_clone clone = g_eventclassinfo[e->type].clone;
     if(clone)
         result = clone(e);
     else {
-        size_t size = _eventclassinfo[e->type].size;
+        size_t size = g_eventclassinfo[e->type].size;
         result = ux_malloc(size);
         memcpy(result, e, size);
         ux_atomic_rel_store(&e->refcount, 1);
@@ -203,10 +135,10 @@ void ux_event_unref(ux_event_t *event)
 ux_event_t* ux_event_malloc(ux_event_type type)
 {
     assert(event_check_type(type) == 0);
-    ux_event_t* e = ux_zalloc(_eventclassinfo[type].size);
+    ux_event_t* e = ux_zalloc(g_eventclassinfo[type].size);
     if (e) {
         e->type = type;
-        e->flag = _eventclassinfo[type].flag;
+        e->flag = g_eventclassinfo[type].flag;
         ux_atomic_rel_store(&e->refcount, 1);
     }
     return e;
@@ -215,7 +147,7 @@ ux_event_t* ux_event_malloc(ux_event_type type)
 void ux_event_dispatch(void *loop, ux_event_t *e)
 {
     // TODO: add plugin extesion pointer: before_event_dispatch & after_event_dispatch
-    event_dispatch dispatch = _eventclassinfo[e->type].dispatch;
+    event_dispatch dispatch = g_eventclassinfo[e->type].dispatch;
     if (dispatch != NULL)
         dispatch(loop, e);
 }

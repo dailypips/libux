@@ -1,29 +1,14 @@
-/*-------------------------------------------------------------------------
- * C-Pluff, a plug-in framework for C
- * Copyright 2007 Johannes Lehtinen
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *-----------------------------------------------------------------------*/
+/******************************************************************************
+ * Automated Trading System                                                   *
+ *                                                                            *
+ * Copyright (C) 2017 Xiaojun Gao                                             *
+ *                                                                            *
+ * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ ******************************************************************************/
 
 /** @file 
- * UXCore C API header file.
- * The elements declared here constitute the UXCore C API.
+ * Libux C API header file.
+ * The elements declared here constitute the Libux C API.
  */
 
 #ifndef __UX_H__
@@ -31,7 +16,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif /*__cplusplus*/
+#endif
 
 #ifdef _WIN32
   /* Windows - set up dll import/export decorators. */
@@ -83,7 +68,7 @@ UX_EXTERN void* ux_malloc_aligned(size_t size, size_t alignment);
 UX_EXTERN char *ux_strdup(const char *src);
 
 /* datetime module */
-/* datetime type represents a date and time.
+/* datetime_t type represents a date and time.
    that stores the date and time as the number of microsecond intervals since
    12:00 AM January 1, year 1 A.D (as Day 0). in the proleptic Gregorian Calendar.
 */
@@ -166,6 +151,7 @@ typedef struct ux_event_s {
   UX_EVENT_PUBLIC_FIELDS
 }ux_event_t;
 
+UX_EXTERN size_t ux_event_size(ux_event_type type);
 UX_EXTERN ux_event_t* ux_event_malloc(ux_event_type type);
 UX_EXTERN ux_event_t* ux_event_ref(ux_event_t *e);
 UX_EXTERN void ux_event_unref(ux_event_t *e);
@@ -280,8 +266,45 @@ typedef struct {
 typedef ux_event_queue_t ux_event_queue_opened_t;
 typedef ux_event_queue_t ux_event_queue_closed_t;
 
+/* queue module */
+typedef enum {
+    UX_CATEGORY_MARKET = 0,
+    UX_CATEGORY_EXECUTION,
+    UX_CATEGORY_SERVICE,
+    UX_CATEGORY_COMMAND,
+    UX_CATEGORY_LAST
+}ux_queue_category;
+
+typedef struct ux_queue_s ux_queue_t;
+
+UX_EXTERN ux_queue_t* ux_queue_new(unsigned int size, ux_queue_category category);
+UX_EXTERN int ux_queue_push(ux_queue_t *q, void *e);
+
+/* loop module */
+typedef struct ux_loop_s ux_loop_t;
+typedef struct ux_async_s ux_async_t;
+typedef void (*ux_async_cb)(ux_loop_t *loop, void *data);
+
+struct ux_async_s {
+    ux_async_cb async_cb;
+    void *data;
+    /* private */
+    ux_atomic_t next;
+};
+
+typedef enum {
+    UX_BUS_SIMULATION,
+    UX_BUS_REALTIME,
+    UX_BUS_MODE_LAST
+}ux_bus_mode;
+
+UX_EXTERN ux_loop_t* ux_loop_new(void);
+UX_EXTERN void ux_loop_free(ux_loop_t *loop);
+UX_EXTERN void ux_stop(ux_loop_t *loop);
+UX_EXTERN void ux_wakeup(ux_loop_t* loop);
+
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif
 
 #endif /*__UX_H__*/

@@ -33,12 +33,13 @@
 typedef struct ux_mpscq_node { ux_atomic_t next; } ux_mpscq_node;
 
 // Actual queue type
-typedef struct ux_mpscq_t {
+typedef struct ux_mpscq_s {
+  char pad1[UX_CACHELINE_SIZE];
   ux_atomic_t head;
   // make sure head & tail don't share a cacheline
-  char padding[UX_CACHELINE_SIZE];
-  ux_mpscq_node *tail;
-  ux_mpscq_node stub;
+  UX_ALIGN(UX_CACHELINE_SIZE) ux_mpscq_node *tail;
+  UX_ALIGN(UX_CACHELINE_SIZE)ux_mpscq_node sentinel;
+  char pad2[UX_CACHELINE_SIZE - sizeof(ux_mpscq_node)];
 } ux_mpscq_t;
 
 UX_FUNC void ux_mpscq_init(ux_mpscq_t *q);

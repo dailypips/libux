@@ -20,6 +20,7 @@ extern "C" {
 
 /*
  * lock-free spsc queue
+ * modified from facebook folly library
  */
 
 typedef struct ux_spscq_s ux_spscq_t;

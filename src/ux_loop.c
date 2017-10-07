@@ -2,12 +2,12 @@
 
 static void loop_add_queue(ux_loop_t *loop, void *q)
 {
-    ux_bus_add_queue(loop, q);
+    ux_bus_add_queue(loop, (ux_queue_t*)q);
 }
 
-void ux_loop_add_queue(ux_loop_t* loop, void* data)
+void ux_loop_add_queue(ux_loop_t* loop, ux_queue_t *q)
 {
-    ux_async_post(loop, loop_add_queue, data);
+    ux_async_post(loop, loop_add_queue, q);
 }
 
 static inline void timewait(ux_loop_t* loop, int64_t timeout)
@@ -32,9 +32,8 @@ void ux_async_post(ux_loop_t *loop, ux_async_cb async_cb, void *data)
     ux_async_t *async = ux_malloc(sizeof(ux_async_t));
     async->async_cb = async_cb;
     async->data = data;
-    async->loop = loop;
 
-    ux_mpscq_push(&loop->async_queue, &async->mpsc_node);
+    ux_mpscq_push(&loop->async_queue, (ux_mpscq_node*)&async->next);
     ux_loop_wakeup(loop);
 }
 
@@ -44,7 +43,7 @@ void ux_loop_run(ux_loop_t* loop, ux_run_mode mode)
         /* step 1: call all async cb */
         ux_mpscq_node* node;
         while ((node = ux_mpscq_pop(&loop->async_queue))) {
-            ux_async_t* async_node = container_of(node, ux_async_t, mpsc_node);
+            ux_async_t* async_node = container_of(node, ux_async_t, next);
             async_node->async_cb(loop, async_node->data);
         }
         /* step 2: pop bus */
