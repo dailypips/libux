@@ -12,6 +12,9 @@ void dispatch_event(ux_loop_t* loop, ux_event_t* e)
         dispatcher(loop, e);
 
     // step4: dispatch to other
+
+    // step5: unref
+    ux_event_unref(e);
 }
 
 
@@ -38,6 +41,8 @@ void event_bid_dispatch(ux_loop_t *loop, ux_event_t *e)
 
      if(bid->exchange_timestamp > bus_get_exchange_time(loop))
          bus_set_exchange_time(loop, bid->exchange_timestamp);
+
+     //bar_factory_process_tick(loop->barfactory, e);
 
     /*
      barFactory.OnTick(ask);

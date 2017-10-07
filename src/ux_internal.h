@@ -11,6 +11,7 @@
 #include <assert.h>
 #include "ux_atomic.h"
 #include "ux_common.h"
+#include "uthash.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,6 +67,56 @@ UX_FUNC void *ux_queue_pop(ux_queue_t *q);
 UX_FUNC int ux_queue_is_empty(ux_queue_t *q);
 UX_FUNC int ux_queue_is_full(ux_queue_t *q);
 
+/* bar factory */
+typedef struct ux_barfactory_s ux_barfactory_t;
+typedef struct ux_bar_factory_item_s ux_bar_factory_item_t;
+
+typedef void (*ux_on_tick_cb)(ux_bar_factory_item_t *item, ux_event_tick_t *tick);
+
+#define UX_BAR_ITEM_PUBLIC_FIELDS \
+    void* queue_node[2];   \
+    ux_barfactory_t* factory;   \
+    ux_instrument_t* instrument;    \
+    int provider_id;    \
+    ux_bar_type bar_type;   \
+    ux_bar_input bar_input; \
+    long bar_size;  \
+    int session_enabled;    \
+    ux_timespan_t session1; \
+    ux_timespan_t session2;
+
+struct ux_bar_factory_item_s {
+    UX_BAR_ITEM_PUBLIC_FIELDS
+    ux_on_tick_cb on_tick;
+};
+
+typedef struct {
+    UT_hash_handle hh;
+    int instrument_id;
+    void* queue[2];
+} item_list_t;
+
+struct ux_barfactory_s {
+    ux_loop_t *framework;
+    item_list_t* list_by_instrument_id;
+    void* reminder_items;
+};
+
+UX_FUNC void ux_barfactory_init(ux_barfactory_t *factory);
+UX_FUNC void ux_barfactory_destory(ux_barfactory_t *factory);
+UX_FUNC void ux_bar_item_init(ux_bar_factory_item_t *item);
+UX_FUNC void ux_bar_item_destory(ux_bar_factory_item_t *item);
+
+/* data manager module */
+typedef struct data_manager_s {
+
+}data_manager_t;
+
+ux_event_ask_t *data_manager_get_ask(data_manager_t *manager, int instrument_id);
+ux_event_ask_t *data_manager_get_bid(data_manager_t *manager, int instrument_id);
+ux_event_ask_t *data_manager_get_trade(data_manager_t *manager, int instrument_id);
+
+/* loop module */
 typedef struct {
     void *min;
     unsigned int nelts;
@@ -89,6 +140,9 @@ struct ux_loop_s {
     int is_simulator_stop;
     /* stat */
     uint64_t event_count;
+    /* bar factory */
+    ux_barfactory_t bar_factory;
+    data_manager_t data_manager;
 };
 
 UX_FUNC void ux_loop_init(ux_loop_t *loop);

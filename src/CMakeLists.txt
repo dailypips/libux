@@ -29,6 +29,10 @@ set(UX_CORE_SRC
         ux_bus.c
         ux_loop.c
         ux_dispatch.c
+        ux_instrument.c
+        ux_order.c
+        ux_barfactory.c
+        ux_data_manager.c
 )
 endif()
 

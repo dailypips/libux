@@ -6,24 +6,103 @@
  * Distributed under the terms and conditions of the BSD 3-Clause License.    *
  ******************************************************************************/
 
+#include "queue.h"
 #include "ux_internal.h"
 
-typedef struct ux_barfactory_s ux_barfactory_t;
+void ux_barfactory_init(ux_barfactory_t* factory)
+{
+    factory->list_by_instrument_id = NULL;
+}
 
-typedef struct ux_bar_item_s {
-    ux_barfactory_t* factory;
-    ux_instrument_t* instrument;
-    int provider_id;
-    ux_bar_type bar_type;
-    ux_bar_input bar_input;
-    long bar_size;
-    int session_enabled;
-    ux_timespan_t session1;
-    ux_timespan_t session2;
-} ux_bar_item_t;
+void ux_barfactory_destory(ux_barfactory_t* factory)
+{
+}
 
-struct ux_barfactory_s {
-    ux_loop_t *framework;
-    void* item_by_instrument_id;
-    void* reminder_items;
-};
+void ux_bar_factory_add_item(ux_barfactory_t* factory, ux_bar_factory_item_t* item)
+{
+    item_list_t* list;
+    int instrument_id = item->instrument->id;
+    item_list_t* hash = factory->list_by_instrument_id;
+    HASH_FIND_INT(factory->list_by_instrument_id, &instrument_id, list);
+    if (list == NULL) {
+        list = ux_zalloc(sizeof(item_list_t));
+        list->instrument_id = instrument_id;
+        HASH_ADD_INT(factory->list_by_instrument_id, instrument_id, list);
+    }
+    QUEUE_INSERT_TAIL(&list->queue, &item->queue_node);
+}
+
+static ux_event_tick_t* event_tick_new(ux_event_tick_t* e, ux_event_tick_t* n)
+{
+    //TODO: BID ?? TICK?? ASK??
+    ux_event_tick_t* tick = (ux_event_tick_t*)ux_event_malloc(UX_EVENT_BID);
+    tick->timestamp = e->timestamp;
+    tick->instrument = e->instrument;
+    tick->provider = e->provider;
+    tick->price = (e->price + n->price) / 2.0;
+    tick->size = (e->size + n->size) / 2;
+    return tick;
+}
+
+void bar_factory_process_tick(ux_barfactory_t* factory, ux_event_tick_t* e)
+{
+    // find item_list by instrument_id
+    // 在item_list上迭代，根据input类型
+    // bar_factory_item_process_tick(item, e);
+    item_list_t* list;
+    QUEUE* q;
+    ux_event_tick_t* tick;
+    ux_loop_t* loop = container_of(factory, ux_loop_t, bar_factory);
+
+    int instrument_id = e->instrument;
+    HASH_FIND_INT((item_list_t*)factory->list_by_instrument_id, &instrument_id, list);
+    if (!list)
+        return;
+
+    QUEUE_FOREACH(q, &list->queue)
+    {
+        ux_bar_factory_item_t* item = QUEUE_DATA(q, ux_bar_factory_item_t, queue_node);
+        switch (item->bar_input) {
+        case UX_BAR_INPUT_TRADE:
+            if (e->type == UX_EVENT_TRADE)
+                item->on_tick(item, e);
+            break;
+        case UX_BAR_INPUT_BID:
+            if (e->type == UX_EVENT_BID)
+                item->on_tick(item, e);
+            break;
+
+        case UX_BAR_INPUT_ASK:
+            if (e->type == UX_EVENT_ASK)
+                item->on_tick(item, e);
+            break;
+
+        case UX_BAR_INPUT_MIDDLE:
+            tick = NULL;
+            if (e->type == UX_EVENT_TRADE)
+                break;
+
+            if (e->type == UX_EVENT_BID) {
+                ux_event_ask_t* ask = data_manager_get_ask(&loop->data_manager, e->instrument);
+                if (ask)
+                    tick = event_tick_new(e, ask);
+            }
+
+            if (e->type == UX_EVENT_ASK) {
+                ux_event_bid_t* bid = data_manager_get_bid(&loop->data_manager, e->instrument);
+                if (bid)
+                    tick = event_tick_new(e, bid);
+            }
+
+            item->on_tick(item, e);
+            break;
+        case UX_BAR_INPUT_TICK:
+            item->on_tick(item, e);
+            break;
+        case UX_BAR_INPUT_BIDASK:
+            if (e->type != UX_EVENT_TRADE)
+                item->on_tick(item, e);
+            break;
+        }
+    }
+}
