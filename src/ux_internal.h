@@ -69,9 +69,9 @@ UX_FUNC int ux_queue_is_full(ux_queue_t *q);
 
 /* bar factory */
 typedef struct ux_barfactory_s ux_barfactory_t;
-typedef struct ux_bar_factory_item_s ux_bar_factory_item_t;
+typedef struct ux_barfactory_item_s ux_barfactory_item_t;
 
-typedef void (*ux_on_tick_cb)(ux_bar_factory_item_t *item, ux_event_tick_t *tick);
+typedef void (*ux_on_tick_cb)(ux_barfactory_item_t *item, ux_event_tick_t *tick);
 
 #define UX_BAR_ITEM_PUBLIC_FIELDS \
     void* queue_node[2];   \
@@ -85,7 +85,7 @@ typedef void (*ux_on_tick_cb)(ux_bar_factory_item_t *item, ux_event_tick_t *tick
     ux_timespan_t session1; \
     ux_timespan_t session2;
 
-struct ux_bar_factory_item_s {
+struct ux_barfactory_item_s {
     UX_BAR_ITEM_PUBLIC_FIELDS
     ux_on_tick_cb on_tick;
 };
@@ -104,8 +104,6 @@ struct ux_barfactory_s {
 
 UX_FUNC void ux_barfactory_init(ux_barfactory_t *factory);
 UX_FUNC void ux_barfactory_destory(ux_barfactory_t *factory);
-UX_FUNC void ux_bar_item_init(ux_bar_factory_item_t *item);
-UX_FUNC void ux_bar_item_destory(ux_bar_factory_item_t *item);
 
 /* data manager module */
 typedef struct data_manager_s {

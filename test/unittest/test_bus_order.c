@@ -42,8 +42,9 @@ static ux_time_t all_time[EVENT_SIZE + TIMER_SIZE] = {
     28, 24, 8, 10, 30, // last is timer
     34, 19, 11, 33, 25, 39, 4, 30
 };
-static void on_reminder(ux_time_t time, void* data)
+static void on_reminder(ux_event_reminder_t *r)
 {
+    UX_UNUSED(r);
 }
 
 static ux_event_t* tick_init(ux_event_t* e, int provider, int instrument, ux_time_t exchange_timestamp, double price, long size)

@@ -18,18 +18,36 @@ void ux_barfactory_destory(ux_barfactory_t* factory)
 {
 }
 
-void ux_bar_factory_add_item(ux_barfactory_t* factory, ux_bar_factory_item_t* item)
+void ux_bar_factory_add_item(ux_barfactory_t* factory, ux_barfactory_item_t* item)
 {
     item_list_t* list;
     int instrument_id = item->instrument->id;
-    item_list_t* hash = factory->list_by_instrument_id;
+
     HASH_FIND_INT(factory->list_by_instrument_id, &instrument_id, list);
     if (list == NULL) {
         list = ux_zalloc(sizeof(item_list_t));
+        QUEUE_INIT(&list->queue);
         list->instrument_id = instrument_id;
         HASH_ADD_INT(factory->list_by_instrument_id, instrument_id, list);
     }
     QUEUE_INSERT_TAIL(&list->queue, &item->queue_node);
+}
+
+void ux_bar_factory_remove_item(ux_barfactory_t* factory, ux_barfactory_item_t* item)
+{
+    UX_UNUSED(factory);
+    QUEUE_REMOVE(&item->queue_node);
+}
+
+static UX_AINLINE ux_loop_t*  get_loop(ux_barfactory_t *factory)
+{
+    UX_ASSERT(factory != NULL);
+    return  container_of(factory, ux_loop_t, bar_factory);
+}
+
+void ux_bar_factory_add_reminder(ux_barfactory_t *factory, ux_event_reminder_t *reminder)
+{
+    bus_add_timer(get_loop(factory), reminder);
 }
 
 static ux_event_tick_t* event_tick_new(ux_event_tick_t* e, ux_event_tick_t* n)
@@ -52,7 +70,7 @@ void bar_factory_process_tick(ux_barfactory_t* factory, ux_event_tick_t* e)
     item_list_t* list;
     QUEUE* q;
     ux_event_tick_t* tick;
-    ux_loop_t* loop = container_of(factory, ux_loop_t, bar_factory);
+    ux_loop_t* loop = get_loop(factory);
 
     int instrument_id = e->instrument;
     HASH_FIND_INT((item_list_t*)factory->list_by_instrument_id, &instrument_id, list);
@@ -61,7 +79,7 @@ void bar_factory_process_tick(ux_barfactory_t* factory, ux_event_tick_t* e)
 
     QUEUE_FOREACH(q, &list->queue)
     {
-        ux_bar_factory_item_t* item = QUEUE_DATA(q, ux_bar_factory_item_t, queue_node);
+        ux_barfactory_item_t* item = QUEUE_DATA(q, ux_barfactory_item_t, queue_node);
         switch (item->bar_input) {
         case UX_BAR_INPUT_TRADE:
             if (e->type == UX_EVENT_TRADE)

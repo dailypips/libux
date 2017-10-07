@@ -29,9 +29,9 @@ static ux_time_t except[EVENT_SIZE] = {
     1,1,1,3,4,6,8,8,10,10,10,11,13,13,14,16,17,19,20,24,24,25,28,30,30,33,34,38,39,39
 };
 
-static void on_reminder(ux_time_t time, void *data)
+static void on_reminder(ux_event_reminder_t *r)
 {
-
+    UX_UNUSED(r);
 }
 
 static void timer_init(ux_event_reminder_t* e, ux_clock_type ctype, ux_time_t timeout)

@@ -353,21 +353,23 @@ typedef enum {
     UX_CLOCK_LAST
 }ux_clock_type;
 
-typedef void (*ux_reminder_cb)(ux_time_t time, void *data);
+typedef struct ux_event_reminder_s ux_event_reminder_t;
 
-typedef struct ux_event_reminder_s {
+typedef void (*ux_reminder_cb)(ux_event_reminder_t *timer);
+
+struct ux_event_reminder_s {
     UX_EVENT_PUBLIC_FIELDS
     ux_clock_type clock_type;
     ux_reminder_cb callback;
     void *user_data;
     ux_time_t start;
     ux_time_t stop;
-    ux_time_t repeat;
+    uint64_t repeat;
     /*private*/
     void *loop;
     void* heap_node[3];
     uint64_t start_id;
-}ux_event_reminder_t;
+};
 
 /* market data event */
 #define UX_EVENT_COMMON_FIELDS \
