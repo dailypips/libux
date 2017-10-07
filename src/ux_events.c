@@ -93,6 +93,35 @@ static ux_event_t* event_l2update_clone(ux_event_t* e)
     update->entries = info;
     return (ux_event_t*)update;
 }
+// TODO:
+static void event_account_report_destory(ux_event_t *e)
+{
+
+}
+
+static ux_event_t* event_account_report_clone(ux_event_t *e)
+{
+    return e;
+}
+
+static void event_execution_report_destory(ux_event_t *e)
+{
+
+}
+
+static ux_event_t* event_execution_report_clone(ux_event_t *e)
+{
+    return e;
+}
+static void event_execution_command_destory(ux_event_t *e)
+{
+
+}
+
+static ux_event_t* event_execution_command_clone(ux_event_t *e)
+{
+    return e;
+}
 
 #define event_default_destory NULL
 #define event_default_dispatch NULL

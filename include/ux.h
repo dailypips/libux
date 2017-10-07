@@ -100,24 +100,29 @@ typedef intptr_t ux_atomic_t;
 typedef uint16_t ux_currency_t;
 
 /* event module */
-#define EVENTDEF(_)                                                                            \
-    /* UppercaseName        LowcaseName         destory        clone           dispatch*/      \
-    _(REMINDER,             reminder,           default,       default,        default)        \
-    _(ASK,                  ask,                default,       default,        default)        \
-    _(BID,                  bid,                default,       default,        default)        \
-    _(TRADE,                trade,              default,       default,        default)        \
-    _(L2SNAPSHOT,           l2snapshot,         l2snapshot,    l2snapshot,     default)        \
-    _(L2UPDATE,             l2update,           l2update,      l2update,       default)        \
-    _(BAR,                  bar,                default,       default,        default)        \
-    _(NEWS,                 news,               news,          news,           default)        \
-    _(FUNDAMENTAL,          fundamental,        default,       default,        default)        \
-    /* internal event */                                                                       \
-    _(QUEUE_OPENED,         queue_opened,       default,       default,        default)        \
-    _(QUEUE_CLOSED,         queue_closed,       default,       default,        default)        \
-    _(SIMULATOR_START,      simulator_start,    default,       default,        default)        \
-    _(SIMULATOR_STOP,       simulator_stop,     default,       default,        default)        \
-    _(SIMULATOR_PROGRESS,   simulator_progress, default,       default,        default)        \
-    _(EXCEPTION,            exception,          exception,     exception,      default)
+#define EVENTDEF(_)                                                                                   \
+    /* UppercaseName        LowcaseName         destory            clone              dispatch*/      \
+     /* market events */                                                                              \
+    _(REMINDER,             reminder,           default,           default,           default)        \
+    _(ASK,                  ask,                default,           default,           default)        \
+    _(BID,                  bid,                default,           default,           default)        \
+    _(TRADE,                trade,              default,           default,           default)        \
+    _(L2SNAPSHOT,           l2snapshot,         l2snapshot,        l2snapshot,        default)        \
+    _(L2UPDATE,             l2update,           l2update,          l2update,          default)        \
+    _(BAR,                  bar,                default,           default,           default)        \
+    _(NEWS,                 news,               news,              news,              default)        \
+    _(FUNDAMENTAL,          fundamental,        default,           default,           default)        \
+    /* execution events */                                                                            \
+    _(ACCOUNT_REPORT,       account_report,     account_report,    account_report,    default)        \
+    _(EXECUTION_REPORT,     execution_report,   execution_report,  execution_report,  default)        \
+    _(EXECUTION_COMMAND,    execution_command,  execution_command, execution_command, default)        \
+    /* internal events */                                                                             \
+    _(QUEUE_OPENED,         queue_opened,       default,           default,           default)        \
+    _(QUEUE_CLOSED,         queue_closed,       default,           default,           default)        \
+    _(SIMULATOR_START,      simulator_start,    default,           default,           default)        \
+    _(SIMULATOR_STOP,       simulator_stop,     default,           default,           default)        \
+    _(SIMULATOR_PROGRESS,   simulator_progress, default,           default,           default)        \
+    _(EXCEPTION,            exception,          exception,         exception,         default)
 
 
 typedef enum {
