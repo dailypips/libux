@@ -70,7 +70,7 @@ static void timer_init(ux_event_reminder_t* e, ux_clock_type ctype, ux_time_t ti
 
 static int test_event_order(ux_bus_mode mode)
 {
-    ux_loop_t bus;
+    ux_loop_t loop;
 
     ux_queue_t queue[QUEUE_SIZE];
 
@@ -81,7 +81,8 @@ static int test_event_order(ux_bus_mode mode)
         ux_queue_init(&queue[i], 10000, UX_CATEGORY_MARKET);
     }
 
-    bus_init(&bus, mode);
+    ux_loop_init(&loop);
+    loop.mode = mode;
 
     /* prepare event */
     for (int i = 0; i < EVENT_SIZE; i++) {
@@ -93,7 +94,7 @@ static int test_event_order(ux_bus_mode mode)
     for (int i = 0; i < TIMER_SIZE; i++) {
         timer[i] = (ux_event_reminder_t*)ux_event_malloc(UX_EVENT_REMINDER);
         timer_init(timer[i], UX_CLOCK_LOCAL, timer_time[i]);
-        bus_add_timer(&bus, timer[i]);
+        bus_add_timer(&loop, timer[i]);
     }
 
     for (int i = 0; i < 10; i++) {
@@ -112,16 +113,16 @@ static int test_event_order(ux_bus_mode mode)
         ((ux_event_tick_t*)event[i])->provider = 2;
     }
 
-    bus_add_queue(&bus, &queue[0]);
-    bus_add_queue(&bus, &queue[1]);
-    bus_add_queue(&bus, &queue[2]);
+    bus_add_queue(&loop, &queue[0]);
+    bus_add_queue(&loop, &queue[1]);
+    bus_add_queue(&loop, &queue[2]);
 
     /* test event order */
     ux_event_t* e;
 
     int k = 0;
     int z= 0;
-    while ((e = bus_next_event(&bus)) != NULL) {
+    while ((e = bus_next_event(&loop)) != NULL) {
         ASSERT(e->timestamp == all_time[z]);
         if (e->type == UX_EVENT_ASK)
         {
@@ -148,7 +149,7 @@ static int test_event_order(ux_bus_mode mode)
 
     /* clear bus*/
 
-    bus_destory(&bus);
+    ux_loop_destory(&loop);
     return 0;
 }
 

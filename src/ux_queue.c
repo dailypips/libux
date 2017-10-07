@@ -14,7 +14,6 @@ ux_queue_t* ux_queue_init(ux_queue_t* q, unsigned int size, ux_queue_category ca
         return NULL;
     }
     q->loop = NULL;
-    q->on_event = NULL;
     q->category = category;
     return q;
 }
@@ -68,9 +67,16 @@ int ux_queue_push(ux_queue_t* q, void* e)
 
     int ret = spscq_push(&q->spsc, e);
 
-    if (is_empty && q->on_event) {
+    /*if (is_empty && q->on_event) {
         UX_ASSERT(ret == 0);
         q->on_event(q);
+    }*/
+
+    if(is_empty && q->loop) {
+        UX_ASSERT(ret == 0);
+        ux_loop_t *loop = q->loop;
+        mpscq_push(&loop->pending_queue, &q->mpsc_node);
+        ux_wakeup(loop);
     }
 
     return ret;

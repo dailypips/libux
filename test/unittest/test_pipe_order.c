@@ -46,7 +46,7 @@ static ux_event_t* tick_init(ux_event_t* e, int provider, int instrument, ux_tim
 
 static int test_pipe_event_order(ux_bus_mode mode, ux_queue_category category)
 {
-    ux_loop_t bus;
+    ux_loop_t loop;
 
     ux_queue_t queue[QUEUE_SIZE];
 
@@ -56,7 +56,8 @@ static int test_pipe_event_order(ux_bus_mode mode, ux_queue_category category)
         ux_queue_init(&queue[i], 10000, category);
     }
 
-    bus_init(&bus, mode);
+    ux_loop_init(&loop);
+    loop.mode = mode;
 
     /* prepare event */
     for (int i = 0; i < EVENT_SIZE; i++) {
@@ -80,15 +81,15 @@ static int test_pipe_event_order(ux_bus_mode mode, ux_queue_category category)
         ((ux_event_tick_t*)event[i])->provider = 2;
     }
 
-    bus_add_queue(&bus, &queue[0]);
-    bus_add_queue(&bus, &queue[1]);
-    bus_add_queue(&bus, &queue[2]);
+    bus_add_queue(&loop, &queue[0]);
+    bus_add_queue(&loop, &queue[1]);
+    bus_add_queue(&loop, &queue[2]);
 
     /* test event order */
     ux_event_t* e;
     int j = 0;
 
-    while ((e = bus_next_event(&bus)) != NULL) {
+    while ((e = bus_next_event(&loop)) != NULL) {
         ASSERT(e->timestamp == except[j].time);
 #ifndef NDEBUG
         ASSERT_THEN(e->dummy == &queue[except[j].qindex],
@@ -109,7 +110,7 @@ static int test_pipe_event_order(ux_bus_mode mode, ux_queue_category category)
 
     /* clear bus*/
 
-    bus_destory(&bus);
+    ux_loop_destory(&loop);
     return 0;
 }
 

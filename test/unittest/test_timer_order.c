@@ -48,17 +48,18 @@ static void timer_init(ux_event_reminder_t* e, ux_clock_type ctype, ux_time_t ti
 static int test_timer_event_order(ux_bus_mode mode, ux_clock_type ctype)
 {
     fprintf(stderr, "mode = %d clock_type = %d\n", mode, ctype);
-    ux_loop_t bus;
+    ux_loop_t loop;
 
     ux_event_reminder_t* event[EVENT_SIZE];
 
-    bus_init(&bus, mode);
+    ux_loop_init(&loop);
+    loop.mode = mode;
 
     /* prepare event */
     for (int i = 0; i < EVENT_SIZE; i++) {
         event[i] = (ux_event_reminder_t*)ux_event_malloc(UX_EVENT_REMINDER);
         timer_init(event[i], ctype, etime[i]);
-        bus_add_timer(&bus, event[i]);
+        bus_add_timer(&loop, event[i]);
     }
 
     /* test timer order */
@@ -66,7 +67,7 @@ static int test_timer_event_order(ux_bus_mode mode, ux_clock_type ctype)
 
     ux_event_reminder_t *e;
 
-    while ((e = bus_next_reminder(&bus, ctype)) != NULL) {
+    while ((e = bus_next_reminder(&loop, ctype)) != NULL) {
 
         ASSERT_THEN(e->timestamp == except[j],
                     fprintf(stderr, "[%d] except %"PRIu64" but %"PRIu64"\n", j, except[j], e->timestamp);
@@ -83,7 +84,7 @@ static int test_timer_event_order(ux_bus_mode mode, ux_clock_type ctype)
 
     /* clear bus*/
 
-    bus_destory(&bus);
+    ux_loop_destory(&loop);
 
     return 0;
 }

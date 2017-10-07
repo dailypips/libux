@@ -1,15 +1,5 @@
 #include "ux_internal.h"
 
-static void loop_add_queue(ux_loop_t *loop, void *q)
-{
-    bus_add_queue(loop, (ux_queue_t*)q);
-}
-
-void ux_loop_add_queue(ux_loop_t* loop, ux_queue_t *q)
-{
-    ux_async_post(loop, loop_add_queue, q);
-}
-
 static inline void timewait(ux_loop_t* loop, int64_t timeout)
 {
     if(timeout < 0) return;
@@ -20,7 +10,6 @@ static inline void timewait(ux_loop_t* loop, int64_t timeout)
         uv_cond_wait(&loop->wait_cond, &loop->wait_mutex);
     uv_mutex_unlock(&loop->wait_mutex);
 }
-
 
 void ux_wakeup(ux_loop_t* loop)
 {
@@ -42,6 +31,15 @@ static void loop_dispatch_event(ux_loop_t *loop, ux_event_t *e)
     event_dispatch dispatcher = g_eventclassinfo[e->type].dispatch;
     if(dispatcher)
         dispatcher(loop, e);
+}
+
+int64_t bus_next_timeout(ux_loop_t *loop)
+{
+    ux_event_reminder_t *r = bus_next_reminder(loop, UX_CLOCK_LOCAL);
+    if (r)
+        return r->timeout - datetime_now();
+    else
+        return 0;
 }
 
 void ux_run(ux_loop_t* loop, ux_run_mode mode)
@@ -89,6 +87,7 @@ void ux_loop_destory(ux_loop_t *loop)
 {
     uv_cond_destroy(&loop->wait_cond);
     uv_mutex_destroy(&loop->wait_mutex);
+    bus_destory(loop);
 }
 
 

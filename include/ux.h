@@ -551,7 +551,7 @@ UX_EXTERN ux_loop_t* ux_loop_new(void);
 UX_EXTERN void ux_loop_free(ux_loop_t *loop);
 UX_EXTERN void ux_run(ux_loop_t*loop, ux_run_mode mode);
 UX_EXTERN void ux_stop(ux_loop_t *loop);
-UX_EXTERN void ux_wakeup(ux_loop_t* loop);
+UX_EXTERN void ux_wakeup(ux_loop_t* loop); 
 
 #ifdef __cplusplus
 }
