@@ -5,9 +5,9 @@ void ux_wakeup(ux_loop_t* loop)
     uv_cond_signal(&loop->wait_cond);
 }
 
-void ux_async_post(ux_loop_t *loop, ux_async_cb async_cb, void *data)
+void ux_async_post(ux_loop_t* loop, ux_async_cb async_cb, void* data)
 {
-    ux_async_t *async = ux_malloc(sizeof(ux_async_t));
+    ux_async_t* async = ux_malloc(sizeof(ux_async_t));
     async->async_cb = async_cb;
     async->data = data;
 
@@ -15,16 +15,16 @@ void ux_async_post(ux_loop_t *loop, ux_async_cb async_cb, void *data)
     ux_wakeup(loop);
 }
 
-static void loop_dispatch_event(ux_loop_t *loop, ux_event_t *e)
+static void loop_dispatch_event(ux_loop_t* loop, ux_event_t* e)
 {
     event_dispatch dispatcher = g_eventclassinfo[e->type].dispatch;
-    if(dispatcher)
+    if (dispatcher)
         dispatcher(loop, e);
 }
 
-static int64_t bus_next_timeout(ux_loop_t *loop)
+static int64_t bus_next_timeout(ux_loop_t* loop)
 {
-    ux_event_reminder_t *r = bus_timer_peek(loop, UX_CLOCK_LOCAL);
+    ux_event_reminder_t* r = bus_timer_peek(loop, UX_CLOCK_LOCAL);
 
     if (r)
         return r->stop - ux_time_now();
@@ -34,7 +34,6 @@ static int64_t bus_next_timeout(ux_loop_t *loop)
 
 static inline void timewait(ux_loop_t* loop, int64_t timeout)
 {
-    if(timeout < 0) return;
     uv_mutex_lock(&loop->wait_mutex);
     if (timeout > 0)
         uv_cond_timedwait(&loop->wait_cond, &loop->wait_mutex, timeout);
@@ -55,21 +54,19 @@ void ux_run(ux_loop_t* loop, ux_run_mode mode)
         /* step 2: pop bus */
         ux_event_t* e = bus_dequeue(loop);
 
-        if (e != NULL) {
+        if (e)
             loop_dispatch_event(loop, e);
-            if (mode == UX_RUN_ONCE || mode == UX_RUN_NOWAIT)
-                break;
-        } else {
-            if (mode == UX_RUN_NOWAIT)
-                break;
 
-            int64_t timeout = bus_next_timeout(loop);
+        if (mode == UX_RUN_NOWAIT || (mode == UX_RUN_ONCE && e))
+            break;
+
+        int64_t timeout = bus_next_timeout(loop);
+        if (timeout > 0)
             timewait(loop, timeout);
-        }
     }
 }
 
-void ux_stop(ux_loop_t *loop)
+void ux_stop(ux_loop_t* loop)
 {
     loop->stop_flag = 1;
 }
@@ -81,7 +78,7 @@ ux_loop_t* ux_loop_new(void)
     return loop;
 }
 
-void ux_loop_free(ux_loop_t *loop)
+void ux_loop_free(ux_loop_t* loop)
 {
     ux_loop_destory(loop);
     ux_free(loop);
