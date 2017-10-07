@@ -52,13 +52,13 @@ static int test_timer_event_order(ux_bus_mode mode, ux_clock_type ctype)
 
     ux_event_reminder_t* event[EVENT_SIZE];
 
-    ux_bus_init(&bus, mode);
+    bus_init(&bus, mode);
 
     /* prepare event */
     for (int i = 0; i < EVENT_SIZE; i++) {
         event[i] = (ux_event_reminder_t*)ux_event_malloc(UX_EVENT_REMINDER);
         timer_init(event[i], ctype, etime[i]);
-        ux_bus_add_timer(&bus, event[i]);
+        bus_add_timer(&bus, event[i]);
     }
 
     /* test timer order */
@@ -66,7 +66,7 @@ static int test_timer_event_order(ux_bus_mode mode, ux_clock_type ctype)
 
     ux_event_reminder_t *e;
 
-    while ((e = ux_bus_next_reminder(&bus, ctype)) != NULL) {
+    while ((e = bus_next_reminder(&bus, ctype)) != NULL) {
 
         ASSERT_THEN(e->timestamp == except[j],
                     fprintf(stderr, "[%d] except %"PRIu64" but %"PRIu64"\n", j, except[j], e->timestamp);
@@ -83,12 +83,12 @@ static int test_timer_event_order(ux_bus_mode mode, ux_clock_type ctype)
 
     /* clear bus*/
 
-    ux_bus_destory(&bus);
+    bus_destory(&bus);
 
     return 0;
 }
 
-TEST_IMPL(ux_bus_signle_timer_event_order)
+TEST_IMPL(bus_signle_timer_event_order)
 {
     // test diff mode && diff pipe
 

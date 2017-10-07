@@ -187,7 +187,7 @@ again:
             goto again;
         }
 
-        datetime_t bus_time = ux_bus_get_time(loop);
+        datetime_t bus_time = bus_get_time(loop);
         if (e->timestamp < bus_time) {
             if (e->type != UX_EVENT_QUEUE_CLOSED && e->type != UX_EVENT_QUEUE_OPENED) {
                 if (e->type != UX_EVENT_SIMULATOR_PROGRESS) {
@@ -195,7 +195,7 @@ again:
                     goto again;
                 }
             }
-            e->timestamp = ux_bus_get_time(loop);
+            e->timestamp = bus_get_time(loop);
         }
         loop->saved_event = e;
     }
@@ -261,7 +261,7 @@ static ux_event_t* bus_realtime_dequeue(ux_loop_t *loop)
     // local clock timer
     if (!heap_is_empty(&loop->timer_heap[UX_CLOCK_LOCAL])) {
         ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&loop->timer_heap[UX_CLOCK_LOCAL]);
-        if (r->timeout <= ux_bus_get_time(loop)) {
+        if (r->timeout <= bus_get_time(loop)) {
             return (ux_event_t*)timer_heap_pop(&loop->timer_heap[UX_CLOCK_LOCAL]);
         }
     }
@@ -299,7 +299,7 @@ static ux_event_t* bus_realtime_dequeue(ux_loop_t *loop)
     return NULL;
 }
 
-ux_event_t* ux_bus_next_event(ux_loop_t *loop)
+ux_event_t* bus_next_event(ux_loop_t *loop)
 {
     if (loop->mode == UX_BUS_SIMULATION)
         return bus_simualtion_dequeue(loop);
@@ -307,7 +307,7 @@ ux_event_t* ux_bus_next_event(ux_loop_t *loop)
         return bus_realtime_dequeue(loop);
 }
 
-int64_t ux_bus_next_timeout(ux_loop_t *loop)
+int64_t bus_next_timeout(ux_loop_t *loop)
 {
     ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&loop->timer_heap[UX_CLOCK_LOCAL]);
     if (r)
@@ -316,30 +316,30 @@ int64_t ux_bus_next_timeout(ux_loop_t *loop)
         return 0;
 }
 
-UX_FUNC ux_event_reminder_t* ux_bus_next_reminder(ux_loop_t *loop, ux_clock_type type)
+UX_FUNC ux_event_reminder_t* bus_next_reminder(ux_loop_t *loop, ux_clock_type type)
 {
     min_heap* heap = &loop->timer_heap[type];
 
     return timer_heap_pop(heap);
 }
 
-void ux_bus_attach(ux_loop_t* src, ux_loop_t* dst)
+void bus_attach(ux_loop_t* src, ux_loop_t* dst)
 {
     int num = src->attached_count++;
     src->attached[num] = ux_zalloc(sizeof(ux_queue_t));
     if (src->attached[num] != NULL) {
         ux_queue_init(src->attached[num], 10000, UX_CATEGORY_MARKET);
-        ux_bus_add_queue(dst, src->attached[num]);
+        bus_add_queue(dst, src->attached[num]);
     }
 }
 
-void ux_bus_detach(ux_loop_t* src, ux_loop_t* dst)
+void bus_detach(ux_loop_t* src, ux_loop_t* dst)
 {
     for (int i = 0; i < src->attached_count; i++) {
         ux_queue_t* q = src->attached[i];
         UX_ASSERT(q != NULL);
         if (q->loop == dst) {
-            ux_bus_remove_queue(dst, q); // todo: add test(remove q from heap when q not insert heap)
+            bus_remove_queue(dst, q); // todo: add test(remove q from heap when q not insert heap)
             for (int j = i; j < src->attached_count - 1; j++)
                 src->attached[j] = src->attached[j + 1];
             src->attached_count--;
@@ -347,7 +347,7 @@ void ux_bus_detach(ux_loop_t* src, ux_loop_t* dst)
     }
 }
 
-void ux_bus_init(ux_loop_t *loop, ux_bus_mode mode)
+void bus_init(ux_loop_t *loop, ux_bus_mode mode)
 {
     UX_ASSERT(loop != NULL);
 
@@ -370,14 +370,14 @@ void ux_bus_init(ux_loop_t *loop, ux_bus_mode mode)
     loop->attached_count = 0;
 }
 
-void ux_bus_destory(ux_loop_t *loop)
+void bus_destory(ux_loop_t *loop)
 {
     UX_ASSERT(loop != NULL);
 
-    ux_bus_clear(loop);
+    bus_clear(loop);
 }
 
-void ux_bus_add_queue(ux_loop_t *loop, ux_queue_t* q)
+void bus_add_queue(ux_loop_t *loop, ux_queue_t* q)
 {
     UX_ASSERT(loop != NULL);
     UX_ASSERT(q != NULL);
@@ -396,7 +396,7 @@ void ux_bus_add_queue(ux_loop_t *loop, ux_queue_t* q)
         queue_less_than);
 }
 
-void ux_bus_remove_queue(ux_loop_t *loop, ux_queue_t* q)
+void bus_remove_queue(ux_loop_t *loop, ux_queue_t* q)
 {
     UX_ASSERT(loop != NULL);
     UX_ASSERT(q != NULL);
@@ -406,7 +406,7 @@ void ux_bus_remove_queue(ux_loop_t *loop, ux_queue_t* q)
         queue_less_than);
 }
 
-void ux_bus_add_timer(ux_loop_t *loop, ux_event_reminder_t* timer)
+void bus_add_timer(ux_loop_t *loop, ux_event_reminder_t* timer)
 {
     UX_ASSERT(loop != NULL);
     UX_ASSERT(timer != NULL);
@@ -418,7 +418,7 @@ void ux_bus_add_timer(ux_loop_t *loop, ux_event_reminder_t* timer)
         timer_less_than);
 }
 
-void ux_bus_remove_timer(ux_loop_t *loop, ux_event_reminder_t* timer)
+void bus_remove_timer(ux_loop_t *loop, ux_event_reminder_t* timer)
 {
     UX_ASSERT(loop != NULL);
     UX_ASSERT(timer != NULL);
@@ -428,7 +428,7 @@ void ux_bus_remove_timer(ux_loop_t *loop, ux_event_reminder_t* timer)
         timer_less_than);
 }
 
-datetime_t ux_bus_get_time(ux_loop_t *loop)
+datetime_t bus_get_time(ux_loop_t *loop)
 {
     UX_ASSERT(loop != NULL);
 
@@ -438,7 +438,7 @@ datetime_t ux_bus_get_time(ux_loop_t *loop)
         return datetime_now();
 }
 
-int ux_bus_set_time(ux_loop_t *loop, datetime_t time)
+int bus_set_time(ux_loop_t *loop, datetime_t time)
 {
     UX_ASSERT(loop != NULL);
 
@@ -452,14 +452,14 @@ int ux_bus_set_time(ux_loop_t *loop, datetime_t time)
     return 0;
 }
 
-datetime_t ux_bus_get_exchange_time(ux_loop_t *loop)
+datetime_t bus_get_exchange_time(ux_loop_t *loop)
 {
     UX_ASSERT(loop != NULL);
 
     return loop->time[UX_CLOCK_EXCHANGE];
 }
 
-int ux_bus_set_exchange_time(ux_loop_t *loop, datetime_t time)
+int bus_set_exchange_time(ux_loop_t *loop, datetime_t time)
 {
     UX_ASSERT(loop != NULL);
 
@@ -470,7 +470,7 @@ int ux_bus_set_exchange_time(ux_loop_t *loop, datetime_t time)
     return 0;
 }
 
-void ux_bus_clear(ux_loop_t *loop)
+void bus_clear(ux_loop_t *loop)
 {
     UX_ASSERT(loop != NULL);
 
@@ -487,7 +487,7 @@ void ux_bus_clear(ux_loop_t *loop)
 
     for (int i = 0; i < loop->attached_count; i++) {
         ux_queue_t* q = loop->attached[i];
-        ux_bus_detach(loop, q->loop);
+        bus_detach(loop, q->loop);
         ux_queue_destory(q);
     }
     loop->attached_count = 0;

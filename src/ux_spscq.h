@@ -23,9 +23,9 @@ extern "C" {
  * modified from facebook folly library
  */
 
-typedef struct ux_spscq_s ux_spscq_t;
+typedef struct spscq_s spscq_t;
 
-struct ux_spscq_s {
+struct spscq_s {
     char pad1[UX_CACHELINE_SIZE];
     uint32_t capacity;
     void **records;
@@ -37,28 +37,28 @@ struct ux_spscq_s {
 /* @param size must be large than 2
  * @resule 0 successful
  */
-UX_FUNC int spscq_init(ux_spscq_t *q, unsigned int size);
+UX_FUNC int spscq_init(spscq_t *q, unsigned int size);
 
-UX_FUNC void spscq_destroy(ux_spscq_t *q);
+UX_FUNC void spscq_destroy(spscq_t *q);
 
 /* return 0 if successful
  * -1 means queue is full
  */
-UX_FUNC int spscq_push(ux_spscq_t *q, void *e);
+UX_FUNC int spscq_push(spscq_t *q, void *e);
 
-UX_FUNC void *spscq_pop(ux_spscq_t *q);
+UX_FUNC void *spscq_pop(spscq_t *q);
 
-UX_FUNC void *spscq_peek(const ux_spscq_t *q);
+UX_FUNC void *spscq_peek(const spscq_t *q);
 
 // return 1 means empty
-UX_FUNC int spscq_is_empty(ux_spscq_t *q);
+UX_FUNC int spscq_is_empty(spscq_t *q);
 
 // return 1 means full
-UX_FUNC int spscq_is_full(ux_spscq_t *q);
+UX_FUNC int spscq_is_full(spscq_t *q);
 
-UX_FUNC unsigned int spscq_size(ux_spscq_t *q);
+UX_FUNC unsigned int spscq_size(spscq_t *q);
 
-UX_FUNC unsigned int spscq_capacity(ux_spscq_t *q);
+UX_FUNC unsigned int spscq_capacity(spscq_t *q);
 
 
 #ifdef __cplusplus

@@ -18,15 +18,12 @@ extern "C" {
 /* event  module */
 
 /* event class info */
-typedef void (*event_init)(ux_event_t* e, va_list args);
 typedef void (*event_destory)(ux_event_t* e);
 typedef ux_event_t* (*event_clone)(ux_event_t* e);
 typedef void (*event_dispatch)(ux_loop_t *loop, ux_event_t* e);
 
 typedef struct _ux_event_class_info_t {
-    ux_event_flag flag;
     size_t size;
-    event_init init;
     event_destory destory;
     event_clone clone;
     event_dispatch dispatch;
@@ -34,19 +31,15 @@ typedef struct _ux_event_class_info_t {
 
 extern ux_event_class_info_t g_eventclassinfo[UX_EVENT_LAST];
 
-UX_FUNC void ux_event_dispatch(void *loop, ux_event_t *e);
-UX_FUNC ux_event_t* event_tick_init(ux_event_t *e, int provider, int instrument, datetime_t exchange_timestamp, double price, long size);
+/*UX_FUNC void ux_event_dispatch(void *loop, ux_event_t *e);
 
-UX_FUNC ux_event_t* event_news_init(ux_event_t *e, int provider, int instrument, char *urgency, char *url, char *headline, char *text);
 UX_FUNC void event_news_destory(ux_event_t *e);
 UX_FUNC ux_event_t* event_news_clone(ux_event_t *e);
 
-UX_FUNC ux_event_t* event_fundamental_init(ux_event_t *e, int provider, int instrument);
 UX_FUNC ux_event_t* event_simulator_start_init(ux_event_t *e, datetime_t time1, datetime_t time2, long long count);
 
-UX_FUNC ux_event_t* event_exception_init(ux_event_t *e, char *source);
 UX_FUNC void event_exception_destory(ux_event_t *e);
-UX_FUNC ux_event_t* event_exception_clone(ux_event_t *e);
+UX_FUNC ux_event_t* event_exception_clone(ux_event_t *e);*/
 
 /* queue module */
 #include "ux_spscq.h"
@@ -58,13 +51,13 @@ struct ux_queue_s {
     void *data;
     /* private */
     ux_atomic_t refcount;
-    ux_spscq_t spsc;
+    spscq_t spsc;
     /* only access by consumer */
     void *loop;
     ux_queue_event_handle on_event;
     ux_queue_category category;
     /* mpsc */
-    ux_mpscq_node mpsc_node;
+    mpscq_node mpsc_node;
     /* min heap node */
     void *heap_node[3];
     uint64_t start_id;
@@ -101,7 +94,7 @@ struct ux_loop_s {
     uv_mutex_t wait_mutex;
     uv_cond_t  wait_cond;
     int stop_flag;
-    ux_mpscq_t async_queue;
+    mpscq_t async_queue;
     /* bus field */
     ux_bus_mode mode;
     min_heap queue_heap[UX_CATEGORY_LAST];
@@ -126,29 +119,29 @@ UX_EXTERN void ux_loop_run(ux_loop_t *loop, ux_run_mode mode);
 UX_EXTERN void ux_loop_stop(ux_loop_t *loop);
 UX_EXTERN void ux_loop_wakeup(ux_loop_t* loop);
 
-UX_FUNC void ux_bus_init(ux_loop_t *bus, ux_bus_mode mode);
-UX_FUNC void ux_bus_destory(ux_loop_t *bus);
+UX_FUNC void bus_init(ux_loop_t *bus, ux_bus_mode mode);
+UX_FUNC void bus_destory(ux_loop_t *bus);
 
-UX_FUNC void ux_bus_clear(ux_loop_t *bus);
+UX_FUNC void bus_clear(ux_loop_t *bus);
 
-UX_FUNC void ux_bus_attach(ux_loop_t* src, ux_loop_t *dst);
-UX_FUNC void ux_bus_detach(ux_loop_t* src, ux_loop_t *dst);
+UX_FUNC void bus_attach(ux_loop_t* src, ux_loop_t *dst);
+UX_FUNC void bus_detach(ux_loop_t* src, ux_loop_t *dst);
 
-UX_FUNC void ux_bus_add_queue(ux_loop_t *bus, ux_queue_t *q);
-UX_FUNC void ux_bus_remove_queue(ux_loop_t *bus, ux_queue_t *q);
+UX_FUNC void bus_add_queue(ux_loop_t *bus, ux_queue_t *q);
+UX_FUNC void bus_remove_queue(ux_loop_t *bus, ux_queue_t *q);
 
-UX_FUNC void ux_bus_add_timer(ux_loop_t *bus, ux_event_reminder_t* timer);
-UX_FUNC void ux_bus_remove_timer(ux_loop_t *bus, ux_event_reminder_t* timer);
+UX_FUNC void bus_add_timer(ux_loop_t *bus, ux_event_reminder_t* timer);
+UX_FUNC void bus_remove_timer(ux_loop_t *bus, ux_event_reminder_t* timer);
 
-UX_FUNC ux_event_t* ux_bus_next_event(ux_loop_t *bus);
-UX_FUNC int64_t ux_bus_next_timeout(ux_loop_t* bus);
-UX_FUNC ux_event_reminder_t* ux_bus_next_reminder(ux_loop_t* bus, ux_clock_type type);
+UX_FUNC ux_event_t* bus_next_event(ux_loop_t *bus);
+UX_FUNC int64_t bus_next_timeout(ux_loop_t* bus);
+UX_FUNC ux_event_reminder_t* bus_next_reminder(ux_loop_t* bus, ux_clock_type type);
 
-UX_FUNC datetime_t ux_bus_get_time(ux_loop_t* bus);
-UX_FUNC int ux_bus_set_time(ux_loop_t* bus, datetime_t time);
+UX_FUNC datetime_t bus_get_time(ux_loop_t* bus);
+UX_FUNC int bus_set_time(ux_loop_t* bus, datetime_t time);
 
-UX_FUNC datetime_t ux_bus_get_exchange_time(ux_loop_t* bus);
-UX_FUNC int ux_bus_set_exchange_time(ux_loop_t* bus, datetime_t time);
+UX_FUNC datetime_t bus_get_exchange_time(ux_loop_t* bus);
+UX_FUNC int bus_set_exchange_time(ux_loop_t* bus, datetime_t time);
 
 //UX_FUNC void ux_async_init(ux_async_t *async, loop, ux_async_cb callback, void *data);
 /* thread safe */
@@ -160,12 +153,12 @@ UX_FUNC void ux_loop_add_queue(ux_loop_t *loop, ux_queue_t *q);
 
 /* dispatch module */
 
-UX_FUNC void ux_event_default_dispatch(ux_loop_t *loop, ux_event_t *e);
+UX_FUNC event_dispatch event_get_dispatcher(ux_event_t *e);
 
-UX_FUNC void ux_event_reminder_dispatch(ux_loop_t *loop, ux_event_t *e);
-UX_FUNC void ux_event_ask_dispatch(ux_loop_t *loop, ux_event_t *e);
-UX_FUNC void ux_event_bid_dispatch(ux_loop_t *loop, ux_event_t *e);
-UX_FUNC void ux_event_trade_dispatch(ux_loop_t *loop, ux_event_t *e);
+UX_FUNC void event_reminder_dispatch(ux_loop_t *loop, ux_event_t *e);
+UX_FUNC void event_ask_dispatch(ux_loop_t *loop, ux_event_t *e);
+UX_FUNC void event_bid_dispatch(ux_loop_t *loop, ux_event_t *e);
+UX_FUNC void event_trade_dispatch(ux_loop_t *loop, ux_event_t *e);
 
 
 #ifdef __cplusplus

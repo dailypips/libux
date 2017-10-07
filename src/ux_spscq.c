@@ -1,7 +1,7 @@
 #include "ux_spscq.h"
 #include <ux.h>
 
-int spscq_init(ux_spscq_t* q, uint32_t size)
+int spscq_init(spscq_t* q, uint32_t size)
 {
     UX_ASSERT(size >= 2);
     q->records = ux_malloc(size * sizeof(void*));
@@ -15,7 +15,7 @@ int spscq_init(ux_spscq_t* q, uint32_t size)
     return 0;
 }
 
-void spscq_destroy(ux_spscq_t* q)
+void spscq_destroy(spscq_t* q)
 {
     // No real synchronization needed at destructor time: only one
     // thread can be doing this.
@@ -23,7 +23,7 @@ void spscq_destroy(ux_spscq_t* q)
     ux_free(q->records);
 }
 
-int spscq_push(ux_spscq_t* q, void* e)
+int spscq_push(spscq_t* q, void* e)
 {
     unsigned int currentWrite = ux_atomic_no_barrier_load(&q->write_pos);
     unsigned int nextRecord = currentWrite + 1;
@@ -40,7 +40,7 @@ int spscq_push(ux_spscq_t* q, void* e)
     return -1;
 }
 
-void* spscq_pop(ux_spscq_t* q)
+void* spscq_pop(spscq_t* q)
 {
     unsigned int currentRead = ux_atomic_no_barrier_load(&q->read_pos);
     if (currentRead == ux_atomic_acq_load(&q->write_pos)) {
@@ -56,7 +56,7 @@ void* spscq_pop(ux_spscq_t* q)
     return q->records[currentRead];
 }
 
-void* spscq_peek(const ux_spscq_t* q)
+void* spscq_peek(const spscq_t* q)
 {
     unsigned int currentRead = ux_atomic_no_barrier_load(&q->read_pos);
     if (currentRead == ux_atomic_acq_load(&q->write_pos)) {
@@ -67,12 +67,12 @@ void* spscq_peek(const ux_spscq_t* q)
     return q->records[currentRead];
 }
 
-int spscq_is_empty(ux_spscq_t* q)
+int spscq_is_empty(spscq_t* q)
 {
     return ux_atomic_acq_load(&q->read_pos) == ux_atomic_acq_load(&q->write_pos);
 }
 
-int spscq_is_full(ux_spscq_t* q)
+int spscq_is_full(spscq_t* q)
 {
     unsigned int nextRecord = ux_atomic_acq_load(&q->write_pos) + 1;
     if (nextRecord == q->capacity)
@@ -86,7 +86,7 @@ int spscq_is_full(ux_spscq_t* q)
     return 1;
 }
 
-unsigned int spscq_size(ux_spscq_t* q)
+unsigned int spscq_size(spscq_t* q)
 {
     int ret = ux_atomic_acq_load(&q->write_pos) - ux_atomic_acq_load(&q->read_pos);
     if (ret < 0)
@@ -94,4 +94,4 @@ unsigned int spscq_size(ux_spscq_t* q)
     return ret;
 }
 
-unsigned int spscq_capacity(ux_spscq_t* q) { return q->capacity; }
+unsigned int spscq_capacity(spscq_t* q) { return q->capacity; }

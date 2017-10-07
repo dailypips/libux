@@ -50,7 +50,10 @@ char* ux_strndup(const char* s, size_t n)
 void* ux_malloc(size_t size)
 {
     assert(size > 0);
-    return ux__allocator.local_malloc(size);
+    void *p =  ux__allocator.local_malloc(size);
+    if (!p)
+        abort();
+    return p;
 }
 
 void ux_free(void* ptr)

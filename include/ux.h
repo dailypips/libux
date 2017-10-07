@@ -97,36 +97,28 @@ UX_EXTERN datetime_t datetime_now(void);
 typedef intptr_t ux_atomic_t;
 
 /* event module */
-typedef enum {
-  UX_EVENT_FLAG_NONE         = 1 << 0,
-  UX_EVENT_FLAG_MARKET       = 1 << 1,
-  UX_EVENT_FLAG_TICK         = 1 << 2,
-  UX_EVENT_FLAG_EXECUTION    = 1 << 3,
-  UX_EVENT_FLAG_SERVICE      = 1 << 4,
-  UX_EVENT_FLAG_REMINDER     = 1 << 5
-} ux_event_flag;
-
-
-#define EVENTDEF(_) \
-    /* UpperName | lowcaseName | init |  destory | clone | dispatch | flag */ \
-    _(REMINDER, reminder, NULL, NULL, NULL, reminder, UX_EVENT_FLAG_REMINDER) \
-    _(ASK,      ask,      NULL, NULL, NULL, ask, UX_EVENT_FLAG_MARKET | UX_EVENT_FLAG_TICK) \
-    _(BID,      bid,      NULL, NULL, NULL, bid, UX_EVENT_FLAG_MARKET | UX_EVENT_FLAG_TICK) \
-    _(TRADE,    trade,    NULL, NULL, NULL, trade, UX_EVENT_FLAG_MARKET | UX_EVENT_FLAG_TICK) \
-    /*_(BAR,      bar,    NULL, NULL, NULL, NULL, UX_EVENT_FLAG_MARKET)*/ \
-    _(NEWS,     news,     NULL,     event_news_destory, event_news_clone, default, UX_EVENT_FLAG_MARKET) \
-    _(FUNDAMENTAL, fundamental, NULL, NULL, NULL, default, UX_EVENT_FLAG_MARKET) \
-    /* internal event */ \
-    _(QUEUE_OPENED, queue_opened, NULL, NULL, NULL, default, UX_EVENT_FLAG_NONE) \
-    _(QUEUE_CLOSED, queue_closed, NULL, NULL, NULL, default, UX_EVENT_FLAG_NONE) \
-    _(SIMULATOR_START, simulator_start, NULL, NULL, NULL, default, UX_EVENT_FLAG_NONE) \
-    _(SIMULATOR_STOP, simulator_stop, NULL, NULL, NULL, default, UX_EVENT_FLAG_NONE) \
-    _(SIMULATOR_PROGRESS, simulator_progress, NULL, NULL, NULL, default, UX_EVENT_FLAG_NONE) \
-    _(EXCEPTION, exception, NULL, event_exception_destory, event_exception_clone, default, UX_EVENT_FLAG_NONE)
+#define EVENTDEF(_)                                                                      \
+    /* UppercaseName        LowcaseName         destory     clone        dispatch*/      \
+    _(REMINDER,             reminder,           default,    default,     default)        \
+    _(ASK,                  ask,                default,    default,     default)        \
+    _(BID,                  bid,                default,    default,     default)        \
+    _(TRADE,                trade,              default,    default,     default)        \
+    _(L2SNAPSHOT,           l2snapshot,         l2snapshot, l2snapshot,  default)        \
+    _(L2UPDATE,             l2update,           l2update,   l2update,    default)        \
+    /*_(BAR,                bar,                default,    default,     bar)*/          \
+    _(NEWS,                 news,               news,       news,        default)        \
+    _(FUNDAMENTAL,          fundamental,        default,    default,     default)        \
+    /* internal event */                                                                 \
+    _(QUEUE_OPENED,         queue_opened,       default,    default,     default)        \
+    _(QUEUE_CLOSED,         queue_closed,       default,    default,     default)        \
+    _(SIMULATOR_START,      simulator_start,    default,    default,     default)        \
+    _(SIMULATOR_STOP,       simulator_stop,     default,    default,     default)        \
+    _(SIMULATOR_PROGRESS,   simulator_progress, default,    default,     default)        \
+    _(EXCEPTION,            exception,          exception,  exception,   default)
 
 
 typedef enum {
-#define EVENTENUM(name, lname, init, destory, clone, processor, flag)	UX_EVENT_##name,
+#define EVENTENUM(name, lname, destory, clone, processor)	UX_EVENT_##name,
 EVENTDEF(EVENTENUM)
 #undef EVENTENUM
     UX_EVENT_LAST
@@ -136,13 +128,11 @@ EVENTDEF(EVENTENUM)
 #define UX_EVENT_PUBLIC_FIELDS \
     ux_atomic_t refcount;        \
     ux_event_type type;        \
-    ux_event_flag flag;        \
     datetime_t timestamp;
 #else
 #define UX_EVENT_PUBLIC_FIELDS \
     ux_atomic_t refcount;        \
     ux_event_type type;        \
-    ux_event_flag flag;        \
     datetime_t timestamp; \
     void* dummy;
 #endif
@@ -182,16 +172,17 @@ typedef struct ux_event_reminder_s {
 }ux_event_reminder_t;
 
 /* market data event */
-#define UX_MARKET_EVENT_PUBLIC_FIELD   \
-    UX_EVENT_PUBLIC_FIELDS             \
-    int provider;                       \
-    int instrument;                     \
+#define UX_EVENT_COMMON_FIELDS \
+    int provider;           \
+    int instrument;
+
+#define UX_EVENT_COMMON_FIELDS_WITH_EXCHANGE_TIME \
+    UX_EVENT_COMMON_FIELDS \
+    datetime_t exchange_timestamp;
 
 typedef struct tick_event_s {
     UX_EVENT_PUBLIC_FIELDS
-    int provider;
-    int instrument;
-    datetime_t exchange_timestamp;
+    UX_EVENT_COMMON_FIELDS_WITH_EXCHANGE_TIME
     double price;
     long size;
 } ux_event_tick_t;
@@ -202,8 +193,7 @@ typedef ux_event_tick_t ux_event_trade_t;
 
 typedef struct {
     UX_EVENT_PUBLIC_FIELDS
-    int provider;
-    int instrument;
+    UX_EVENT_COMMON_FIELDS
     char *urgency;
     char *url;
     char *headline;
@@ -212,10 +202,46 @@ typedef struct {
 
 typedef struct {
     UX_EVENT_PUBLIC_FIELDS
-    int provider;
-    int instrument;
+    UX_EVENT_COMMON_FIELDS
 } ux_event_fundamental_t;
 
+typedef struct {
+    double price;
+    long size;
+}ux_tick_info_t;
+
+typedef struct {
+    UX_EVENT_PUBLIC_FIELDS
+    UX_EVENT_COMMON_FIELDS_WITH_EXCHANGE_TIME
+    size_t num_bids;
+    size_t num_asks;
+    ux_tick_info_t* ticks;
+}ux_event_l2snapshot_t;
+
+typedef enum {
+    UX_L2_ACTION_NEW,
+    UX_L2_ACTION_CHANGE,
+    UX_L2_ACTION_DELETE,
+    UX_L2_ACTION_RESET
+}ux_level2_action;
+
+typedef enum {
+    UX_SIDE_BID,
+    UX_SIDE_ASK,
+}ux_level2_side;
+
+typedef struct {
+    ux_level2_side side;
+    ux_level2_action action;
+    int position;
+}ux_level2_t;
+
+typedef struct {
+    UX_EVENT_PUBLIC_FIELDS
+    UX_EVENT_COMMON_FIELDS_WITH_EXCHANGE_TIME
+    size_t num_entries;
+    ux_level2_t *entries;
+}ux_event_l2update_t;
 
 /* system */
 typedef struct {

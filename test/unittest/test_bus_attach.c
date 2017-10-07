@@ -41,7 +41,7 @@ static ux_event_t* tick_init(ux_event_t* e, int provider, int instrument, dateti
 static void on_push(ux_queue_t *q)
 {
     assert(q->loop != NULL);
-    ux_bus_add_queue(q->loop, q);
+    bus_add_queue(q->loop, q);
 }
 
 static int test_attach(ux_bus_mode mode)
@@ -55,8 +55,8 @@ static int test_attach(ux_bus_mode mode)
         ux_queue_init(&queue[i], 10000, UX_CATEGORY_MARKET);
     }
 
-    ux_bus_init(&bus1, mode);
-    ux_bus_init(&bus2, mode);
+    bus_init(&bus1, mode);
+    bus_init(&bus2, mode);
 
     /* prepare event */
     for (int i = 0; i < EVENT_SIZE; i++) {
@@ -80,12 +80,12 @@ static int test_attach(ux_bus_mode mode)
         ((ux_event_tick_t*)event[i])->provider = 2;
     }
 
-    ux_bus_add_queue(&bus1, &queue[0]);
-    ux_bus_add_queue(&bus1, &queue[1]);
-    ux_bus_add_queue(&bus1, &queue[2]);
+    bus_add_queue(&bus1, &queue[0]);
+    bus_add_queue(&bus1, &queue[1]);
+    bus_add_queue(&bus1, &queue[2]);
 
 
-    ux_bus_attach(&bus1, &bus2);
+    bus_attach(&bus1, &bus2);
     ux_queue_t * q = bus1.attached[bus1.attached_count - 1];
     q->on_event = on_push;
 
@@ -93,8 +93,8 @@ static int test_attach(ux_bus_mode mode)
     ux_event_t* e1, *e2;
     int j = 0;
 
-    while ((e1 = ux_bus_next_event(&bus1)) != NULL) {
-        e2 = ux_bus_next_event(&bus2);
+    while ((e1 = bus_next_event(&bus1)) != NULL) {
+        e2 = bus_next_event(&bus2);
         ASSERT_THEN(e1 == e2,
             fprintf(stderr, "index:%d e1: %p, e2:%p\n", j, e1, e2);
        );
@@ -110,13 +110,13 @@ static int test_attach(ux_bus_mode mode)
     }
 
     /* clear bus*/
-    ux_bus_detach(&bus1, &bus2);
-    ux_bus_destory(&bus1);
-    ux_bus_destory(&bus2);
+    bus_detach(&bus1, &bus2);
+    bus_destory(&bus1);
+    bus_destory(&bus2);
     return 0;
 }
 
-TEST_IMPL(ux_bus_attach)
+TEST_IMPL(bus_attach)
 {
     test_attach(UX_BUS_SIMULATION);
     return 0;

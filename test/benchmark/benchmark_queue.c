@@ -41,14 +41,14 @@ BENCHMARK_IMPL(queue)
    fflush(stderr);
 
 
-    ux_mpscq_t mq;
-    ux_mpscq_node node;
-    ux_mpscq_init(&mq);
+    mpscq_t mq;
+    mpscq_node node;
+    mpscq_init(&mq);
 
 
     ns = uv_hrtime();
      for (int i =0; i < NUM_TICKS; i++)
-    ux_mpscq_push(&mq, &node);
+    mpscq_push(&mq, &node);
     ns = uv_hrtime() - ns;
 
     fprintf(stderr, "mpsc: %d ticks in %.2fs (%.0f_10K/s)\n",

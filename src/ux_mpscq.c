@@ -18,32 +18,32 @@
 
 #include "ux_mpscq.h"
 
-void ux_mpscq_init(ux_mpscq_t *q) {
+void mpscq_init(mpscq_t *q) {
   ux_atomic_no_barrier_store(&q->head, (ux_atomic_t)&q->sentinel);
   q->tail = &q->sentinel;
   ux_atomic_no_barrier_store(&q->sentinel.next, (ux_atomic_t)NULL);
 }
 
-void ux_mpscq_destroy(ux_mpscq_t *q) {
+void mpscq_destroy(mpscq_t *q) {
   UX_ASSERT(ux_atomic_no_barrier_load(&q->head) == (ux_atomic_t)&q->sentinel);
   UX_ASSERT(q->tail == &q->sentinel);
 }
 
-void ux_mpscq_push(ux_mpscq_t *q, ux_mpscq_node *n) {
+void mpscq_push(mpscq_t *q, mpscq_node *n) {
   ux_atomic_no_barrier_store(&n->next, (ux_atomic_t)NULL);
-  ux_mpscq_node *prev =
-      (ux_mpscq_node *)ux_atomic_full_xchg(&q->head, (ux_atomic_t)n);
+  mpscq_node *prev =
+      (mpscq_node *)ux_atomic_full_xchg(&q->head, (ux_atomic_t)n);
   ux_atomic_rel_store(&prev->next, (ux_atomic_t)n);
 }
 
-ux_mpscq_node *ux_mpscq_pop(ux_mpscq_t *q) {
+mpscq_node *mpscq_pop(mpscq_t *q) {
   bool empty;
-  return ux_mpscq_pop_and_check_end(q, &empty);
+  return mpscq_pop_and_check_end(q, &empty);
 }
 
-ux_mpscq_node *ux_mpscq_pop_and_check_end(ux_mpscq_t *q, bool *empty) {
-  ux_mpscq_node *tail = q->tail;
-  ux_mpscq_node *next = (ux_mpscq_node *)ux_atomic_acq_load(&tail->next);
+mpscq_node *mpscq_pop_and_check_end(mpscq_t *q, bool *empty) {
+  mpscq_node *tail = q->tail;
+  mpscq_node *next = (mpscq_node *)ux_atomic_acq_load(&tail->next);
   if (tail == &q->sentinel) {
     // indicates the list is actually (ephemerally) empty
     if (next == NULL) {
@@ -52,21 +52,21 @@ ux_mpscq_node *ux_mpscq_pop_and_check_end(ux_mpscq_t *q, bool *empty) {
     }
     q->tail = next;
     tail = next;
-    next = (ux_mpscq_node *)ux_atomic_acq_load(&tail->next);
+    next = (mpscq_node *)ux_atomic_acq_load(&tail->next);
   }
   if (next != NULL) {
     *empty = false;
     q->tail = next;
     return tail;
   }
-  ux_mpscq_node *head = (ux_mpscq_node *)ux_atomic_acq_load(&q->head);
+  mpscq_node *head = (mpscq_node *)ux_atomic_acq_load(&q->head);
   if (tail != head) {
     *empty = false;
     // indicates a retry is in order: we're still adding
     return NULL;
   }
-  ux_mpscq_push(q, &q->sentinel);
-  next = (ux_mpscq_node *)ux_atomic_acq_load(&tail->next);
+  mpscq_push(q, &q->sentinel);
+  next = (mpscq_node *)ux_atomic_acq_load(&tail->next);
   if (next != NULL) {
     q->tail = next;
     return tail;
