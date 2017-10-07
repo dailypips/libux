@@ -73,25 +73,25 @@ UX_EXTERN char *ux_strdup(const char *src);
    12:00 AM January 1, year 1 A.D (as Day 0). in the proleptic Gregorian Calendar.
 */
 
-typedef uint64_t datetime_t;
-typedef int64_t  timespan_t;
+typedef uint64_t ux_time_t;
+typedef int64_t  ux_timespan_t;
 
 #define EPOCH_DATE_TIME UINT64_C(62135596800000000)  /* 1970-01-01T00:00:00:00 */
 #define MIN_DATE_TIME UINT64_C(0)                    /* 0001-01-01T00:00:00:00 */
 #define MAX_DATE_TIME UINT64_C(315537897599999999)   /* 9999-12-31T23:59:59.999999*/
 
-UX_EXTERN datetime_t datetime_from_ymd(uint16_t year, uint16_t month, uint16_t day);
-UX_EXTERN datetime_t datetime_from_hmsu(uint16_t hour, uint16_t minute, uint16_t second, uint32_t usec);
-UX_EXTERN datetime_t datetime_from_timeval(struct timeval *t);
+UX_EXTERN ux_time_t datetime_from_ymd(uint16_t year, uint16_t month, uint16_t day);
+UX_EXTERN ux_time_t datetime_from_hmsu(uint16_t hour, uint16_t minute, uint16_t second, uint32_t usec);
+UX_EXTERN ux_time_t datetime_from_timeval(struct timeval *t);
 /* result = 0 means ok, other means error */
-UX_EXTERN int datetime_from_iso8601(const char *str, size_t len, datetime_t *dt);
-UX_EXTERN void datetime_decode(datetime_t dt, uint16_t *year, uint16_t *month, uint16_t *day, uint16_t *hour, uint16_t *minute, uint16_t *second, uint32_t *usec);
-UX_EXTERN int datetime_to_tm(const datetime_t dt, struct tm *tmp);
-UX_EXTERN size_t datetime_format(char *dst, size_t len, datetime_t dt, long offset /* see timeout_offset */);
+UX_EXTERN int datetime_from_iso8601(const char *str, size_t len, ux_time_t *dt);
+UX_EXTERN void datetime_decode(ux_time_t dt, uint16_t *year, uint16_t *month, uint16_t *day, uint16_t *hour, uint16_t *minute, uint16_t *second, uint32_t *usec);
+UX_EXTERN int datetime_to_tm(const ux_time_t dt, struct tm *tmp);
+UX_EXTERN size_t datetime_format(char *dst, size_t len, ux_time_t dt, long offset /* see timeout_offset */);
 /* return timezone offset from utc, in minutes [-1439,1439] */
 UX_EXTERN long get_timezone_offset(void);
 UX_EXTERN void ux_timezone_update(void);
-UX_EXTERN datetime_t datetime_now(void);
+UX_EXTERN ux_time_t datetime_now(void);
 
 /* atomic module */
 typedef intptr_t ux_atomic_t;
@@ -128,12 +128,12 @@ EVENTDEF(EVENTENUM)
 #define UX_EVENT_PUBLIC_FIELDS \
     ux_atomic_t refcount;        \
     ux_event_type type;        \
-    datetime_t timestamp;
+    ux_time_t timestamp;
 #else
 #define UX_EVENT_PUBLIC_FIELDS \
     ux_atomic_t refcount;        \
     ux_event_type type;        \
-    datetime_t timestamp; \
+    ux_time_t timestamp; \
     void* dummy;
 #endif
 
@@ -155,16 +155,16 @@ typedef enum {
     UX_CLOCK_LAST
 }ux_clock_type;
 
-typedef void (*ux_reminder_cb)(datetime_t time, void *data);
+typedef void (*ux_reminder_cb)(ux_time_t time, void *data);
 
 typedef struct ux_event_reminder_s {
     UX_EVENT_PUBLIC_FIELDS
     ux_clock_type clock_type;
     ux_reminder_cb callback;
     void *user_data;
-    datetime_t start;
-    datetime_t timeout;
-    datetime_t repeat;
+    ux_time_t start;
+    ux_time_t timeout;
+    ux_time_t repeat;
     /*private*/
     void *loop;
     void* heap_node[3];
@@ -178,7 +178,7 @@ typedef struct ux_event_reminder_s {
 
 #define UX_EVENT_COMMON_FIELDS_WITH_EXCHANGE_TIME \
     UX_EVENT_COMMON_FIELDS \
-    datetime_t exchange_timestamp;
+    ux_time_t exchange_timestamp;
 
 typedef struct tick_event_s {
     UX_EVENT_PUBLIC_FIELDS
@@ -271,8 +271,8 @@ typedef struct {
 
 typedef struct {
     UX_EVENT_PUBLIC_FIELDS
-    datetime_t time1;
-    datetime_t time2;
+    ux_time_t time1;
+    ux_time_t time2;
     long long count;
 }ux_event_simulator_start_t;
 

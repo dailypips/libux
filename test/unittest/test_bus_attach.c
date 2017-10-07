@@ -7,7 +7,7 @@
 #define QUEUE_SIZE 3
 #define EVENT_SIZE QUEUE_SIZE * 10
 
-static datetime_t etime[EVENT_SIZE] = {
+static ux_time_t etime[EVENT_SIZE] = {
     8, 10, 34, 19, 11, 33, 25, 39, 4, 30,
     1, 6, 13, 3, 28, 24, 8, 10,
     1, 13, 24, 10, 30, 38, 1, 14, 20, 39, 17, 16
@@ -15,7 +15,7 @@ static datetime_t etime[EVENT_SIZE] = {
 };
 
 typedef struct {
-    datetime_t time;
+    ux_time_t time;
     int qindex;
 } result_except_t;
 
@@ -27,7 +27,7 @@ static result_except_t except[EVENT_SIZE] = {
     { 39, 2 }, { 17, 2 }, { 16, 2 }
 };
 
-static ux_event_t* tick_init(ux_event_t* e, int provider, int instrument, datetime_t exchange_timestamp, double price, long size)
+static ux_event_t* tick_init(ux_event_t* e, int provider, int instrument, ux_time_t exchange_timestamp, double price, long size)
 {
     ux_event_tick_t* tick = (ux_event_tick_t*)e;
     tick->exchange_timestamp = exchange_timestamp;

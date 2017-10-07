@@ -8,19 +8,19 @@
 #define EVENT_SIZE 30
 #define TIMER_SIZE 5
 
-static datetime_t etime[EVENT_SIZE] = {
+static ux_time_t etime[EVENT_SIZE] = {
     8, 10, 34, 19, 11, 33, 25, 39, 4, 30,
     1, 6, 13, 3, 28, 24, 8, 10,
     1, 13, 24, 10, 30, 38, 1, 14, 20, 39, 17, 16
 
 };
 
-static datetime_t timer_time[TIMER_SIZE] = {
+static ux_time_t timer_time[TIMER_SIZE] = {
     15, 30, 25, 9, 11
 };
 
 typedef struct {
-    datetime_t time;
+    ux_time_t time;
     int qindex;
 } result_except_t;
 
@@ -30,11 +30,11 @@ static result_except_t except[EVENT_SIZE] = {
     {34, 0}, {19, 0}, {11, 0}, {33, 0}, {25, 0}, {39, 0}, {4, 0}, {30, 0}
 };
 
-static datetime_t except_timer[TIMER_SIZE] = {
+static ux_time_t except_timer[TIMER_SIZE] = {
     9, 11, 15, 25, 30
 };
 
-static datetime_t all_time[EVENT_SIZE + TIMER_SIZE] = {
+static ux_time_t all_time[EVENT_SIZE + TIMER_SIZE] = {
     1, 13, 24, 10, 30, 38, 1, 14, 20, 39, 17, 16, // first pop all execution message
     1, 6, 8, 9, // last is timer
     10, 11,     // last is timer
@@ -42,11 +42,11 @@ static datetime_t all_time[EVENT_SIZE + TIMER_SIZE] = {
     28, 24, 8, 10, 30, // last is timer
     34, 19, 11, 33, 25, 39, 4, 30
 };
-static void on_reminder(datetime_t time, void* data)
+static void on_reminder(ux_time_t time, void* data)
 {
 }
 
-static ux_event_t* tick_init(ux_event_t* e, int provider, int instrument, datetime_t exchange_timestamp, double price, long size)
+static ux_event_t* tick_init(ux_event_t* e, int provider, int instrument, ux_time_t exchange_timestamp, double price, long size)
 {
     ux_event_tick_t* tick = (ux_event_tick_t*)e;
     tick->exchange_timestamp = exchange_timestamp;
@@ -57,7 +57,7 @@ static ux_event_t* tick_init(ux_event_t* e, int provider, int instrument, dateti
     return e;
 }
 
-static void timer_init(ux_event_reminder_t* e, ux_clock_type ctype, datetime_t timeout)
+static void timer_init(ux_event_reminder_t* e, ux_clock_type ctype, ux_time_t timeout)
 {
     e->clock_type = ctype;
     e->callback = on_reminder;

@@ -94,20 +94,20 @@ static inline uint32_t ymd_to_rdn(uint16_t y, uint16_t m, uint16_t d)
     return yd_to_rdn(y, days_preceding_month[leap_year(y)][m] + d - 1);
 }
 
-datetime_t datetime_from_ymd(uint16_t year, uint16_t month, uint16_t day)
+ux_time_t datetime_from_ymd(uint16_t year, uint16_t month, uint16_t day)
 {
     uint64_t rdn = ymd_to_rdn(year, month, day);
     return rdn * TICKS_PER_DAY;
 }
 
-void datetime_to_ymd(datetime_t time, uint16_t* year, uint16_t* month,
+void datetime_to_ymd(ux_time_t time, uint16_t* year, uint16_t* month,
     uint16_t* day)
 {
     uint32_t rdn = time / TICKS_PER_DAY;
     rdn_to_ymd(rdn, year, month, day, NULL);
 }
 
-datetime_t datetime_from_hmsu(uint16_t hour, uint16_t minute, uint16_t second,
+ux_time_t datetime_from_hmsu(uint16_t hour, uint16_t minute, uint16_t second,
     uint32_t usec)
 {
     // totalSeconds is bounded by 2^31 * 2^12 + 2^31 * 2^8 + 2^31,
@@ -116,7 +116,7 @@ datetime_t datetime_from_hmsu(uint16_t hour, uint16_t minute, uint16_t second,
     return totalSeconds * TICKS_PER_SECOND + usec;
 }
 
-void datetime_decode(datetime_t dt, uint16_t* year, uint16_t* month,
+void datetime_decode(ux_time_t dt, uint16_t* year, uint16_t* month,
     uint16_t* day, uint16_t* hour, uint16_t* minute,
     uint16_t* second, uint32_t* usec)
 {
@@ -132,7 +132,7 @@ void datetime_decode(datetime_t dt, uint16_t* year, uint16_t* month,
     *hour = sod;
 }
 
-datetime_t datetime_from_timeval(struct timeval* t)
+ux_time_t datetime_from_timeval(struct timeval* t)
 {
     uint64_t epoch_ticks = t->tv_sec * TICKS_PER_SECOND + t->tv_usec;
     return epoch_ticks + EPOCH_DATE_TIME;
@@ -156,14 +156,14 @@ static int parse_4d(const unsigned char* const p, size_t i, uint16_t* vp)
     return 0;
 }
 
-int datetime_from_iso8601(const char* str, size_t len, datetime_t* dt)
+int datetime_from_iso8601(const char* str, size_t len, ux_time_t* dt)
 {
     const unsigned char *cur, *end;
     unsigned char ch;
     uint16_t year, month, day, hour, min, sec;
     uint16_t zone_hour, zone_min;
     uint32_t nsec;
-    timespan_t offset;
+    ux_timespan_t offset;
 
     /*
      *           1
@@ -240,7 +240,7 @@ int datetime_from_iso8601(const char* str, size_t len, datetime_t* dt)
     return 0;
 }
 
-int datetime_to_tm(const datetime_t dt, struct tm* tmp)
+int datetime_to_tm(const ux_time_t dt, struct tm* tmp)
 {
     uint32_t rdn, sod;
 
@@ -267,7 +267,7 @@ int datetime_to_tm(const datetime_t dt, struct tm* tmp)
 
 /* zone_offset [-1439,1439] minutes */
 static size_t timestamp_format_internal(char* dst, size_t len,
-    const datetime_t dt,
+    const ux_time_t dt,
     int32_t zone_offset,
     const int precision)
 {
@@ -398,7 +398,7 @@ static size_t timestamp_format_internal(char* dst, size_t len,
  * YYYY-MM-DDThh:mm:ss.123456789±hh:mm
  */
 
-size_t datetime_format(char* dst, size_t len, datetime_t dt, long offset)
+size_t datetime_format(char* dst, size_t len, ux_time_t dt, long offset)
 {
     uint32_t f;
     int precision;
@@ -512,7 +512,7 @@ long get_timezone_offset(void)
 }
 #endif
 
-datetime_t datetime_now(void)
+ux_time_t datetime_now(void)
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);

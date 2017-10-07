@@ -13,7 +13,7 @@ static int random_range(int rmin, int rmax)
     return (rand() % (rmax - rmin + 1)) + rmin;
 }
 
-static datetime_t etime[EVENT_SIZE] = {
+static ux_time_t etime[EVENT_SIZE] = {
     8, 10, 34, 19, 11, 33, 25, 39, 4, 30,
     1, 6, 13, 3, 28, 24, 8, 10,
     1, 13, 24, 10, 30, 38, 1, 14, 20, 39, 17, 16
@@ -21,20 +21,20 @@ static datetime_t etime[EVENT_SIZE] = {
 };
 
 typedef struct {
-    datetime_t time;
+    ux_time_t time;
     int qindex;
 } result_except_t;
 
-static datetime_t except[EVENT_SIZE] = {
+static ux_time_t except[EVENT_SIZE] = {
     1,1,1,3,4,6,8,8,10,10,10,11,13,13,14,16,17,19,20,24,24,25,28,30,30,33,34,38,39,39
 };
 
-static void on_reminder(datetime_t time, void *data)
+static void on_reminder(ux_time_t time, void *data)
 {
 
 }
 
-static void timer_init(ux_event_reminder_t* e, ux_clock_type ctype, datetime_t timeout)
+static void timer_init(ux_event_reminder_t* e, ux_clock_type ctype, ux_time_t timeout)
 {
     e->clock_type = ctype;
     e->callback = on_reminder;

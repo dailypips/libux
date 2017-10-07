@@ -100,7 +100,7 @@ struct ux_loop_s {
     min_heap queue_heap[UX_CATEGORY_LAST];
     min_heap timer_heap[UX_CLOCK_LAST];
     uint64_t counter;
-    datetime_t time[UX_CLOCK_LAST];
+    ux_time_t time[UX_CLOCK_LAST];
     ux_event_t *saved_event;
     ux_queue_t* attached[128];
     int attached_count;
@@ -137,11 +137,11 @@ UX_FUNC ux_event_t* bus_next_event(ux_loop_t *bus);
 UX_FUNC int64_t bus_next_timeout(ux_loop_t* bus);
 UX_FUNC ux_event_reminder_t* bus_next_reminder(ux_loop_t* bus, ux_clock_type type);
 
-UX_FUNC datetime_t bus_get_time(ux_loop_t* bus);
-UX_FUNC int bus_set_time(ux_loop_t* bus, datetime_t time);
+UX_FUNC ux_time_t bus_get_time(ux_loop_t* bus);
+UX_FUNC int bus_set_time(ux_loop_t* bus, ux_time_t time);
 
-UX_FUNC datetime_t bus_get_exchange_time(ux_loop_t* bus);
-UX_FUNC int bus_set_exchange_time(ux_loop_t* bus, datetime_t time);
+UX_FUNC ux_time_t bus_get_exchange_time(ux_loop_t* bus);
+UX_FUNC int bus_set_exchange_time(ux_loop_t* bus, ux_time_t time);
 
 //UX_FUNC void ux_async_init(ux_async_t *async, loop, ux_async_cb callback, void *data);
 /* thread safe */

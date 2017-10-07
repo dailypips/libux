@@ -187,7 +187,7 @@ again:
             goto again;
         }
 
-        datetime_t bus_time = bus_get_time(loop);
+        ux_time_t bus_time = bus_get_time(loop);
         if (e->timestamp < bus_time) {
             if (e->type != UX_EVENT_QUEUE_CLOSED && e->type != UX_EVENT_QUEUE_OPENED) {
                 if (e->type != UX_EVENT_SIMULATOR_PROGRESS) {
@@ -428,7 +428,7 @@ void bus_remove_timer(ux_loop_t *loop, ux_event_reminder_t* timer)
         timer_less_than);
 }
 
-datetime_t bus_get_time(ux_loop_t *loop)
+ux_time_t bus_get_time(ux_loop_t *loop)
 {
     UX_ASSERT(loop != NULL);
 
@@ -438,7 +438,7 @@ datetime_t bus_get_time(ux_loop_t *loop)
         return datetime_now();
 }
 
-int bus_set_time(ux_loop_t *loop, datetime_t time)
+int bus_set_time(ux_loop_t *loop, ux_time_t time)
 {
     UX_ASSERT(loop != NULL);
 
@@ -452,14 +452,14 @@ int bus_set_time(ux_loop_t *loop, datetime_t time)
     return 0;
 }
 
-datetime_t bus_get_exchange_time(ux_loop_t *loop)
+ux_time_t bus_get_exchange_time(ux_loop_t *loop)
 {
     UX_ASSERT(loop != NULL);
 
     return loop->time[UX_CLOCK_EXCHANGE];
 }
 
-int bus_set_exchange_time(ux_loop_t *loop, datetime_t time)
+int bus_set_exchange_time(ux_loop_t *loop, ux_time_t time)
 {
     UX_ASSERT(loop != NULL);
 
