@@ -122,7 +122,7 @@ static int test_event_order(ux_bus_mode mode)
 
     int k = 0;
     int z= 0;
-    while ((e = bus_next_event(&loop)) != NULL) {
+    while ((e = bus_dequeue(&loop)) != NULL) {
         ASSERT(e->timestamp == all_time[z]);
         if (e->type == UX_EVENT_ASK)
         {

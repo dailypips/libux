@@ -35,7 +35,7 @@ static void loop_dispatch_event(ux_loop_t *loop, ux_event_t *e)
 
 int64_t bus_next_timeout(ux_loop_t *loop)
 {
-    ux_event_reminder_t *r = bus_next_reminder(loop, UX_CLOCK_LOCAL);
+    ux_event_reminder_t *r = bus_timer_peek(loop, UX_CLOCK_LOCAL);
     if (r)
         return r->timeout - datetime_now();
     else
@@ -52,7 +52,7 @@ void ux_run(ux_loop_t* loop, ux_run_mode mode)
             async_node->async_cb(loop, async_node->data);
         }
         /* step 2: pop bus */
-        ux_event_t* e = bus_next_event(loop);
+        ux_event_t* e = bus_dequeue(loop);
 
         if (e != NULL) {
             loop_dispatch_event(loop, e);

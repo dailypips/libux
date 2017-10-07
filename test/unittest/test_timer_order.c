@@ -67,7 +67,7 @@ static int test_timer_event_order(ux_bus_mode mode, ux_clock_type ctype)
 
     ux_event_reminder_t *e;
 
-    while ((e = bus_next_reminder(&loop, ctype)) != NULL) {
+    while ((e = bus_timer_dequeue(&loop, ctype)) != NULL) {
 
         ASSERT_THEN(e->timestamp == except[j],
                     fprintf(stderr, "[%d] except %"PRIu64" but %"PRIu64"\n", j, except[j], e->timestamp);

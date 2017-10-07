@@ -122,8 +122,9 @@ UX_FUNC void bus_remove_queue(ux_loop_t *loop, ux_queue_t *q);
 UX_FUNC void bus_add_timer(ux_loop_t *loop, ux_event_reminder_t* timer);
 UX_FUNC void bus_remove_timer(ux_loop_t *loop, ux_event_reminder_t* timer);
 
-UX_FUNC ux_event_t* bus_next_event(ux_loop_t *loop);
-UX_FUNC ux_event_reminder_t* bus_next_reminder(ux_loop_t *loop, ux_clock_type type);
+UX_FUNC ux_event_t* bus_dequeue(ux_loop_t *loop);
+UX_FUNC ux_event_reminder_t* bus_timer_peek(ux_loop_t *loop, ux_clock_type type);
+UX_FUNC ux_event_reminder_t* bus_timer_dequeue(ux_loop_t *loop, ux_clock_type type);
 
 UX_FUNC ux_time_t bus_get_time(ux_loop_t *loop);
 UX_FUNC int bus_set_time(ux_loop_t *loop, ux_time_t time);
@@ -131,13 +132,8 @@ UX_FUNC int bus_set_time(ux_loop_t *loop, ux_time_t time);
 UX_FUNC ux_time_t bus_get_exchange_time(ux_loop_t *loop);
 UX_FUNC int bus_set_exchange_time(ux_loop_t *loop, ux_time_t time);
 
-//UX_FUNC void ux_async_init(ux_async_t *async, loop, ux_async_cb callback, void *data);
 /* thread safe */
 UX_EXTERN void ux_async_post(ux_loop_t *loop, ux_async_cb async_cb, void *data);
-
-UX_FUNC void ux_loop_add_queue(ux_loop_t *loop, ux_queue_t *q);
-//void ux_loop_remove_queue(ux_loop_t *loop, void *q);
-
 
 /* dispatch module */
 

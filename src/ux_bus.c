@@ -299,7 +299,7 @@ static ux_event_t* bus_realtime_dequeue(ux_loop_t *loop)
     return NULL;
 }
 
-void bus_add_pending_queue(ux_loop_t *loop)
+static inline void bus_add_pending_queue(ux_loop_t *loop)
 {
     mpscq_node* node;
     while ((node = mpscq_pop(&loop->pending_queue))) {
@@ -308,7 +308,7 @@ void bus_add_pending_queue(ux_loop_t *loop)
     }
 }
 
-ux_event_t* bus_next_event(ux_loop_t *loop)
+ux_event_t* bus_dequeue(ux_loop_t *loop)
 {
     bus_add_pending_queue(loop);
     if (loop->mode == UX_BUS_SIMULATION)
@@ -317,12 +317,16 @@ ux_event_t* bus_next_event(ux_loop_t *loop)
         return bus_realtime_dequeue(loop);
 }
 
-ux_event_reminder_t* bus_next_reminder(ux_loop_t *loop, ux_clock_type type)
+ux_event_reminder_t* bus_timer_peek(ux_loop_t *loop, ux_clock_type type)
 {
-    bus_add_pending_queue(loop);
-    min_heap* heap = &loop->timer_heap[type];
+    assert(type < UX_CLOCK_LAST);
+    return timer_heap_peek(&loop->timer_heap[type]);
+}
 
-    return timer_heap_pop(heap);
+ux_event_reminder_t* bus_timer_dequeue(ux_loop_t *loop, ux_clock_type type)
+{
+    assert(type < UX_CLOCK_LAST);
+    return timer_heap_pop(&loop->timer_heap[type]);
 }
 
 void bus_attach(ux_loop_t* src, ux_loop_t* dst)

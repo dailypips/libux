@@ -46,13 +46,12 @@ void ux_queue_unref(ux_queue_t *q)
        ux_queue_free(q);
 }
 
-/* 这里要改
- * 基本逻辑是这样的，
+/* 基本逻辑是这样的，
  * 如果向空队列压入事件，必须通知相应的runloop
- * 通知runloop是异步的，通过把通知信号压入runloop的async_queue来实现
+ * 通知runloop是异步的，通过把队列压入runloop的pending_queue来实现
  * 如果要简化生命周期管理的话，queue_t必须是MPSC的节点子类型
  * 同时pipe通过最小堆管理queue，所以queue_t必须是heap的节点子类型
- * 如果队列内容为空，pipe并不保存这个queue的指针，
+ * 如果队列内容为空，heap并不保存这个queue的指针，
  * queue的关闭是通过push QUEUE_CLOSED事件来完成
  */
 /* only for producer */
@@ -66,11 +65,6 @@ int ux_queue_push(ux_queue_t* q, void* e)
 #endif
 
     int ret = spscq_push(&q->spsc, e);
-
-    /*if (is_empty && q->on_event) {
-        UX_ASSERT(ret == 0);
-        q->on_event(q);
-    }*/
 
     if(is_empty && q->loop) {
         UX_ASSERT(ret == 0);

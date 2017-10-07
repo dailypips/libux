@@ -89,7 +89,7 @@ static int test_pipe_event_order(ux_bus_mode mode, ux_queue_category category)
     ux_event_t* e;
     int j = 0;
 
-    while ((e = bus_next_event(&loop)) != NULL) {
+    while ((e = bus_dequeue(&loop)) != NULL) {
         ASSERT(e->timestamp == except[j].time);
 #ifndef NDEBUG
         ASSERT_THEN(e->dummy == &queue[except[j].qindex],

@@ -87,8 +87,8 @@ static int test_attach(ux_bus_mode mode)
     ux_event_t* e1, *e2;
     int j = 0;
 
-    while ((e1 = bus_next_event(&loop1)) != NULL) {
-        e2 = bus_next_event(&loop2);
+    while ((e1 = bus_dequeue(&loop1)) != NULL) {
+        e2 = bus_dequeue(&loop2);
         ASSERT_THEN(e1 == e2,
             fprintf(stderr, "index:%d e1: %p, e2:%p\n", j, e1, e2);
        );
