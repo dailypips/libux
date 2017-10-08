@@ -1,6 +1,6 @@
 #include "ux_internal.h"
 
-void ux_dispatch_event(ux_loop_t* loop, ux_event_t* e, ux_dispatch_mode mode)
+static void on_event(ux_loop_t* loop, ux_event_t* e)
 {
     // step 1: filter event
 
@@ -17,6 +17,21 @@ void ux_dispatch_event(ux_loop_t* loop, ux_event_t* e, ux_dispatch_mode mode)
     ux_event_unref(e);
 }
 
+void ux_dispatch_event(ux_loop_t* loop, ux_event_t* e, ux_dispatch_mode mode)
+{
+    if (mode == UX_DISPATCH_IMMEDIATELY)
+        on_event(loop, e);
+    else
+        spscq_push(&loop->buffed_event_queue, e);
+}
+
+void ux_emit_bufferd_events(ux_loop_t *loop)
+{
+    ux_event_t * e;
+    while((e = spscq_pop(&loop->buffed_event_queue))) {
+        on_event(loop, e);
+    }
+}
 
 /* default process event */
 

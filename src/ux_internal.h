@@ -149,6 +149,7 @@ struct ux_loop_s {
     /* bus field */
     ux_bus_mode mode;
     mpscq_t pending_queue;
+    spscq_t buffed_event_queue;
     min_heap queue_heap[UX_CATEGORY_LAST];
     min_heap timer_heap[UX_CLOCK_LAST];
     uint64_t counter;
@@ -197,6 +198,7 @@ typedef enum {
 }ux_dispatch_mode;
 
 UX_EXTERN void ux_dispatch_event(ux_loop_t* loop, ux_event_t* e, ux_dispatch_mode mode);
+UX_FUNC   void ux_emit_bufferd_events(ux_loop_t *loop);
 
 /* default event dispatch */
 UX_FUNC void event_reminder_dispatch(ux_loop_t *loop, ux_event_t *e);
