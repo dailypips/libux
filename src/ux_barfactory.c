@@ -141,13 +141,13 @@ void bar_factory_process_tick(ux_barfactory_t* factory, ux_event_tick_t* e)
 void ux_barfactory_emit_bar_open(ux_barfactory_t *factory, ux_barfactory_item_t *item)
 {
     item->bar->status = UX_BAR_STATUS_OPEN;
-    dispatch_event(get_loop(factory), (ux_event_t*)item->bar);
+    ux_dispatch_event(get_loop(factory), (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
 }
 
 void ux_barfactory_emit_bar(ux_barfactory_t *factory, ux_barfactory_item_t *item)
 {
     item->bar->status = UX_BAR_STATUS_CLOSE;
-    dispatch_event(get_loop(factory), (ux_event_t*)item->bar);
+    ux_dispatch_event(get_loop(factory), (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
     item->bar = NULL;
 }
 

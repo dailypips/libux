@@ -48,7 +48,7 @@ void ux_run(ux_loop_t* loop, ux_run_mode mode)
         ux_event_t* e = bus_dequeue(loop);
 
         if (e)
-            dispatch_event(loop, e);
+            ux_dispatch_event(loop, e, UX_DISPATCH_IMMEDIATELY);
 
         if (mode == UX_RUN_NOWAIT || (mode == UX_RUN_ONCE && e))
             break;

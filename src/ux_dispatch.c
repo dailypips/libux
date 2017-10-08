@@ -1,6 +1,6 @@
 #include "ux_internal.h"
 
-void dispatch_event(ux_loop_t* loop, ux_event_t* e)
+void ux_dispatch_event(ux_loop_t* loop, ux_event_t* e, ux_dispatch_mode mode)
 {
     // step 1: filter event
 

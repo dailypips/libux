@@ -191,8 +191,12 @@ UX_FUNC int bus_set_exchange_time(ux_loop_t *loop, ux_time_t time);
 UX_EXTERN void ux_async_post(ux_loop_t *loop, ux_async_cb async_cb, void *data);
 
 /* dispatch module */
+typedef enum {
+    UX_DISPATCH_LATE = 0,
+    UX_DISPATCH_IMMEDIATELY
+}ux_dispatch_mode;
 
-UX_FUNC void dispatch_event(ux_loop_t* loop, ux_event_t* e);
+UX_EXTERN void ux_dispatch_event(ux_loop_t* loop, ux_event_t* e, ux_dispatch_mode mode);
 
 /* default event dispatch */
 UX_FUNC void event_reminder_dispatch(ux_loop_t *loop, ux_event_t *e);
