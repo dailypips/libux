@@ -42,7 +42,7 @@ void event_bid_dispatch(ux_loop_t *loop, ux_event_t *e)
      if(bid->exchange_timestamp > bus_get_exchange_time(loop))
          bus_set_exchange_time(loop, bid->exchange_timestamp);
 
-     //bar_factory_process_tick(loop->barfactory, e);
+     bar_factory_process_tick(&loop->bar_factory, (ux_event_tick_t*)e);
 
     /*
      barFactory.OnTick(ask);

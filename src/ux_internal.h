@@ -77,9 +77,13 @@ typedef void (*ux_on_tick_cb)(ux_barfactory_item_t *item, ux_event_tick_t *tick)
     void* queue_node[2];   \
     ux_barfactory_t* factory;   \
     ux_instrument_t* instrument;    \
+    ux_bar_input bar_input; \
+    ux_on_tick_cb on_tick;  \
+    ux_event_bar_t *bar;
+
+#define UX_BAR_ITEM_COMMON_FILEDS \
     int provider_id;    \
     ux_bar_type bar_type;   \
-    ux_bar_input bar_input; \
     long bar_size;  \
     int session_enabled;    \
     ux_timespan_t session1; \
@@ -87,8 +91,10 @@ typedef void (*ux_on_tick_cb)(ux_barfactory_item_t *item, ux_event_tick_t *tick)
 
 struct ux_barfactory_item_s {
     UX_BAR_ITEM_PUBLIC_FIELDS
-    ux_on_tick_cb on_tick;
 };
+
+UX_FUNC void ux_barfactory_item_init(ux_barfactory_item_t *item);
+UX_FUNC void ux_barfactory_item_destory(ux_barfactory_item_t *item);
 
 typedef struct {
     UT_hash_handle hh;
@@ -104,6 +110,21 @@ struct ux_barfactory_s {
 
 UX_FUNC void ux_barfactory_init(ux_barfactory_t *factory);
 UX_FUNC void ux_barfactory_destory(ux_barfactory_t *factory);
+UX_EXTERN void ux_barfactory_add_item(ux_barfactory_t* factory, ux_barfactory_item_t* item);
+UX_EXTERN void ux_barfactory_remove_item(ux_barfactory_t* factory, ux_barfactory_item_t* item);
+UX_EXTERN void ux_barfactory_add_reminder(ux_barfactory_t *factory, ux_event_reminder_t *reminder);
+UX_EXTERN void bar_factory_process_tick(ux_barfactory_t* factory, ux_event_tick_t* e);
+UX_EXTERN void ux_barfactory_emit_bar_open(ux_barfactory_t *factory, ux_barfactory_item_t *item);
+UX_EXTERN void ux_barfactory_emit_bar(ux_barfactory_t *factory, ux_barfactory_item_t *item);
+
+typedef struct time_bar_item_s {
+    UX_BAR_ITEM_PUBLIC_FIELDS
+    UX_BAR_ITEM_COMMON_FILEDS
+    ux_clock_type clock_type;
+}time_bar_item_t;
+
+UX_FUNC void time_bar_item_init(time_bar_item_t *item);
+UX_FUNC void time_bar_item_destory(time_bar_item_t *item);
 
 /* data manager module */
 typedef struct data_manager_s {
@@ -178,15 +199,6 @@ UX_FUNC void event_reminder_dispatch(ux_loop_t *loop, ux_event_t *e);
 UX_FUNC void event_ask_dispatch(ux_loop_t *loop, ux_event_t *e);
 UX_FUNC void event_bid_dispatch(ux_loop_t *loop, ux_event_t *e);
 UX_FUNC void event_trade_dispatch(ux_loop_t *loop, ux_event_t *e);
-
-/* instrument */
-UX_FUNC void instrument_init(ux_instrument_t *inst);
-UX_FUNC void instrument_destory(ux_instrument_t *inst);
-
-/* order */
-UX_FUNC void order_init(ux_order_t *order);
-UX_FUNC void order_destory(ux_order_t *order);
-
 
 #ifdef __cplusplus
 }

@@ -34,21 +34,21 @@ ux_event_t *ux_event_clone(ux_event_t *e)
 
 ux_event_t *ux_event_ref(ux_event_t *event)
 {
-  assert(event != NULL);
+  UX_ASSERT(event != NULL);
   ux_atomic_full_fetch_add(&event->refcount, 1);
   return event;
 }
 
 void ux_event_unref(ux_event_t *event)
 {
-   assert(event != NULL);
+   UX_ASSERT(event != NULL);
    if(ux_atomic_full_fetch_add(&event->refcount, -1) == 1)
        event_free(event);
 }
 
 ux_event_t* ux_event_malloc(ux_event_type type)
 {
-    assert(type < UX_EVENT_LAST);
+    UX_ASSERT(type < UX_EVENT_LAST);
     ux_event_t* e = ux_zalloc(g_eventclassinfo[type].size);
     if (e) {
         e->type = type;

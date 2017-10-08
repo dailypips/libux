@@ -774,6 +774,7 @@ typedef enum {
 }ux_putcall_type;
 
 typedef struct ux_instrument_s {
+    ux_atomic_t refcount;
     int id;
     ux_instrument_type type;
     char* symbol;
@@ -805,8 +806,14 @@ typedef struct ux_instrument_s {
   */
 }ux_instrument_t;
 
+UX_EXTERN void ux_instrument_init(ux_instrument_t *instrument);
+UX_EXTERN void ux_instrument_destory(ux_instrument_t *instrument);
+UX_EXTERN void ux_instrument_ref(ux_instrument_t *instrument);
+UX_EXTERN void ux_instrument_unref(ux_instrument_t *instrument);
+
 /* order module */
 typedef struct ux_order_s {
+    ux_atomic_t refcount;
     int id;
     int clId;
     int algoId;
@@ -851,6 +858,11 @@ typedef struct ux_order_s {
     Portfolio portfolio;
     */
 } ux_order_t;
+
+UX_EXTERN void ux_order_init(ux_order_t *order);
+UX_EXTERN void ux_order_destory(ux_order_t *order);
+UX_EXTERN void ux_order_ref(ux_order_t *order);
+UX_EXTERN void ux_order_unref(ux_order_t *order);
 
 #ifdef __cplusplus
 }

@@ -8,12 +8,33 @@
 
 #include "ux_internal.h"
 
-void order_init(ux_order_t *order)
+static void order_free(ux_order_t *order)
+{
+    UX_ASSERT(order != NULL);
+    ux_order_destory(order);
+    ux_free(order);
+}
+
+UX_EXTERN void ux_order_init(ux_order_t *order)
 {
 
 }
 
-void order_destory(ux_order_t *order)
+UX_EXTERN void ux_order_destory(ux_order_t *order)
 {
 
+}
+
+UX_EXTERN void ux_order_ref(ux_order_t *order)
+{
+    UX_ASSERT(order != NULL);
+    ux_atomic_full_fetch_add(&order->refcount, 1);
+}
+
+UX_EXTERN void ux_order_unref(ux_order_t *order)
+{
+    UX_ASSERT(order != NULL);
+    if(ux_atomic_full_fetch_add(&order->refcount, -1) == 1) {
+        order_free(order);
+    }
 }
