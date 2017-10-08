@@ -60,7 +60,6 @@ void event_bid_dispatch(ux_loop_t *loop, ux_event_t *e)
      bar_factory_process_tick(&loop->bar_factory, (ux_event_tick_t*)e);
 
     /*
-     barFactory.OnTick(ask);
      framework.dataManager.method_2(ask);
      framework.instrumentManager.GetById(ask.instrumentId).ask = ask;
      framework.providerManager.executionSimulator.OnAsk(ask);

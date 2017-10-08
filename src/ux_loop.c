@@ -20,7 +20,7 @@ static int64_t bus_next_timeout(ux_loop_t* loop)
     ux_event_reminder_t* r = bus_timer_peek(loop, UX_CLOCK_LOCAL);
 
     if (r)
-        return r->stop - ux_time_now();
+        return r->timeout - ux_time_now();
 
     return 0;
 }

@@ -13,9 +13,6 @@
 #include <time.h>
 #include "ux_internal.h"
 
-#define TICKS_PER_SECOND UINT64_C(1000000)
-#define TICKS_PER_DAY UINT64_C(86400000000)
-
 static const int days_preceding_month[2][13] = {
     { 0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 },
     { 0, 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335 }

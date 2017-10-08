@@ -9,6 +9,9 @@
 #include "queue.h"
 #include "ux_internal.h"
 
+//TODO: hash node lifetime
+// HASH_ADD_INT(&factory->list_by_instrument_id ...)
+
 void ux_barfactory_init(ux_barfactory_t* factory)
 {
     factory->list_by_instrument_id = NULL;
@@ -18,16 +21,14 @@ void ux_barfactory_destory(ux_barfactory_t* factory)
 {
 }
 
-void ux_barfactory_item_init(ux_barfactory_item_t *item)
+void ux_barfactory_item_init(ux_barfactory_item_t* item)
 {
     QUEUE_INIT(&item->queue_node);
 }
 
-void ux_barfactory_item_destory(ux_barfactory_item_t *item)
+void ux_barfactory_item_destory(ux_barfactory_item_t* item)
 {
-
 }
-
 
 void ux_barfactory_add_item(ux_barfactory_t* factory, ux_barfactory_item_t* item)
 {
@@ -52,13 +53,13 @@ void ux_barfactory_remove_item(ux_barfactory_t* factory, ux_barfactory_item_t* i
     item->factory = NULL;
 }
 
-static UX_AINLINE ux_loop_t*  get_loop(ux_barfactory_t *factory)
+static UX_AINLINE ux_loop_t* get_loop(ux_barfactory_t* factory)
 {
     UX_ASSERT(factory != NULL);
-    return  container_of(factory, ux_loop_t, bar_factory);
+    return container_of(factory, ux_loop_t, bar_factory);
 }
 
-void ux_barfactory_add_reminder(ux_barfactory_t *factory, ux_event_reminder_t *reminder)
+void ux_barfactory_add_reminder(ux_barfactory_t* factory, ux_event_reminder_t* reminder)
 {
     bus_add_timer(get_loop(factory), reminder);
 }
@@ -85,19 +86,22 @@ void bar_factory_process_tick(ux_barfactory_t* factory, ux_event_tick_t* e)
     ux_event_tick_t* tick;
     ux_loop_t* loop = get_loop(factory);
 
-    int instrument_id = e->instrument;
-    HASH_FIND_INT((item_list_t*)factory->list_by_instrument_id, &instrument_id, list);
+    int key = e->instrument;
+    HASH_FIND_INT((item_list_t*)factory->list_by_instrument_id, &key, list);
     if (!list)
         return;
 
     QUEUE_FOREACH(q, &list->queue)
     {
         ux_barfactory_item_t* item = QUEUE_DATA(q, ux_barfactory_item_t, queue_node);
+
         switch (item->bar_input) {
+
         case UX_BAR_INPUT_TRADE:
             if (e->type == UX_EVENT_TRADE)
                 item->on_tick(item, e);
             break;
+
         case UX_BAR_INPUT_BID:
             if (e->type == UX_EVENT_BID)
                 item->on_tick(item, e);
@@ -138,81 +142,15 @@ void bar_factory_process_tick(ux_barfactory_t* factory, ux_event_tick_t* e)
     }
 }
 
-void ux_barfactory_emit_bar_open(ux_barfactory_t *factory, ux_barfactory_item_t *item)
+void ux_barfactory_emit_bar_open(ux_barfactory_t* factory, ux_barfactory_item_t* item)
 {
     item->bar->status = UX_BAR_STATUS_OPEN;
     ux_dispatch_event(get_loop(factory), (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
 }
 
-void ux_barfactory_emit_bar(ux_barfactory_t *factory, ux_barfactory_item_t *item)
+void ux_barfactory_emit_bar(ux_barfactory_t* factory, ux_barfactory_item_t* item)
 {
     item->bar->status = UX_BAR_STATUS_CLOSE;
     ux_dispatch_event(get_loop(factory), (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
     item->bar = NULL;
-}
-
-static void time_bar_on_reminder(ux_event_reminder_t *r)
-{
-    time_bar_item_t * item = (time_bar_item_t*)(r->user_data);
-    if (item->clock_type == UX_CLOCK_LOCAL)
-        item->bar->timestamp = r->stop;
-    else
-        item->bar->timestamp = bus_get_exchange_time(get_loop(item->factory));
-    //TODO:
-    // emit_bar();
-}
-
-void time_bar_on_tick(ux_barfactory_item_t *item, ux_event_tick_t *tick)
-{
-    int is_empty = item->bar == NULL;
-
-    if (item->bar) {
-        if(tick->price > item->bar->high)
-            item->bar->high = tick->price;
-        if (tick->price < item->bar->low)
-            item->bar->low = tick->price;
-        item->bar->close = tick->price;
-        item->bar->volume += tick->size;
-        //TODO:
-        // item->bar.timestamp = ....
-    } else {
-        item->bar = (ux_event_bar_t*)ux_event_malloc(UX_EVENT_BAR);
-        item->bar->provider = tick->provider;
-        item->bar->instrument = tick->instrument;
-        item->bar->bar_type = ((time_bar_item_t*)item)->bar_type;
-        item->bar->size = ((time_bar_item_t*)item)->bar_size;
-        //item->bar->open_time = item->
-        //item->bar->close_time =
-        item->bar->open = tick->price;
-        item->bar->high = tick->price;
-        item->bar->low  = tick->price;
-        item->bar->close = tick->price;
-        item->bar->volume = tick->size;
-        //TODO:
-        // emit_bar_open
-    }
-    item->bar->tick_count++;
-
-    if(is_empty) {
-        ux_event_reminder_t *r = (ux_event_reminder_t*)ux_event_malloc(UX_EVENT_REMINDER);
-        r->clock_type = ((time_bar_item_t*)item)->clock_type;
-        r->start = 0; //TODO
-        r->stop = 0; // TODO
-        r->repeat = 0; // TODO
-        r->callback = time_bar_on_reminder;
-        r->user_data = item;
-        ux_barfactory_add_reminder(item->factory, r);
-    }
-}
-
-void time_bar_item_init(time_bar_item_t *item)
-{
-    ux_barfactory_item_init((ux_barfactory_item_t*)item);
-    item->clock_type = UX_CLOCK_LOCAL;
-    item->on_tick = time_bar_on_tick;
-}
-
-void time_bar_item_destory(time_bar_item_t *item)
-{
-    ux_barfactory_item_destory((ux_barfactory_item_t*)item);
 }

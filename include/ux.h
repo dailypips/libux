@@ -81,6 +81,9 @@ typedef int64_t  ux_timespan_t;
 #define MIN_DATE_TIME UINT64_C(0)                    /* 0001-01-01T00:00:00:00 */
 #define MAX_DATE_TIME UINT64_C(315537897599999999)   /* 9999-12-31T23:59:59.999999*/
 
+#define TICKS_PER_SECOND UINT64_C(1000000)
+#define TICKS_PER_DAY UINT64_C(86400000000)
+
 UX_EXTERN ux_time_t ux_time_from_ymd(uint16_t year, uint16_t month, uint16_t day);
 UX_EXTERN ux_time_t ux_time_from_hmsu(uint16_t hour, uint16_t minute, uint16_t second, uint32_t usec);
 UX_EXTERN ux_time_t ux_time_from_timeval(struct timeval *t);
@@ -96,6 +99,17 @@ UX_EXTERN ux_time_t ux_time_now(void);
 
 /* atomic module */
 typedef intptr_t ux_atomic_t;
+
+/* ids */
+typedef uint16_t ux_iid_t;   /* for instrument id, range[1,65534] */
+#define UX_INSTRUMENT_ID_MIN 1
+#define UX_INSTRUMENT_ID_MAX 65534
+
+typedef uint8_t ux_pid_t;   /* for provider id, range[1,254] */
+//TODO: 可以取 -1
+#define UX_UNKNOWN_PROVDER -1
+#define UX_PROVIDER_ID_MIN 1
+#define UX_PROVIDRE_ID_MAX 254
 
 /* currency module */
 typedef uint16_t ux_currency_t;
@@ -362,8 +376,7 @@ struct ux_event_reminder_s {
     ux_clock_type clock_type;
     ux_reminder_cb callback;
     void *user_data;
-    ux_time_t start;
-    ux_time_t stop;
+    ux_time_t timeout;
     uint64_t repeat;
     /*private*/
     void *loop;

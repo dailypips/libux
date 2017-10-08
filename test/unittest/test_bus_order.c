@@ -64,9 +64,8 @@ static void timer_init(ux_event_reminder_t* e, ux_clock_type ctype, ux_time_t ti
     e->callback = on_reminder;
     e->user_data = e;
     e->timestamp = timeout;
-    e->stop = timeout;
+    e->timeout = timeout;
     e->repeat = 0;
-    e->start = 0;
 }
 
 static int test_event_order(ux_bus_mode mode)

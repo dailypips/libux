@@ -127,8 +127,16 @@ UX_FUNC void time_bar_item_init(time_bar_item_t *item);
 UX_FUNC void time_bar_item_destory(time_bar_item_t *item);
 
 /* data manager module */
-typedef struct data_manager_s {
+typedef struct tick_hash_node_s {
+    UT_hash_handle hh;
+    int key;
+    ux_event_tick_t *e;
+}tick_hash_node_t;
 
+typedef struct data_manager_s {
+    tick_hash_node_t *ask_hash;
+    tick_hash_node_t *bid_hash;
+    tick_hash_node_t *trade_hash;
 }data_manager_t;
 
 ux_event_ask_t *data_manager_get_ask(data_manager_t *manager, int instrument_id);
@@ -148,8 +156,8 @@ struct ux_loop_s {
     mpscq_t async_queue;
     /* bus field */
     ux_bus_mode mode;
-    mpscq_t pending_queue;
-    spscq_t buffed_event_queue;
+    mpscq_t pending_queue;      //保存要被添加到heap中的queue
+    spscq_t buffed_event_queue; //保存被缓存的事件
     min_heap queue_heap[UX_CATEGORY_LAST];
     min_heap timer_heap[UX_CLOCK_LAST];
     uint64_t counter;
