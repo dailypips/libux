@@ -26,54 +26,75 @@ static void time_bar_on_reminder(ux_event_reminder_t* r)
     ux_barfactory_emit_bar(item->factory, (ux_barfactory_item_t*)item);
 }
 
-//TODO:考虑第二个Bar时候round_time
-//方案二，通过定时器控制加入barfactory的事件来达到定时开始计算bar
-static ux_time_t round_time(time_bar_item_t* item, ux_event_tick_t *tick)
+static ux_time_t round_start_time(time_bar_item_t* item, ux_event_tick_t* tick)
 {
-   /* bar_size 表达秒数 */
+    /* bar_size 表达秒数 */
     int bar_size = item->bar_size;
     return tick->timestamp;
 }
 
-void time_bar_on_tick(ux_barfactory_item_t* item, ux_event_tick_t* tick)
+void time_bar_on_tick(ux_barfactory_item_t* node, ux_event_tick_t* tick)
 {
-    if (item->bar) {
-        if (tick->timestamp < item->bar->open_time)
-            return;
-        if (tick->price > item->bar->high)
-            item->bar->high = tick->price;
-        if (tick->price < item->bar->low)
-            item->bar->low = tick->price;
-        item->bar->close = tick->price;
-        item->bar->volume += tick->size;
-        item->bar->timestamp = tick->timestamp;
-    } else {
-        ux_event_bar_t *bar = (ux_event_bar_t*)ux_event_malloc(UX_EVENT_BAR);
+    ux_event_bar_t* bar;
+    time_bar_item_t* item = (time_bar_item_t*)node;
 
+    if (item->bar) {
+
+        if (!item->started && tick->timestamp < item->start_time) /*忽略开始时间之前的数据*/
+            return;
+
+        bar = item->bar;
+
+        if (UX_LIKELY(item->started)) {
+            if (tick->price > bar->high)
+                bar->high = tick->price;
+            if (tick->price < bar->low)
+                bar->low = tick->price;
+            bar->close = tick->price;
+            bar->volume += tick->size;
+            bar->timestamp = tick->timestamp;
+        } else {
+            item->started = 1;
+            bar->timestamp = tick->timestamp;
+            bar->open = tick->price;
+            bar->high = tick->price;
+            bar->low = tick->price;
+            bar->close = tick->price;
+            bar->volume = tick->size;
+            ux_barfactory_emit_bar_open(item->factory, (ux_barfactory_item_t*)item);
+        }
+    } else {
+        bar = (ux_event_bar_t*)ux_event_malloc(UX_EVENT_BAR);
+        item->bar = bar;
         bar->provider = tick->provider;
         bar->instrument = tick->instrument;
-        bar->bar_type = ((time_bar_item_t*)item)->bar_type;
-        bar->size = ((time_bar_item_t*)item)->bar_size;
-        bar->open_time = round_time((time_bar_item_t*)item, tick);
-        bar->timestamp = tick->timestamp;
-        bar->open = tick->price;
-        bar->high = tick->price;
-        bar->low = tick->price;
-        bar->close = tick->price;
-        bar->volume = tick->size;
+        bar->bar_type = item->bar_type;
+        bar->size = item->bar_size;
 
-        item->bar = bar;
-        ux_barfactory_emit_bar_open(item->factory, (ux_barfactory_item_t*)item);
+        if (UX_LIKELY(item->started)) {
+            bar->open_time = tick->timestamp;
+            bar->timestamp = tick->timestamp;
+            bar->open = tick->price;
+            bar->high = tick->price;
+            bar->low = tick->price;
+            bar->close = tick->price;
+            bar->volume = tick->size;
+            ux_barfactory_emit_bar_open(item->factory, (ux_barfactory_item_t*)item);
+        } else {
+            item->start_time = round_start_time(item, tick);
 
-        ux_event_reminder_t* r = (ux_event_reminder_t*)ux_event_malloc(UX_EVENT_REMINDER);
-        r->clock_type = ((time_bar_item_t*)item)->clock_type;
-        r->repeat = ((time_bar_item_t*)item)->bar_size * TICKS_PER_SECOND;
-        r->timeout = bar->open_time + r->repeat;
-        r->callback = time_bar_on_reminder;
-        r->user_data = item;
-        ux_barfactory_add_reminder(item->factory, r);
+            ux_event_reminder_t* r = (ux_event_reminder_t*)ux_event_malloc(UX_EVENT_REMINDER);
+            r->clock_type = item->clock_type;
+            r->repeat = item->bar_size * TICKS_PER_SECOND;
+            r->timeout = item->start_time + r->repeat;
+            r->callback = time_bar_on_reminder;
+            r->user_data = item;
+
+            ux_barfactory_add_reminder(item->factory, r);
+        }
     }
-    item->bar->tick_count++;
+    if (UX_LIKELY(item->started))
+        item->bar->tick_count++;
 }
 
 void time_bar_item_init(time_bar_item_t* item)
@@ -81,6 +102,8 @@ void time_bar_item_init(time_bar_item_t* item)
     ux_barfactory_item_init((ux_barfactory_item_t*)item);
     item->clock_type = UX_CLOCK_LOCAL;
     item->on_tick = time_bar_on_tick;
+    item->start_time = MIN_DATE_TIME;
+    item->started = 0;
 }
 
 void time_bar_item_destory(time_bar_item_t* item)

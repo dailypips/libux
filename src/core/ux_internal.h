@@ -121,6 +121,8 @@ typedef struct time_bar_item_s {
     UX_BAR_ITEM_PUBLIC_FIELDS
     UX_BAR_ITEM_COMMON_FILEDS
     ux_clock_type clock_type;
+    ux_time_t start_time;
+    int started;
 }time_bar_item_t;
 
 UX_FUNC void time_bar_item_init(time_bar_item_t *item);
