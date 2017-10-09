@@ -1,4 +1,4 @@
-#include "../src/ux_internal.h"
+#include "ux_internal.h"
 #include "task.h"
 #include <inttypes.h>
 #include <stdio.h>

@@ -7,7 +7,7 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <ux.h>
+#include <ux/ux.h>
 
 typedef struct {
     ux_malloc_func local_malloc;

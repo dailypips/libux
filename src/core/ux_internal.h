@@ -7,10 +7,10 @@
 #include <stdarg.h>
 #include <string.h>
 #include <uv.h>
-#include <ux.h>
+#include <ux/ux.h>
 #include <assert.h>
 #include "ux_atomic.h"
-#include "ux_common.h"
+#include "ux_macro.h"
 #include "uthash.h"
 
 #ifdef __cplusplus

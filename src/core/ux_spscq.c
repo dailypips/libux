@@ -1,5 +1,6 @@
 #include "ux_spscq.h"
-#include <ux.h>
+#include "ux_atomic.h"
+#include <ux/ux_memory.h>
 
 int spscq_init(spscq_t* q, uint32_t size)
 {

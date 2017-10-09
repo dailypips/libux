@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.1)
 
-include_directories("../src")
+include_directories("../src/core")
 include_directories("framework")
 include_directories("unittest")
 include_directories("benchmark")
 include_directories("test")
+include_directories("../src/common")
 
 project(test C)
 

@@ -26,9 +26,12 @@ static void time_bar_on_reminder(ux_event_reminder_t* r)
     ux_barfactory_emit_bar(item->factory, (ux_barfactory_item_t*)item);
 }
 
+//TODO:考虑第二个Bar时候round_time
+//方案二，通过定时器控制加入barfactory的事件来达到定时开始计算bar
 static ux_time_t round_time(time_bar_item_t* item, ux_event_tick_t *tick)
 {
    /* bar_size 表达秒数 */
+    int bar_size = item->bar_size;
     return tick->timestamp;
 }
 
@@ -51,7 +54,7 @@ void time_bar_on_tick(ux_barfactory_item_t* item, ux_event_tick_t* tick)
         bar->instrument = tick->instrument;
         bar->bar_type = ((time_bar_item_t*)item)->bar_type;
         bar->size = ((time_bar_item_t*)item)->bar_size;
-        bar->open_time = round_time((time_bar_item_t*)item, tick); //TODO: 考虑取整到分钟
+        bar->open_time = round_time((time_bar_item_t*)item, tick);
         bar->timestamp = tick->timestamp;
         bar->open = tick->price;
         bar->high = tick->price;
@@ -64,7 +67,7 @@ void time_bar_on_tick(ux_barfactory_item_t* item, ux_event_tick_t* tick)
 
         ux_event_reminder_t* r = (ux_event_reminder_t*)ux_event_malloc(UX_EVENT_REMINDER);
         r->clock_type = ((time_bar_item_t*)item)->clock_type;
-        r->repeat = ((time_bar_item_t*)item)->bar_size * TICKS_PER_SECOND; // bar_size 表达为秒数
+        r->repeat = ((time_bar_item_t*)item)->bar_size * TICKS_PER_SECOND;
         r->timeout = bar->open_time + r->repeat;
         r->callback = time_bar_on_reminder;
         r->user_data = item;

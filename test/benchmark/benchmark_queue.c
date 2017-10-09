@@ -9,8 +9,8 @@
 #include "task.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "../src/ux_internal.h"
-#include "../src/ux_mpscq.h"
+#include "ux_internal.h"
+#include "ux_mpscq.h"
 #include <assert.h>
 
 #define NUM_TICKS 10240000

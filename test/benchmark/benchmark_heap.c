@@ -2,7 +2,7 @@
 #include "task.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "../src/heap-inl.h"
+#include "heap-inl.h"
 #include <assert.h>
 
 #define NUM_TICKS 102400

@@ -21,7 +21,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include "ux_common.h"
+#include "ux_macro.h"
 #include "ux_atomic.h"
 
 // Multiple-producer single-consumer lock free queue, based upon the

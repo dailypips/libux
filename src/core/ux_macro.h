@@ -1,5 +1,5 @@
-#ifndef __UX_COMMON_H__
-#define __UX_COMMON_H__
+#ifndef __UX_MACRO_H__
+#define __UX_MACRO_H__
 
 #include <assert.h>
 
@@ -67,4 +67,4 @@
   extern void UX_ASSERT_NAME(__LINE__)(int STATIC_ASSERTION_FAILED[(cond)?1:-1])
 #endif
 
-#endif // __UX_COMMON_H__
+#endif // __UX_MACRO_H__

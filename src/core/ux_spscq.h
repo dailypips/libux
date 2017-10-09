@@ -12,7 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "ux_atomic.h"
-#include "ux_common.h"
+#include "ux_macro.h"
 
 #ifdef __cplusplus
 extern "C" {
