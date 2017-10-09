@@ -11,7 +11,7 @@
 #include <assert.h>
 #include "ux_atomic.h"
 #include "ux_macro.h"
-#include "uthash.h"
+#include "ux_hash.h"
 
 #ifdef __cplusplus
 extern "C" {

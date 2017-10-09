@@ -8,8 +8,6 @@
 
 #include "ux_internal.h"
 
-/* 组合ProviderId InstrumentId 构成不重复的HashKey */
-
 static void set_key_value(tick_hash_node_t** hash, int key, ux_event_tick_t* tick)
 {
     tick_hash_node_t* node;
@@ -45,12 +43,6 @@ static void set_tick(tick_hash_node_t** hash, ux_event_tick_t* tick)
     int key = tick->instrument;
 
     set_key_value(hash, key, tick);
-
-    /*if (tick->provider > 0) {
-        key = tick->instrument * (tick->provider + 1);
-
-        set_key_value(hash, key, tick);
-    }*/
 }
 
 void data_manager_set_ask(data_manager_t* manager, ux_event_ask_t* ask)
