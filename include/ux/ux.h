@@ -204,13 +204,13 @@ typedef enum
 
 typedef struct ux_provider_s ux_provider_t;
 typedef struct ux_data_provider_s ux_data_provider_t;
-typedef struct ux_execution_provder_s ux_execution_provder_t;
+typedef struct ux_execution_provider_s ux_execution_provider_t;
 typedef struct ux_fundamental_provider_s ux_fundamental_provider_t;
 typedef struct ux_news_provider_s ux_news_provider_t;
 typedef struct ux_historical_provider_s ux_historical_provider_t;
 typedef struct ux_instrument_provider_s ux_instrument_provider_t;
 
-typedef void (*provider_cb)(ux_provider_t *provider, int code);
+typedef void (*ux_provider_cb)(ux_provider_t *provider, uintptr_t code);
 
 #define UX_PROVIDER_PUBLIC_FIELDS \
     /* info */ \
@@ -219,8 +219,8 @@ typedef void (*provider_cb)(ux_provider_t *provider, int code);
     const char* (*get_name)(ux_provider_t *provider); \
     /* method */    \
     ux_provider_status (*get_status)(ux_provider_t *provider); \
-    void (*connect)(ux_provider_t *provider, provider_cb on_connect); \
-    void (*disconnect)(ux_provider_t *provider, provider_cb on_disconnect);
+    void (*connect)(ux_provider_t *provider, ux_provider_cb on_connect); \
+    void (*disconnect)(ux_provider_t *provider, ux_provider_cb on_disconnect);
 
 struct ux_provider_s{
     UX_PROVIDER_PUBLIC_FIELDS
@@ -228,45 +228,45 @@ struct ux_provider_s{
 
 struct ux_data_provider_s {
     UX_PROVIDER_PUBLIC_FIELDS
-    void (*subscribe)(ux_data_provider_t *provider, ux_instrument_t *instrument, provider_cb on_subscribe);
-    void (*unsubscribe)(ux_data_provider_t *provider, ux_instrument_t *instrument, provider_cb on_unsubscribe);
-};
-
-struct ux_execution_provder_s {
-    UX_PROVIDER_PUBLIC_FIELDS
-    void (*send)(ux_execution_provder_t *provider, ux_event_execution_command_t *command, provider_cb on_send);
+    void (*subscribe)  (ux_data_provider_t *provider, ux_instrument_t *instrument, int level2_flag, ux_provider_cb on_subscribe);
+    void (*unsubscribe)(ux_data_provider_t *provider, ux_instrument_t *instrument, ux_provider_cb on_unsubscribe);
 };
 
 struct ux_fundamental_provider_s {
     UX_PROVIDER_PUBLIC_FIELDS
-    void (*subscribe)(ux_fundamental_provider_t *provider, ux_instrument_t *instrument, provider_cb on_subscribe);
-    void (*unsubscribe)(ux_fundamental_provider_t *provider, ux_instrument_t *instrument, provider_cb on_unsubscribe);
+    void (*subscribe)  (ux_fundamental_provider_t *provider, ux_instrument_t *instrument, ux_provider_cb on_subscribe);
+    void (*unsubscribe)(ux_fundamental_provider_t *provider, ux_instrument_t *instrument, ux_provider_cb on_unsubscribe);
 };
 
 struct ux_news_provider_s {
     UX_PROVIDER_PUBLIC_FIELDS
-    void (*subscribe)(ux_news_provider_t *provider, ux_instrument_t *instrument, provider_cb on_subscribe);
-    void (*unsubscribe)(ux_news_provider_t *provider, ux_instrument_t *instrument, provider_cb on_unsubscribe);
+    void (*subscribe)  (ux_news_provider_t *provider, ux_instrument_t *instrument, ux_provider_cb on_subscribe);
+    void (*unsubscribe)(ux_news_provider_t *provider, ux_instrument_t *instrument, ux_provider_cb on_unsubscribe);
+};
+
+struct ux_execution_provider_s {
+    UX_PROVIDER_PUBLIC_FIELDS
+    void (*send)(ux_execution_provider_t *provider, ux_event_execution_command_t *command, ux_provider_cb on_send);
 };
 
 typedef struct {
     char* request_id;
     ux_instrument_t *instrument;
-    ux_time_t time1;
-    ux_time_t time2;
-    uint8_t data_type;
+    ux_time_t start_time;
+    ux_time_t end_time;
+    ux_event_type data_type;
     ux_bar_type bar_type;
     long bar_size;      /* bar_size == -1 means no value */
 }ux_historical_data_request_t;
 
 struct ux_historical_provider_s {
     UX_PROVIDER_PUBLIC_FIELDS
-    void (*send)(ux_historical_provider_t *provider, ux_historical_data_request_t request, provider_cb on_request);
-    void (*cancel)(ux_historical_provider_t *provider, char* request_id, provider_cb on_cancel);
+    void (*send)(ux_historical_provider_t *provider, ux_historical_data_request_t request, ux_provider_cb on_request);
+    void (*cancel)(ux_historical_provider_t *provider, char* request_id, ux_provider_cb on_cancel);
 };
 
 typedef struct ux_instrument_definition_request_s {
-    char *id;
+    char *request_id;
     ux_instrument_type filter_type;
     char *filter_symbol;
     char *filter_exchange;
@@ -274,8 +274,274 @@ typedef struct ux_instrument_definition_request_s {
 
 struct ux_instrument_provider_s {
     UX_PROVIDER_PUBLIC_FIELDS
-    void (*send)(ux_instrument_provider_t *provider, ux_historical_data_request_t request, provider_cb on_request);
-    void (*cancel)(ux_instrument_provider_t *provider, char* request_id, provider_cb on_cancel);
+    void (*send)(ux_instrument_provider_t *provider, ux_instrument_definition_request_t request, ux_provider_cb on_request);
+    void (*cancel)(ux_instrument_provider_t *provider, char* request_id, ux_provider_cb on_cancel);
+};
+
+typedef struct {
+    ux_order_t *order;
+    int order_id;
+    int portfolio_id;
+    int instrument_id;
+    ux_currency_t currency;
+    ux_order_side side;
+    double qty;
+    double price;
+    char *text;
+    double commission;
+}ux_fill_t;
+
+typedef struct ux_account_s ux_account_t;
+struct ux_account_s {
+    ux_currency_t currency;
+    void* positions[2];
+    void* transaction[2];
+    struct ux_account_t *parent;
+    int update_parent;
+};
+
+typedef struct ux_portfolio_s ux_portfolio_t;
+
+typedef struct ux_fill_series_s {
+    char *name;
+    int count;
+    ux_fill_t *min;
+    ux_fill_t *max;
+    ux_fill_t *fills;
+}ux_fill_series_t;
+
+typedef enum {
+    UX_POSITION_SIDE_LOG,
+    UX_POSITION_SIDE_SHORT
+}ux_position_side;
+
+
+typedef struct ux_position_s ux_position_t;
+
+struct ux_position_s {
+    ux_portfolio_t *portfolio;
+    ux_instrument_t *instrument;
+    int portfolio_id;
+    int instrument_id;
+    double amount;
+    double qty_bought;
+    double qty_sold;
+    double open_value;
+    double avg_price;
+    double pnl;
+    void* fills[2];
+    ux_fill_t entry;
+};
+
+typedef struct ux_pricer_s {
+    double (*get_price)(ux_position_t *position);
+    double (*get_value)(ux_portfolio_t *position);
+}ux_pricer_t;
+
+typedef struct ux_time_series_item_s {
+    ux_time_t timestamp;
+    double value;
+}ux_time_series_item_t;
+
+typedef struct ux_time_series_s {
+    int id;
+    char *name;
+    char *description;
+    ux_time_series_item_t *min;
+    ux_time_series_item_t *max;
+    void* indicators[2];
+    int count;
+    ux_time_series_item_t *series;
+}ux_time_series_t;
+
+typedef struct ux_portfolio_performance_s {
+    ux_portfolio_t *portfolio;
+    int update_parent;
+    ux_time_t time;
+    double equity;
+    double drawdown;
+    double high_equity;
+    ux_time_series_t enquity_series;
+    ux_time_series_t drawdown_series;
+}ux_portfolio_performance_t;
+
+typedef struct ux_portfolio_statistics_s ux_portfolio_statistics_t;
+
+typedef struct ux_portfolio_statistics_item_s {
+    double total_value;
+    double long_value;
+    double short_value;
+    ux_time_series_t totals;
+    ux_time_series_t longs;
+    ux_time_series_t shorts;
+    ux_portfolio_t *portfolio;
+    ux_portfolio_statistics_t *statistics;
+    /* private */
+    int emit_id;
+}ux_portfolio_statistics_item_t;
+
+typedef enum {
+    UX_TRADE_DETECTION_TYPE_FIFO,
+    UX_TRADE_DETECTION_TYPE_LIFO
+}ux_trade_detection_type;
+
+typedef struct ux_trade_detector_s {
+    ux_instrument_t *instrument;
+    ux_portfolio_t *portfolio;
+    // TODO
+}ux_trade_detector_t;
+
+
+struct ux_portfolio_statistics_s {
+    ux_portfolio_t *portfolio;
+    void* trade_detectors[2];
+    void* statistics[2];
+};
+
+typedef struct {
+    ux_fill_t fill;
+    int portfolio_id;
+    ux_fill_series_t *fills;
+    void* transactions[2];
+    void* positions[2];
+}ux_event_fill_t;
+
+struct ux_portfolio_s {
+    int id;
+    char *name;
+    char *description;
+    ux_account_t *account;
+    ux_fill_series_t fills;
+    void* transactions[2];
+    void* pisitions[2];
+    ux_pricer_t pricer;
+    ux_portfolio_performance_t *performance;
+    ux_portfolio_statistics_t *statistics;
+    int is_owner_algo;
+    int is_loaded;
+    ux_portfolio_t *parent;
+    int update_parent;
+    void* children[2];
+};
+
+
+typedef struct parameter_s {
+    char *name;
+    uintptr_t value;
+    char *type_name;
+}parameter_t;
+
+
+typedef struct ux_strategy_s ux_strategy_t;
+
+typedef enum {
+    UX_STRATEGY_STATUS_RUNNING,
+    UX_STRATEGY_STATUS_STOPPED
+}ux_strategy_status;
+
+typedef struct ux_tick_series_s {
+    char *name;
+    char *description;
+    int count;
+    ux_event_tick_t* ticks;
+    ux_event_tick_t* min;
+    ux_event_tick_t* max;
+}ux_tick_series_t;
+
+typedef struct ux_bar_series_s {
+    int id;
+    char *name;
+    int count;
+    ux_event_bar_t *bars;
+    ux_event_bar_t *min;
+    ux_event_bar_t *max;
+    void* indicators[2];
+}ux_bar_series_t;
+
+typedef enum {
+    UX_STOP_FILL_MODE_CLOSE,
+    UX_STOP_FILL_MODE_HIGHLOW,
+    UX_STOP_FILL_MODE_STOP
+}ux_stop_fill_mode;
+
+typedef enum {
+    UX_STOP_MODE_ABSOLUTE,
+    UX_STOP_MODE_PERCENT
+}ux_stop_mode;
+
+typedef enum {
+    UX_STOP_STATUS_ACTIVE,
+    UX_STOP_STATUS_EXECUTED,
+    UX_STOP_STATUS_CANCELED
+}ux_stop_status;
+
+typedef enum {
+    UX_STOP_TYPE_FIXED,
+    UX_STOP_TYPE_TRAILING,
+    UX_STOP_TYPE_TIME
+}ux_stop_type;
+
+typedef struct ux_stop_s {
+    ux_strategy_t *strategy;
+    ux_position_t *position;
+    ux_instrument_t *instrument;
+    int connected;
+    ux_stop_type type;
+    ux_stop_mode mode;
+    ux_stop_status status;
+    double level;
+    double init_price;
+    double current_price;
+    double stop_price;
+    double fill_price;
+    double trail_price;
+    double qty;
+    ux_position_side side;
+    ux_time_t creation_time;
+    ux_time_t completion_time;
+    int trace_on_quote :1;
+    int trace_on_trade:1;
+    int trace_on_bar:1;
+    int trace_on_bar_open:1;
+    int trail_on_open:1;
+    int trail_on_highlow:1;
+    long filter_bar_size;
+    ux_bar_type filter_bar_type;
+    ux_stop_fill_mode fill_mode;
+}ux_stop_t;
+
+typedef struct ux_subscription_s {
+    int request_id;
+    char *symbol;
+    int source_id;
+    ux_instrument_t *instrument;
+    ux_data_provider_t *provider;
+    int instrument_id;
+    int provider_id;
+    int route_id;
+}ux_subscription_t;
+
+struct ux_strategy_s {
+    int raise_events;
+    int id;
+    char *name;
+    int client_id;
+    int enabled;
+    ux_strategy_status status;
+    ux_portfolio_t *portfolio;
+    void* instruments[2];
+    ux_data_provider_t *data_provider;
+    ux_execution_provider_t *execution_provider;
+    ux_fundamental_provider_t *fundamental_provider;
+    void* children[2];
+    ux_strategy_t *parent;
+    ux_tick_series_t bids;
+    ux_tick_series_t asks;
+    ux_tick_series_t trade;
+    ux_bar_series_t bars;
+    ux_time_series_t equity;
+    void* stops[2];
+    void* subscritions[2];
 };
 
 #ifdef __cplusplus

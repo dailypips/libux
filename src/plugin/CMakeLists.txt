@@ -32,13 +32,21 @@ endif()
 
 if(NOT WIN32)
   add_definitions(-DDLOPEN_POSIX)
+  #add_definitions(-DDLOPEN_LIBTOOL)
 endif()
 
-set(UX_CORE_HEADER
-
+set(UX_CP_HEADER
+      cp.h
+      cp_def.h
+      cp_hash.h
+      cp_list.h
+      cp_internal.h
+      cp_nls.h
+      cp_thread.h
+      cp_util.h
 )
 
-set(UX_CORE_SRC
+set(UX_CP_SRC
         cp.c
         cp_context.c
         cp_hash.c
@@ -55,10 +63,10 @@ set(UX_CORE_SRC
 )
 
 if(WIN32)
-  list(APPEND UX_CORE_SRC thread_windows.c)
+  list(APPEND UX_CP_SRC thread_windows.c)
 else(WIN32)
-  list(APPEND UX_CORE_SRC thread_posix.c)
+  list(APPEND UX_CP_SRC thread_posix.c)
 endif()
 
-add_library(cpcore ${LIBUX_BUILD_TYPE}  ${UX_CORE_HEADER} ${UX_CORE_SRC})
-target_link_libraries(cpcore ${UX_EXTERNAL_LIBRARIES} ${EXPAT_LIBRARIES})
+add_library(cpcore ${LIBUX_BUILD_TYPE}  ${UX_CP_HEADER} ${UX_CP_SRC})
+target_link_libraries(cpcore  ${EXPAT_LIBRARIES})

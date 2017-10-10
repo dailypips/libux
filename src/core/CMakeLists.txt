@@ -34,6 +34,7 @@ set(UX_CORE_SRC
         ux_barfactory.c
         ux_barfactory_items.c
         ux_data_manager.c
+        ux_plugin.c
 )
 endif()
 
@@ -44,4 +45,4 @@ endif()
 #endif()
 
 add_library(uxcore ${LIBUX_BUILD_TYPE}  ${UX_CORE_HEADER} ${UX_CORE_SRC})
-target_link_libraries(uxcore ${UX_EXTERNAL_LIBRARIES})
+target_link_libraries(uxcore cpcore ${UX_EXTERNAL_LIBRARIES})
