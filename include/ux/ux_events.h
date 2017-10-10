@@ -170,6 +170,7 @@ typedef struct {
 }ux_event_l2update_t;
 
 typedef enum {
+    UX_BAR_TYPE_NONE = 0,
     UX_BAR_TYPE_TIME,
     UX_BAR_TYPE_TICK,
     UX_BAR_TYPE_VOLUME,

@@ -84,6 +84,7 @@ UX_EXTERN void ux_wakeup(ux_loop_t* loop);
 
 /* instrument module */
 typedef enum {
+    UX_INSTRUMENT_TYPE_NONE = 0,
     UX_INSTRUMENT_TYPE_STOCK,
     UX_INSTRUMENT_TYPE_FUTURE,
     UX_INSTRUMENT_TYPE_OPTION,
@@ -191,6 +192,91 @@ UX_EXTERN void ux_order_init(ux_order_t *order);
 UX_EXTERN void ux_order_destory(ux_order_t *order);
 UX_EXTERN void ux_order_ref(ux_order_t *order);
 UX_EXTERN void ux_order_unref(ux_order_t *order);
+
+/* provider */
+typedef enum
+{
+    UX_PROVIDER_STATUS_CONNECTING,
+    UX_PROVIDER_STATUS_CONNECTED,
+    UX_PROVIDER_STATUS_DISCONNECTING,
+    UX_PROVIDER_STATUS_DISCONNECTED
+}ux_provider_status;
+
+typedef struct ux_provider_s ux_provider_t;
+typedef struct ux_data_provider_s ux_data_provider_t;
+typedef struct ux_execution_provder_s ux_execution_provder_t;
+typedef struct ux_fundamental_provider_s ux_fundamental_provider_t;
+typedef struct ux_news_provider_s ux_news_provider_t;
+typedef struct ux_historical_provider_s ux_historical_provider_t;
+typedef struct ux_instrument_provider_s ux_instrument_provider_t;
+
+typedef void (*provider_cb)(ux_provider_t *provider, int code);
+
+#define UX_PROVIDER_PUBLIC_FIELDS \
+    /* info */ \
+    int (*is_enable)(ux_provider_t *provider); \
+    int (*get_id)(ux_provider_t *provider); \
+    const char* (*get_name)(ux_provider_t *provider); \
+    /* method */    \
+    ux_provider_status (*get_status)(ux_provider_t *provider); \
+    void (*connect)(ux_provider_t *provider, provider_cb on_connect); \
+    void (*disconnect)(ux_provider_t *provider, provider_cb on_disconnect);
+
+struct ux_provider_s{
+    UX_PROVIDER_PUBLIC_FIELDS
+};
+
+struct ux_data_provider_s {
+    UX_PROVIDER_PUBLIC_FIELDS
+    void (*subscribe)(ux_data_provider_t *provider, ux_instrument_t *instrument, provider_cb on_subscribe);
+    void (*unsubscribe)(ux_data_provider_t *provider, ux_instrument_t *instrument, provider_cb on_unsubscribe);
+};
+
+struct ux_execution_provder_s {
+    UX_PROVIDER_PUBLIC_FIELDS
+    void (*send)(ux_execution_provder_t *provider, ux_event_execution_command_t *command, provider_cb on_send);
+};
+
+struct ux_fundamental_provider_s {
+    UX_PROVIDER_PUBLIC_FIELDS
+    void (*subscribe)(ux_fundamental_provider_t *provider, ux_instrument_t *instrument, provider_cb on_subscribe);
+    void (*unsubscribe)(ux_fundamental_provider_t *provider, ux_instrument_t *instrument, provider_cb on_unsubscribe);
+};
+
+struct ux_news_provider_s {
+    UX_PROVIDER_PUBLIC_FIELDS
+    void (*subscribe)(ux_news_provider_t *provider, ux_instrument_t *instrument, provider_cb on_subscribe);
+    void (*unsubscribe)(ux_news_provider_t *provider, ux_instrument_t *instrument, provider_cb on_unsubscribe);
+};
+
+typedef struct {
+    char* request_id;
+    ux_instrument_t *instrument;
+    ux_time_t time1;
+    ux_time_t time2;
+    uint8_t data_type;
+    ux_bar_type bar_type;
+    long bar_size;      /* bar_size == -1 means no value */
+}ux_historical_data_request_t;
+
+struct ux_historical_provider_s {
+    UX_PROVIDER_PUBLIC_FIELDS
+    void (*send)(ux_historical_provider_t *provider, ux_historical_data_request_t request, provider_cb on_request);
+    void (*cancel)(ux_historical_provider_t *provider, char* request_id, provider_cb on_cancel);
+};
+
+typedef struct ux_instrument_definition_request_s {
+    char *id;
+    ux_instrument_type filter_type;
+    char *filter_symbol;
+    char *filter_exchange;
+}ux_instrument_definition_request_t;
+
+struct ux_instrument_provider_s {
+    UX_PROVIDER_PUBLIC_FIELDS
+    void (*send)(ux_instrument_provider_t *provider, ux_historical_data_request_t request, provider_cb on_request);
+    void (*cancel)(ux_instrument_provider_t *provider, char* request_id, provider_cb on_cancel);
+};
 
 #ifdef __cplusplus
 }
