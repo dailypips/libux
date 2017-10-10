@@ -11,18 +11,20 @@
 
 /* define ext point for uxcore */
 
-#define DATA_PROVIDER_EXT_POINT            "org.dailypips.uxcore.provider.data"
-#define INSTRUMENT_PROVIDER_EXT_POINT      "org.dailypips.uxcore.provider.instrument"
-#define FUNDAMENTAL_PROVIDER_EXT_POINT     "org.dailypips.uxcore.provider.fundamental"
-#define NEWS_PROVIDER_EXT_POINT            "org.dailypips.uxcore.provider.news"
+#define UX_BAR_FACTORY_ITEM_EXT_POINT         "org.dailypips.uxcore.barfactory.item"
+#define UX_DATA_PROVIDER_EXT_POINT            "org.dailypips.uxcore.provider.data"
+#define UX_INSTRUMENT_PROVIDER_EXT_POINT      "org.dailypips.uxcore.provider.instrument"
+#define UX_FUNDAMENTAL_PROVIDER_EXT_POINT     "org.dailypips.uxcore.provider.fundamental"
+#define UX_NEWS_PROVIDER_EXT_POINT            "org.dailypips.uxcore.provider.news"
 
-#define EXECUTION_PROVIDER_EXT_POINT       "org.dailypips.uxcore.provider.execution"
+#define UX_EXECUTION_PROVIDER_EXT_POINT       "org.dailypips.uxcore.provider.execution"
 
-#define HISTORICAL_PROVIDER_EXT_POINT      "org.dailypips.uxcore.provider.historical"
+#define UX_HISTORICAL_PROVIDER_EXT_POINT      "org.dailypips.uxcore.provider.historical"
 
 
 int subscribe(cp_context_t *ctx, const char *extpt_id, cp_extension_t ***info, int *num)
 {
     cp_status_t status;
     *info = cp_get_extensions_info(ctx, extpt_id, &status, num);
+    return status == CP_OK;
 }

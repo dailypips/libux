@@ -24,6 +24,9 @@ extern "C" {
 #include <ux/ux_currency.h>
 #include <ux/ux_events.h>
 
+/* list all error code */
+#define UX_OK   0
+
 /* ids */
 typedef uint16_t ux_iid_t;   /* for instrument id, range[1,65534] */
 #define UX_INSTRUMENT_ID_MIN 1
@@ -129,10 +132,9 @@ typedef struct ux_instrument_s {
     struct ux_instrument_s *parent;
     int is_deleted    :1;
     int is_persistent :1;
-    /*
-  IDataProvider dataProvider;
-  IExecutionProvider executionProvider;
-  */
+
+    void* data_provider;
+    void* execution_provider;
 }ux_instrument_t;
 
 UX_EXTERN void ux_instrument_init(ux_instrument_t *instrument);
@@ -179,13 +181,7 @@ typedef struct ux_order_s {
     int isQueueCalculated;
     void* commands[2]; // list
     void* reports[2]; // list
-    void* messages[2]; // list
-
-    /*
-    Instrument instrument;
-    IExecutionProvider executionProvider;
-    Portfolio portfolio;
-    */
+    //void* messages[2]; // list
 } ux_order_t;
 
 UX_EXTERN void ux_order_init(ux_order_t *order);
@@ -226,27 +222,119 @@ struct ux_provider_s{
     UX_PROVIDER_PUBLIC_FIELDS
 };
 
-struct ux_data_provider_s {
-    UX_PROVIDER_PUBLIC_FIELDS
-    void (*subscribe)  (ux_data_provider_t *provider, ux_instrument_t *instrument, int level2_flag, ux_provider_cb on_subscribe);
+#define UX_DATA_PROVIDER_PUBLIC_FIELDS \
+    UX_PROVIDER_PUBLIC_FIELDS   \
+    void (*subscribe)  (ux_data_provider_t *provider, ux_instrument_t *instrument, int level2_flag, ux_provider_cb on_subscribe); \
     void (*unsubscribe)(ux_data_provider_t *provider, ux_instrument_t *instrument, ux_provider_cb on_unsubscribe);
+
+struct ux_data_provider_s {
+    UX_DATA_PROVIDER_PUBLIC_FIELDS
 };
+
+typedef struct ux_data_simulator_s ux_data_simulator_t;
+
+#define UX_DATA_SIMULATOR_PUBLIC_FIELDS \
+    UX_DATA_PROVIDER_PUBLIC_FIELDS \
+    ux_time_t time1; \
+    ux_time_t time2; \
+    int run_on_subscribe:1; \
+    int subscribe_bid:1; \
+    int subscribe_ask:1; \
+    int subscribe_trade:1; \
+    int subscribe_bar:1; \
+    int subscribe_level2:1; \
+    int subscribe_news:1; \
+    int subscribe_fundamental:1; \
+    void* bar_filters[2]; \
+    void* processors; \
+    void* series[2]; \
+    void (*run)(ux_data_simulator_t *simulator); \
+    void (*clear)(ux_data_simulator_t *simulator);
+
+struct ux_data_simulator_s {
+    UX_DATA_SIMULATOR_PUBLIC_FIELDS
+};
+
+
+#define UX_FUNDAMENTAL_PROVIDER_PUBLIC_FIELDS \
+    UX_PROVIDER_PUBLIC_FIELDS \
+    void (*subscribe)  (ux_fundamental_provider_t *provider, ux_instrument_t *instrument, ux_provider_cb on_subscribe); \
+    void (*unsubscribe)(ux_fundamental_provider_t *provider, ux_instrument_t *instrument, ux_provider_cb on_unsubscribe);
 
 struct ux_fundamental_provider_s {
-    UX_PROVIDER_PUBLIC_FIELDS
-    void (*subscribe)  (ux_fundamental_provider_t *provider, ux_instrument_t *instrument, ux_provider_cb on_subscribe);
-    void (*unsubscribe)(ux_fundamental_provider_t *provider, ux_instrument_t *instrument, ux_provider_cb on_unsubscribe);
+    UX_FUNDAMENTAL_PROVIDER_PUBLIC_FIELDS
 };
+
+#define UX_NEWS_PROVIDER_PUBLIC_FIELDS \
+    UX_PROVIDER_PUBLIC_FIELDS \
+    void (*subscribe)  (ux_news_provider_t *provider, ux_instrument_t *instrument, ux_provider_cb on_subscribe); \
+    void (*unsubscribe)(ux_news_provider_t *provider, ux_instrument_t *instrument, ux_provider_cb on_unsubscribe);
 
 struct ux_news_provider_s {
-    UX_PROVIDER_PUBLIC_FIELDS
-    void (*subscribe)  (ux_news_provider_t *provider, ux_instrument_t *instrument, ux_provider_cb on_subscribe);
-    void (*unsubscribe)(ux_news_provider_t *provider, ux_instrument_t *instrument, ux_provider_cb on_unsubscribe);
+    UX_NEWS_PROVIDER_PUBLIC_FIELDS
 };
 
-struct ux_execution_provider_s {
-    UX_PROVIDER_PUBLIC_FIELDS
+#define UX_EXECUTION_PROVIDER_PUBLIC_FIELDS \
+    UX_PROVIDER_PUBLIC_FIELDS \
     void (*send)(ux_execution_provider_t *provider, ux_event_execution_command_t *command, ux_provider_cb on_send);
+
+struct ux_execution_provider_s {
+    UX_EXECUTION_PROVIDER_PUBLIC_FIELDS
+};
+
+typedef enum {
+    UX_COMMISSION_TYPE_PERSHARE,
+    UX_COMMISSION_TYPE_PERCENT,
+    UX_COMMISSION_TYPE_ABSOLUTE
+}ux_commission_type;
+
+#define UX_COMMISSION_PROVIDER_PUBLIC_FIELDS \
+    ux_commission_type commission_type; \
+    double commission; \
+    double min_commission;
+
+typedef struct ux_commission_provider_s {
+    UX_COMMISSION_PROVIDER_PUBLIC_FIELDS
+}ux_commission_provider_t;
+
+#define UX_SLIPPAGE_PROVIDER_PUBLIC_FIELDS \
+    double slippage;
+
+typedef struct ux_slippage_provider_s {
+    UX_SLIPPAGE_PROVIDER_PUBLIC_FIELDS
+}ux_slippage_provider_t;
+
+typedef struct ux_execution_simulator_s ux_execution_simulator_t;
+
+#define UX_EXECUTION_SIMULATOR_PUBLIC_FIELDS \
+    UX_EXECUTION_PROVIDER_PUBLIC_FIELDS \
+    int fill_on_quote:1; \
+    int fill_on_trade:1; \
+    int fill_on_bar:1; \
+    int fill_on_bar_open:1; \
+    int fill_on_level2:1; \
+    int fill_market_on_next:1; \
+    int fill_limit_on_next:1; \
+    int fill_stop_on_next:1; \
+    int fill_stop_limit_on_next:1; \
+    int fill_at_limit_price:1; \
+    int fill_at_stop_price:1; \
+    int partial_fills:1; \
+    int queued:1; \
+    void* bar_filters[2]; \
+    ux_commission_provider_t *commission_provider; \
+    ux_slippage_provider_t   *slippage_provider; \
+    void (*on_bid)(ux_event_bid_t *bid); \
+    void (*on_ask)(ux_event_bid_t *ask);  \
+    void (*on_trade)(ux_event_trade_t *trade); \
+    void (*on_level2_snapshot)(ux_event_l2snapshot_t *snapshot); \
+    void (*on_level2_update)(ux_event_l2update_t *update); \
+    void (*on_bar_open)(ux_event_bar_t *bar); \
+    void (*on_bar)(ux_event_bar_t *bar); \
+    void (*clear)(void);
+
+struct ux_execution_simulator_s {
+    UX_EXECUTION_SIMULATOR_PUBLIC_FIELDS
 };
 
 typedef struct {
@@ -259,10 +347,13 @@ typedef struct {
     long bar_size;      /* bar_size == -1 means no value */
 }ux_historical_data_request_t;
 
-struct ux_historical_provider_s {
-    UX_PROVIDER_PUBLIC_FIELDS
-    void (*send)(ux_historical_provider_t *provider, ux_historical_data_request_t request, ux_provider_cb on_request);
+#define UX_HISTORICAL_PROVIDER_PUBLIC_FIELDS \
+    UX_PROVIDER_PUBLIC_FIELDS \
+    void (*send)(ux_historical_provider_t *provider, ux_historical_data_request_t request, ux_provider_cb on_request); \
     void (*cancel)(ux_historical_provider_t *provider, char* request_id, ux_provider_cb on_cancel);
+
+struct ux_historical_provider_s {
+    UX_HISTORICAL_PROVIDER_PUBLIC_FIELDS
 };
 
 typedef struct ux_instrument_definition_request_s {
@@ -272,10 +363,13 @@ typedef struct ux_instrument_definition_request_s {
     char *filter_exchange;
 }ux_instrument_definition_request_t;
 
-struct ux_instrument_provider_s {
-    UX_PROVIDER_PUBLIC_FIELDS
-    void (*send)(ux_instrument_provider_t *provider, ux_instrument_definition_request_t request, ux_provider_cb on_request);
+#define UX_INSTRUMENT_PROVIDER_PUBLIC_FIELDS \
+    UX_PROVIDER_PUBLIC_FIELDS \
+    void (*send)(ux_instrument_provider_t *provider, ux_instrument_definition_request_t request, ux_provider_cb on_request); \
     void (*cancel)(ux_instrument_provider_t *provider, char* request_id, ux_provider_cb on_cancel);
+
+struct ux_instrument_provider_s {
+    UX_INSTRUMENT_PROVIDER_PUBLIC_FIELDS
 };
 
 typedef struct {
@@ -290,6 +384,41 @@ typedef struct {
     char *text;
     double commission;
 }ux_fill_t;
+
+typedef enum {
+    UX_ACCOUNT_DATA_TYPE_ACCTVALUE,
+    UX_ACCOUNT_DATA_TYPE_POSITION,
+    UX_ACCOUNT_DATA_TYPE_ORDER
+}ux_accout_data_type;
+
+#define PREDEFINE_ACCOUNT_FIELDS(_) \
+    _(SYMBOL,    "Symbol") \
+    _(EXCHANGE,   "Exchange") \
+    _(SECURITY_TYPE, "SecurityType") \
+    _(CURRENCY, "Currency") \
+    _(MATURITY, "Maturity") \
+    _(PUT_OR_CALL, "PutOrCall") \
+    _(STRIKE, "Strike") \
+    _(QTY, "Qty") \
+    _(LONG_QTY, "LongQty") \
+    _(SHORT_QTY, "ShortQty") \
+    _(ORDER_ID, "OrderID") \
+    _(ORDER_TYPE, "OrderType") \
+    _(ORDER_SIDE, "OrderSide") \
+    _(ORDER_STATUS, "OrderStatus") \
+    _(PRICE, "Price") \
+    _(STOP_PX, "StopPx")
+
+typedef struct account_field_item_s {
+    char *name;
+    ux_currency_t currency;
+    uintptr_t value;
+}account_field_item_t;
+
+typedef struct account_position_s {
+    ux_currency_t currency;
+    double value;
+}account_position_t;
 
 typedef struct ux_account_s ux_account_t;
 struct ux_account_s {
@@ -520,6 +649,12 @@ typedef struct ux_subscription_s {
     int provider_id;
     int route_id;
 }ux_subscription_t;
+
+typedef enum {
+    UX_STRATEGY_MODE_BACKTEST,
+    UX_STRATEGY_MODE_PAPER,
+    UX_STRATEGY_MODE_LIVE
+}ux_strategy_mode;
 
 struct ux_strategy_s {
     int raise_events;

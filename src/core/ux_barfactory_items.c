@@ -7,6 +7,7 @@
  ******************************************************************************/
 
 #include "ux_internal.h"
+#include "queue.h"
 
 static UX_AINLINE ux_loop_t* get_loop(ux_barfactory_t* factory)
 {
@@ -33,7 +34,7 @@ static ux_time_t round_start_time(time_bar_item_t* item, ux_event_tick_t* tick)
     return tick->timestamp;
 }
 
-void time_bar_on_tick(ux_barfactory_item_t* node, ux_event_tick_t* tick)
+static void time_bar_on_tick(ux_barfactory_item_t* node, ux_event_tick_t* tick)
 {
     ux_event_bar_t* bar;
     time_bar_item_t* item = (time_bar_item_t*)node;
@@ -99,7 +100,8 @@ void time_bar_on_tick(ux_barfactory_item_t* node, ux_event_tick_t* tick)
 
 void time_bar_item_init(time_bar_item_t* item)
 {
-    ux_barfactory_item_init((ux_barfactory_item_t*)item);
+    //ux_barfactory_item_init((ux_barfactory_item_t*)item);
+    QUEUE_INIT(&item->queue_node);
     item->clock_type = UX_CLOCK_LOCAL;
     item->on_tick = time_bar_on_tick;
     item->start_time = MIN_DATE_TIME;
@@ -108,5 +110,5 @@ void time_bar_item_init(time_bar_item_t* item)
 
 void time_bar_item_destory(time_bar_item_t* item)
 {
-    ux_barfactory_item_destory((ux_barfactory_item_t*)item);
+    //ux_barfactory_item_destory((ux_barfactory_item_t*)item);
 }

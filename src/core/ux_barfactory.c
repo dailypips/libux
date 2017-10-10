@@ -9,24 +9,12 @@
 #include "queue.h"
 #include "ux_internal.h"
 
-//TODO: hash node lifetime
-// HASH_ADD_INT(&factory->list_by_instrument_id ...)
-
 void ux_barfactory_init(ux_barfactory_t* factory)
 {
     factory->list_by_instrument_id = NULL;
 }
 
 void ux_barfactory_destory(ux_barfactory_t* factory)
-{
-}
-
-void ux_barfactory_item_init(ux_barfactory_item_t* item)
-{
-    QUEUE_INIT(&item->queue_node);
-}
-
-void ux_barfactory_item_destory(ux_barfactory_item_t* item)
 {
 }
 
@@ -43,6 +31,7 @@ void ux_barfactory_add_item(ux_barfactory_t* factory, ux_barfactory_item_t* item
         HASH_ADD_INT(factory->list_by_instrument_id, instrument_id, list);
     }
     item->factory = factory;
+    QUEUE_INIT(&item->queue_node);
     QUEUE_INSERT_TAIL(&list->queue, &item->queue_node);
 }
 

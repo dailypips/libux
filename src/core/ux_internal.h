@@ -74,7 +74,9 @@ typedef struct ux_barfactory_item_s ux_barfactory_item_t;
 typedef void (*ux_on_tick_cb)(ux_barfactory_item_t *item, ux_event_tick_t *tick);
 
 #define UX_BAR_ITEM_PUBLIC_FIELDS \
+    /* private */ \
     void* queue_node[2];   \
+    /* read only */ \
     ux_barfactory_t* factory;   \
     ux_instrument_t* instrument;    \
     ux_bar_input bar_input; \
