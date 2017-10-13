@@ -59,6 +59,8 @@ void event_bid_dispatch(ux_ctx_t *ctx, ux_event_t *e)
 
      bar_factory_process_tick(&ctx->bar_factory, (ux_event_tick_t*)e);
 
+     ctx->execution_simulator->on_bid(ctx->execution_simulator, bid);
+
 
     /*
      framework.dataManager.method_2(bid);

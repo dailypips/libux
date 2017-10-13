@@ -27,6 +27,7 @@ extern "C" {
     _(L2SNAPSHOT,           l2snapshot,         l2snapshot,        l2snapshot,        default)        \
     _(L2UPDATE,             l2update,           l2update,          l2update,          default)        \
     _(BAR,                  bar,                default,           default,           default)        \
+    _(BARSLICE,             bar_slice,          default,           default,           default)        \
     _(NEWS,                 news,               news,              news,              default)        \
     _(FUNDAMENTAL,          fundamental,        default,           default,           default)        \
     /* execution events */                                                                            \

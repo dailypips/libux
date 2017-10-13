@@ -8,13 +8,6 @@
 
 #include "ux_internal.h"
 
-
-typedef struct ux_bar_filter_item_s {
-    void* queue_node[2];
-    ux_bar_type bar_type;
-    long bar_size;
-}ux_bar_filter_item_t;
-
 typedef struct ux_default_data_simulator_s ux_default_data_simulator_t;
 
 static const char *data_simulator_name = "DataSimulator";

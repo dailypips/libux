@@ -158,6 +158,10 @@ struct ux_ctx_s {
     ux_barfactory_t bar_factory;
     //BAR_FACTORY_PUBLIC_FIELDS
     data_manager_t data_manager;
+
+    /* simulator */
+    ux_data_simulator_t *data_simulator;
+    ux_execution_simulator_t *execution_simulator;
 };
 
 UX_FUNC void ux_ctx_init(ux_ctx_t *ctx);
@@ -222,7 +226,7 @@ struct ux_series_s {
 typedef struct {
 	ux_time_t timestamp;
 	double value;
-}ux_time_date_t;
+}ux_time_series_data_t;
 
 
 #ifdef __cplusplus

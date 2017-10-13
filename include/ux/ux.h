@@ -125,10 +125,10 @@ typedef struct ux_instrument_s {
     char* formula;
     //AltIdList altId = new AltIdList();
     void* legs[2];
-    ux_event_trade_t trade;
-    ux_event_ask_t ask;
-    ux_event_bid_t bid;
-    ux_event_bar_t bar;
+    ux_event_trade_t *trade;
+    ux_event_ask_t *ask;
+    ux_event_bid_t *bid;
+    ux_event_bar_t *bar;
     struct ux_instrument_s *parent;
     int is_deleted    :1;
     int is_persistent :1;
@@ -208,6 +208,12 @@ typedef struct ux_historical_provider_s ux_historical_provider_t;
 typedef struct ux_instrument_provider_s ux_instrument_provider_t;
 
 typedef void (*ux_provider_cb)(ux_provider_t *provider, uintptr_t code);
+
+typedef struct ux_bar_filter_item_s {
+    void* queue_node[2];
+    ux_bar_type bar_type;
+    long bar_size;
+}ux_bar_filter_item_t;
 
 #define UX_PROVIDER_PUBLIC_FIELDS \
     /* info */ \
@@ -307,21 +313,25 @@ typedef struct ux_slippage_provider_s {
 
 typedef struct ux_execution_simulator_s ux_execution_simulator_t;
 
+typedef enum {
+    UX_EXECUTION_SIMULATOR_FLAG_FILL_ON_QUOTE           = 1 << 0,
+    UX_EXECUTION_SIMULATOR_FLAG_FILL_ON_TRADE           = 1 << 1,
+    UX_EXECUTION_SIMULATOR_FLAG_FILL_ON_BAR             = 1 << 2,
+    UX_EXECUTION_SIMULATOR_FLAG_FILL_ON_BAR_OPEN        = 1 << 3,
+    UX_EXECUTION_SIMULATOR_FLAG_FILL_ON_LEVEL2          = 1 << 4,
+    UX_EXECUTION_SIMULATOR_FLAG_FILL_MARKET_ON_NEXT     = 1 << 5,
+    UX_EXECUTION_SIMULATOR_FLAG_FILL_LIMIT_ON_NEXT      = 1 << 6,
+    UX_EXECUTION_SIMULATOR_FLAG_FILL_STOP_ON_NEXT       = 1 << 7,
+    UX_EXECUTION_SIMULATOR_FLAG_FILL_STOP_LIMIT_ON_NEXT = 1 << 8,
+    UX_EXECUTION_SIMULATOR_FLAG_FILL_AT_LIMIT_PRICE     = 1 << 9,
+    UX_EXECUTION_SIMULATOR_FLAG_FILL_AT_STOP_PRICE      = 1 << 10,
+    UX_EXECUTION_SIMULATOR_FLAG_PARTIAL                 = 1 << 11,
+    UX_EXECUTION_SIMULATOR_FLAG_QUEUED                  = 1 << 12
+}ux_execution_simulator_flag_t;
+
 #define UX_EXECUTION_SIMULATOR_PUBLIC_FIELDS \
     UX_EXECUTION_PROVIDER_PUBLIC_FIELDS \
-    int fill_on_quote:1; \
-    int fill_on_trade:1; \
-    int fill_on_bar:1; \
-    int fill_on_bar_open:1; \
-    int fill_on_level2:1; \
-    int fill_market_on_next:1; \
-    int fill_limit_on_next:1; \
-    int fill_stop_on_next:1; \
-    int fill_stop_limit_on_next:1; \
-    int fill_at_limit_price:1; \
-    int fill_at_stop_price:1; \
-    int partial_fills:1; \
-    int queued:1; \
+    int fill_flag; \
     void* bar_filters[2]; \
     ux_commission_provider_t *commission_provider; \
     ux_slippage_provider_t   *slippage_provider; \
@@ -679,6 +689,11 @@ struct ux_strategy_s {
     ux_time_series_t equity;
     void* stops[2];
     void* subscritions[2];
+
+    /* cb */
+    void (*add_strategy)(ux_strategy_t *parent, ux_strategy_t *strategy);
+    void (*remove_strategy)(ux_strategy_t *parent, ux_strategy_t *strategy);
+    void (*on_provider_connected)(ux_strategy_t *strategy, );
 };
 
 /* barfactory */

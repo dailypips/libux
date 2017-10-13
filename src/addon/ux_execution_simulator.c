@@ -89,7 +89,7 @@ static void on_bid(ux_execution_simulator_t* simulator, ux_event_bid_t *bid)
     if (!list)
         return;
 
-    if(s->fill_on_quote) {
+    if(s->fill_flag & UX_EXECUTION_SIMULATOR_FLAG_FILL_ON_QUOTE) {
         QUEUE_FOREACH(q, &list->orders) {
             ux_order_t *order = QUEUE_DATA(q, ux_order_t, queue_node);
             process_bid(order, bid);

@@ -201,7 +201,14 @@ typedef uint16_t ux_currency_t;
   _(ZMW, 967)           \
   _(ZWD, 932)
 
-#define ISO4217_CURRENCY_LAST 1024
+//#define ISO4217_CURRENCY_LAST 1024
+
+typedef enum {
+#define CURRENTENUM(name, code) UX_CURRENCY_##name,
+CURRENCY_DEF(CURRENTENUM)
+#undef CURRENTENUM
+    ISO4217_CURRENCY_LAST = 1024
+}ux_currency_t;
 
 ux_currency_t ux_currency_from_name(const char *name);
 const char* ux_currency_to_name(ux_currency_t currency);
