@@ -42,15 +42,15 @@ void ux_barfactory_remove_item(ux_barfactory_t* factory, ux_barfactory_item_t* i
     item->factory = NULL;
 }
 
-static UX_AINLINE ux_loop_t* get_loop(ux_barfactory_t* factory)
+static UX_AINLINE ux_ctx_t* get_ctx(ux_barfactory_t* factory)
 {
     UX_ASSERT(factory != NULL);
-    return container_of(factory, ux_loop_t, bar_factory);
+    return container_of(factory, ux_ctx_t, bar_factory);
 }
 
 void ux_barfactory_add_reminder(ux_barfactory_t* factory, ux_event_reminder_t* reminder)
 {
-    bus_add_timer(get_loop(factory), reminder);
+    bus_add_timer(get_ctx(factory), reminder);
 }
 
 static ux_event_tick_t* event_tick_new(ux_event_tick_t* e, ux_event_tick_t* n)
@@ -73,7 +73,7 @@ void bar_factory_process_tick(ux_barfactory_t* factory, ux_event_tick_t* e)
     item_list_t* list;
     QUEUE* q;
     ux_event_tick_t* tick;
-    ux_loop_t* loop = get_loop(factory);
+    ux_ctx_t *ctx = get_ctx(factory);
 
     int key = e->instrument;
     HASH_FIND_INT((item_list_t*)factory->list_by_instrument_id, &key, list);
@@ -107,13 +107,13 @@ void bar_factory_process_tick(ux_barfactory_t* factory, ux_event_tick_t* e)
                 break;
 
             if (e->type == UX_EVENT_BID) {
-                ux_event_ask_t* ask = data_manager_get_ask(&loop->data_manager, e->instrument);
+                ux_event_ask_t* ask = data_manager_get_ask(&ctx->data_manager, e->instrument);
                 if (ask)
                     tick = event_tick_new(e, ask);
             }
 
             if (e->type == UX_EVENT_ASK) {
-                ux_event_bid_t* bid = data_manager_get_bid(&loop->data_manager, e->instrument);
+                ux_event_bid_t* bid = data_manager_get_bid(&ctx->data_manager, e->instrument);
                 if (bid)
                     tick = event_tick_new(e, bid);
             }
@@ -134,12 +134,12 @@ void bar_factory_process_tick(ux_barfactory_t* factory, ux_event_tick_t* e)
 void ux_barfactory_emit_bar_open(ux_barfactory_t* factory, ux_barfactory_item_t* item)
 {
     item->bar->status = UX_BAR_STATUS_OPEN;
-    ux_dispatch_event(get_loop(factory), (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
+    ux_dispatch_event(get_ctx(factory), (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
 }
 
 void ux_barfactory_emit_bar(ux_barfactory_t* factory, ux_barfactory_item_t* item)
 {
     item->bar->status = UX_BAR_STATUS_CLOSE;
-    ux_dispatch_event(get_loop(factory), (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
+    ux_dispatch_event(get_ctx(factory), (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
     item->bar = NULL;
 }

@@ -13,7 +13,7 @@ ux_queue_t* ux_queue_init(ux_queue_t* q, unsigned int size, ux_queue_category ca
     if (ret < 0) {
         return NULL;
     }
-    q->loop = NULL;
+    q->ctx = NULL;
     q->category = category;
     return q;
 }
@@ -47,8 +47,8 @@ void ux_queue_unref(ux_queue_t *q)
 }
 
 /* 基本逻辑是这样的，
- * 如果向空队列压入事件，必须通知相应的runloop
- * 通知runloop是异步的，通过把队列压入runloop的pending_queue来实现
+ * 如果向空队列压入事件，必须通知相应的runctx
+ * 通知runctx是异步的，通过把队列压入runctx的pending_queue来实现
  * 如果要简化生命周期管理的话，queue_t必须是MPSC的节点子类型
  * 同时pipe通过最小堆管理queue，所以queue_t必须是heap的节点子类型
  * 如果队列内容为空，heap并不保存这个queue的指针，
@@ -66,11 +66,11 @@ int ux_queue_push(ux_queue_t* q, void* e)
 
     int ret = spscq_push(&q->spsc, e);
 
-    if(is_empty && q->loop) {
+    if(is_empty && q->ctx) {
         UX_ASSERT(ret == 0);
-        ux_loop_t *loop = q->loop;
-        mpscq_push(&loop->pending_queue, &q->mpsc_node);
-        ux_wakeup(loop);
+        ux_ctx_t *ctx = q->ctx;
+        mpscq_push(&ctx->pending_queue, &q->mpsc_node);
+        ux_wakeup(ctx);
     }
 
     return ret;

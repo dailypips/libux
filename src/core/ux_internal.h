@@ -22,7 +22,7 @@ extern "C" {
 /* event class info */
 typedef void (*event_destory)(ux_event_t* e);
 typedef ux_event_t* (*event_clone)(ux_event_t* e);
-typedef void (*event_dispatch)(ux_loop_t *loop, ux_event_t* e);
+typedef void (*event_dispatch)(ux_ctx_t *ctx, ux_event_t* e);
 
 typedef struct _ux_event_class_info_t {
     size_t size;
@@ -43,7 +43,7 @@ struct ux_queue_s {
     ux_atomic_t refcount;
     spscq_t spsc;
     /* only access by consumer */
-    void *loop;
+    void *ctx;
     ux_queue_category category;
     /* mpsc */
     mpscq_node mpsc_node;
@@ -68,32 +68,11 @@ UX_FUNC int ux_queue_is_empty(ux_queue_t *q);
 UX_FUNC int ux_queue_is_full(ux_queue_t *q);
 
 /* bar factory */
-typedef struct ux_barfactory_s ux_barfactory_t;
-typedef struct ux_barfactory_item_s ux_barfactory_item_t;
+//typedef struct ux_barfactory_s ux_barfactory_t;
+//typedef struct ux_barfactory_item_s ux_barfactory_item_t;
 
-typedef void (*ux_on_tick_cb)(ux_barfactory_item_t *item, ux_event_tick_t *tick);
+//typedef void (*ux_on_tick_cb)(ux_barfactory_item_t *item, ux_event_tick_t *tick);
 
-#define UX_BAR_ITEM_PUBLIC_FIELDS \
-    /* private */ \
-    void* queue_node[2];   \
-    /* read only */ \
-    ux_barfactory_t* factory;   \
-    ux_instrument_t* instrument;    \
-    ux_bar_input bar_input; \
-    ux_on_tick_cb on_tick;  \
-    ux_event_bar_t *bar;
-
-#define UX_BAR_ITEM_COMMON_FILEDS \
-    int provider_id;    \
-    ux_bar_type bar_type;   \
-    long bar_size;  \
-    int session_enabled;    \
-    ux_timespan_t session1; \
-    ux_timespan_t session2;
-
-struct ux_barfactory_item_s {
-    UX_BAR_ITEM_PUBLIC_FIELDS
-};
 
 UX_FUNC void ux_barfactory_item_init(ux_barfactory_item_t *item);
 UX_FUNC void ux_barfactory_item_destory(ux_barfactory_item_t *item);
@@ -104,10 +83,12 @@ typedef struct {
     void* queue[2];
 } item_list_t;
 
-struct ux_barfactory_s {
-    ux_loop_t *framework;
-    item_list_t* list_by_instrument_id;
+#define BAR_FACTORY_PUBLIC_FIELDS \
+    item_list_t* list_by_instrument_id; \
     void* reminder_items;
+
+struct ux_barfactory_s {
+    BAR_FACTORY_PUBLIC_FIELDS
 };
 
 UX_FUNC void ux_barfactory_init(ux_barfactory_t *factory);
@@ -118,17 +99,6 @@ UX_EXTERN void ux_barfactory_add_reminder(ux_barfactory_t *factory, ux_event_rem
 UX_EXTERN void bar_factory_process_tick(ux_barfactory_t* factory, ux_event_tick_t* e);
 UX_EXTERN void ux_barfactory_emit_bar_open(ux_barfactory_t *factory, ux_barfactory_item_t *item);
 UX_EXTERN void ux_barfactory_emit_bar(ux_barfactory_t *factory, ux_barfactory_item_t *item);
-
-typedef struct time_bar_item_s {
-    UX_BAR_ITEM_PUBLIC_FIELDS
-    UX_BAR_ITEM_COMMON_FILEDS
-    ux_clock_type clock_type;
-    ux_time_t start_time;
-    int started;
-}time_bar_item_t;
-
-UX_FUNC void time_bar_item_init(time_bar_item_t *item);
-UX_FUNC void time_bar_item_destory(time_bar_item_t *item);
 
 /* data manager module */
 typedef struct tick_hash_node_s {
@@ -143,17 +113,27 @@ typedef struct data_manager_s {
     tick_hash_node_t *trade_hash;
 }data_manager_t;
 
+typedef struct instrument_hash_node_s {
+    UT_hash_handle hh;
+    int id;
+    ux_instrument_t *instrument;
+}instrument_hash_node_t;
+
+typedef struct instrument_manager_s {
+    instrument_hash_node_t *instrument_hash;
+}instrument_manager_t;
+
 ux_event_ask_t *data_manager_get_ask(data_manager_t *manager, int instrument_id);
 ux_event_ask_t *data_manager_get_bid(data_manager_t *manager, int instrument_id);
 ux_event_ask_t *data_manager_get_trade(data_manager_t *manager, int instrument_id);
 
-/* loop module */
+/* ctx module */
 typedef struct {
     void *min;
     unsigned int nelts;
 }min_heap;
 
-struct ux_loop_s {
+struct ux_ctx_s {
     uv_mutex_t wait_mutex;
     uv_cond_t  wait_cond;
     int stop_flag;
@@ -172,36 +152,39 @@ struct ux_loop_s {
     int is_simulator_stop;
     /* stat */
     uint64_t event_count;
+    /* instrument manager*/
+
     /* bar factory */
     ux_barfactory_t bar_factory;
+    //BAR_FACTORY_PUBLIC_FIELDS
     data_manager_t data_manager;
 };
 
-UX_FUNC void ux_loop_init(ux_loop_t *loop);
-UX_FUNC void ux_loop_destory(ux_loop_t *loop);
-UX_FUNC void ux_loop_clear(ux_loop_t *loop);
+UX_FUNC void ux_ctx_init(ux_ctx_t *ctx);
+UX_FUNC void ux_ctx_destory(ux_ctx_t *ctx);
+UX_FUNC void ux_ctx_clear(ux_ctx_t *ctx);
 
-UX_FUNC void bus_attach(ux_loop_t* src, ux_loop_t *dst);
-UX_FUNC void bus_detach(ux_loop_t* src, ux_loop_t *dst);
+UX_FUNC void bus_attach(ux_ctx_t* src, ux_ctx_t *dst);
+UX_FUNC void bus_detach(ux_ctx_t* src, ux_ctx_t *dst);
 
-UX_FUNC void bus_add_queue(ux_loop_t *loop, ux_queue_t *q);
-UX_FUNC void bus_remove_queue(ux_loop_t *loop, ux_queue_t *q);
+UX_FUNC void bus_add_queue(ux_ctx_t *ctx, ux_queue_t *q);
+UX_FUNC void bus_remove_queue(ux_ctx_t *ctx, ux_queue_t *q);
 
-UX_FUNC void bus_add_timer(ux_loop_t *loop, ux_event_reminder_t* timer);
-UX_FUNC void bus_remove_timer(ux_loop_t *loop, ux_event_reminder_t* timer);
+UX_FUNC void bus_add_timer(ux_ctx_t *ctx, ux_event_reminder_t* timer);
+UX_FUNC void bus_remove_timer(ux_ctx_t *ctx, ux_event_reminder_t* timer);
 
-UX_FUNC ux_event_t* bus_dequeue(ux_loop_t *loop);
-UX_FUNC ux_event_reminder_t* bus_timer_peek(ux_loop_t *loop, ux_clock_type type);
-UX_FUNC ux_event_reminder_t* bus_timer_dequeue(ux_loop_t *loop, ux_clock_type type);
+UX_FUNC ux_event_t* bus_dequeue(ux_ctx_t *ctx);
+UX_FUNC ux_event_reminder_t* bus_timer_peek(ux_ctx_t *ctx, ux_clock_type type);
+UX_FUNC ux_event_reminder_t* bus_timer_dequeue(ux_ctx_t *ctx, ux_clock_type type);
 
-UX_FUNC ux_time_t bus_get_time(ux_loop_t *loop);
-UX_FUNC int bus_set_time(ux_loop_t *loop, ux_time_t time);
+UX_FUNC ux_time_t bus_get_time(ux_ctx_t *ctx);
+UX_FUNC int bus_set_time(ux_ctx_t *ctx, ux_time_t time);
 
-UX_FUNC ux_time_t bus_get_exchange_time(ux_loop_t *loop);
-UX_FUNC int bus_set_exchange_time(ux_loop_t *loop, ux_time_t time);
+UX_FUNC ux_time_t bus_get_exchange_time(ux_ctx_t *ctx);
+UX_FUNC int bus_set_exchange_time(ux_ctx_t *ctx, ux_time_t time);
 
 /* thread safe */
-UX_EXTERN void ux_async_post(ux_loop_t *loop, ux_async_cb async_cb, void *data);
+UX_EXTERN void ux_async_post(ux_ctx_t *ctx, ux_async_cb async_cb, void *data);
 
 /* dispatch module */
 typedef enum {
@@ -209,14 +192,38 @@ typedef enum {
     UX_DISPATCH_IMMEDIATELY
 }ux_dispatch_mode;
 
-UX_EXTERN void ux_dispatch_event(ux_loop_t* loop, ux_event_t* e, ux_dispatch_mode mode);
-UX_FUNC   void ux_emit_bufferd_events(ux_loop_t *loop);
+UX_EXTERN void ux_dispatch_event(ux_ctx_t *ctx, ux_event_t* e, ux_dispatch_mode mode);
+UX_FUNC   void ux_emit_bufferd_events(ux_ctx_t *ctx);
 
 /* default event dispatch */
-UX_FUNC void event_reminder_dispatch(ux_loop_t *loop, ux_event_t *e);
-UX_FUNC void event_ask_dispatch(ux_loop_t *loop, ux_event_t *e);
-UX_FUNC void event_bid_dispatch(ux_loop_t *loop, ux_event_t *e);
-UX_FUNC void event_trade_dispatch(ux_loop_t *loop, ux_event_t *e);
+UX_FUNC void event_reminder_dispatch(ux_ctx_t *ctx, ux_event_t *e);
+UX_FUNC void event_ask_dispatch(ux_ctx_t *ctx, ux_event_t *e);
+UX_FUNC void event_bid_dispatch(ux_ctx_t *ctx, ux_event_t *e);
+UX_FUNC void event_trade_dispatch(ux_ctx_t *ctx, ux_event_t *e);
+
+
+/* series & indicator */
+typedef struct ux_series_s ux_series_t;
+
+struct ux_series_s {
+	void* indicators[2];
+	const char* (*get_name)(ux_series_t *s);
+	const char* (*get_description)(ux_series_t *s);
+	int (*get_size)(ux_series_t *s);
+	double (*get_first)(ux_series_t *s);
+	double (*get_last)(ux_series_t *s);
+	ux_time_t (*get_first_time)(ux_series_t *s);
+	ux_time_t (*get_last_time)(ux_series_t *s);
+	double (*get)(ux_series_t, int index);
+	double (*get_min)(ux_series_t* s, ux_time_t start, ux_time_t end);
+	double (*get_max)(ux_series_t* s, ux_time_t start, ux_time_t end);
+};
+
+typedef struct {
+	ux_time_t timestamp;
+	double value;
+}ux_time_date_t;
+
 
 #ifdef __cplusplus
 }

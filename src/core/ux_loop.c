@@ -1,23 +1,23 @@
 #include "ux_internal.h"
 
-void ux_wakeup(ux_loop_t* loop)
+void ux_wakeup(ux_ctx_t *ctx)
 {
-    uv_cond_signal(&loop->wait_cond);
+    uv_cond_signal(&ctx->wait_cond);
 }
 
-void ux_async_post(ux_loop_t* loop, ux_async_cb async_cb, void* data)
+void ux_async_post(ux_ctx_t *ctx, ux_async_cb async_cb, void* data)
 {
     ux_async_t* async = ux_malloc(sizeof(ux_async_t));
     async->async_cb = async_cb;
     async->data = data;
 
-    mpscq_push(&loop->async_queue, (mpscq_node*)&async->next);
-    ux_wakeup(loop);
+    mpscq_push(&ctx->async_queue, (mpscq_node*)&async->next);
+    ux_wakeup(ctx);
 }
 
-static int64_t bus_next_timeout(ux_loop_t* loop)
+static int64_t bus_next_timeout(ux_ctx_t *ctx)
 {
-    ux_event_reminder_t* r = bus_timer_peek(loop, UX_CLOCK_LOCAL);
+    ux_event_reminder_t* r = bus_timer_peek(ctx, UX_CLOCK_LOCAL);
 
     if (r)
         return r->timeout - ux_time_now();
@@ -25,54 +25,54 @@ static int64_t bus_next_timeout(ux_loop_t* loop)
     return 0;
 }
 
-static inline void timewait(ux_loop_t* loop, int64_t timeout)
+static inline void timewait(ux_ctx_t *ctx, int64_t timeout)
 {
-    uv_mutex_lock(&loop->wait_mutex);
+    uv_mutex_lock(&ctx->wait_mutex);
     if (timeout > 0)
-        uv_cond_timedwait(&loop->wait_cond, &loop->wait_mutex, timeout);
+        uv_cond_timedwait(&ctx->wait_cond, &ctx->wait_mutex, timeout);
     else
-        uv_cond_wait(&loop->wait_cond, &loop->wait_mutex);
-    uv_mutex_unlock(&loop->wait_mutex);
+        uv_cond_wait(&ctx->wait_cond, &ctx->wait_mutex);
+    uv_mutex_unlock(&ctx->wait_mutex);
 }
 
-void ux_run(ux_loop_t* loop, ux_run_mode mode)
+void ux_run(ux_ctx_t *ctx, ux_run_mode mode)
 {
-    while (loop->stop_flag == 0) {
+    while (ctx->stop_flag == 0) {
         /* step 1: call all async cb */
         mpscq_node* node;
-        while ((node = mpscq_pop(&loop->async_queue))) {
+        while ((node = mpscq_pop(&ctx->async_queue))) {
             ux_async_t* async_node = container_of(node, ux_async_t, next);
-            async_node->async_cb(loop, async_node->data);
+            async_node->async_cb(ctx, async_node->data);
         }
         /* step 2: pop bus */
-        ux_event_t* e = bus_dequeue(loop);
+        ux_event_t* e = bus_dequeue(ctx);
 
         if (e)
-            ux_dispatch_event(loop, e, UX_DISPATCH_IMMEDIATELY);
+            ux_dispatch_event(ctx, e, UX_DISPATCH_IMMEDIATELY);
 
         if (mode == UX_RUN_NOWAIT || (mode == UX_RUN_ONCE && e))
             break;
 
-        int64_t timeout = bus_next_timeout(loop);
+        int64_t timeout = bus_next_timeout(ctx);
         if (timeout > 0)
-            timewait(loop, timeout);
+            timewait(ctx, timeout);
     }
 }
 
-void ux_stop(ux_loop_t* loop)
+void ux_stop(ux_ctx_t *ctx)
 {
-    loop->stop_flag = 1;
+    ctx->stop_flag = 1;
 }
 
-ux_loop_t* ux_loop_new(void)
+ux_ctx_t* ux_ctx_new(void)
 {
-    ux_loop_t* loop = ux_zalloc(sizeof(ux_loop_t));
-    ux_loop_init(loop);
-    return loop;
+    ux_ctx_t *ctx = ux_zalloc(sizeof(ux_ctx_t));
+    ux_ctx_init(ctx);
+    return ctx;
 }
 
-void ux_loop_free(ux_loop_t* loop)
+void ux_ctx_free(ux_ctx_t *ctx)
 {
-    ux_loop_destory(loop);
-    ux_free(loop);
+    ux_ctx_destory(ctx);
+    ux_free(ctx);
 }

@@ -5,13 +5,13 @@
 #include <assert.h>
 
 
-TEST_IMPL(ux_loop_test)
+TEST_IMPL(ux_ctx_test)
 {
-    ux_loop_t loop;
+    ux_ctx_t ctx;
 
-    ux_loop_init(&loop);
+    ux_ctx_init(&ctx);
 
-    ux_run(&loop, UX_RUN_NOWAIT);
+    ux_run(&ctx, UX_RUN_NOWAIT);
 
     return 0;
 }

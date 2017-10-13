@@ -81,27 +81,27 @@ static UX_AINLINE int heap_is_empty(min_heap* heap)
     return heap_min((const struct heap*)heap) == NULL;
 }
 
-static ux_event_t* event_pop_form_pipe(ux_loop_t *loop, ux_queue_category category)
+static ux_event_t* event_pop_form_pipe(ux_ctx_t *ctx, ux_queue_category category)
 {
-    UX_ASSERT(loop != NULL);
+    UX_ASSERT(ctx != NULL);
 
-    struct heap_node* node = heap_min((const struct heap*)&loop->queue_heap[category]);
+    struct heap_node* node = heap_min((const struct heap*)&ctx->queue_heap[category]);
 
     if (node == NULL)
         return NULL;
 
     ux_queue_t* q = container_of(node, ux_queue_t, heap_node);
 
-    heap_remove((struct heap*)&loop->queue_heap[category],
+    heap_remove((struct heap*)&ctx->queue_heap[category],
         (struct heap_node*)node,
         queue_less_than);
 
     ux_event_t* e = ux_queue_pop(q);
 
     if (!ux_queue_is_empty(q)) {
-        ux_loop_t *loop = q->loop;
-        q->start_id = loop->counter++;
-        heap_insert((struct heap*)&loop->queue_heap[category],
+        ux_ctx_t *ctx = q->ctx;
+        q->start_id = ctx->counter++;
+        heap_insert((struct heap*)&ctx->queue_heap[category],
             (struct heap_node*)node,
             queue_less_than);
     }
@@ -134,8 +134,8 @@ static ux_event_reminder_t* timer_heap_pop(min_heap* heap)
         timer_less_than);
 
     if (timer->repeat != 0) {
-        ux_loop_t *loop = timer->loop;
-        timer->start_id = loop->counter++;
+        ux_ctx_t *ctx = timer->ctx;
+        timer->start_id = ctx->counter++;
         timer->timeout = timer->timeout + timer->repeat;
         heap_insert((struct heap*)heap,
             (struct heap_node*)node,
@@ -144,9 +144,9 @@ static ux_event_reminder_t* timer_heap_pop(min_heap* heap)
     return timer;
 }
 
-static UX_INLINE int pipe_is_empty(ux_loop_t *loop, ux_queue_category category)
+static UX_INLINE int pipe_is_empty(ux_ctx_t *ctx, ux_queue_category category)
 {
-    return heap_is_empty(&loop->queue_heap[category]);
+    return heap_is_empty(&ctx->queue_heap[category]);
 }
 
 static void queue_heap_clear(min_heap* heap)
@@ -173,75 +173,75 @@ static void timer_heap_clear(min_heap* heap)
     }
 }
 
-static ux_event_t* bus_simualtion_dequeue(ux_loop_t *loop)
+static ux_event_t* bus_simualtion_dequeue(ux_ctx_t *ctx)
 {
 again:
     // market data
-    if (!pipe_is_empty(loop, UX_CATEGORY_MARKET) && loop->saved_event == NULL) {
-        ux_event_t* e = event_pop_form_pipe(loop, UX_CATEGORY_MARKET);
+    if (!pipe_is_empty(ctx, UX_CATEGORY_MARKET) && ctx->saved_event == NULL) {
+        ux_event_t* e = event_pop_form_pipe(ctx, UX_CATEGORY_MARKET);
 
         //if (e == NULL) goto next; // TODO
         UX_ASSERT(e != NULL);
 
         if (e->type == UX_EVENT_SIMULATOR_STOP) {
-            loop->is_simulator_stop = 1;
+            ctx->is_simulator_stop = 1;
             goto again;
         }
 
-        ux_time_t bus_time = bus_get_time(loop);
+        ux_time_t bus_time = bus_get_time(ctx);
         if (e->timestamp < bus_time) {
             if (e->type != UX_EVENT_QUEUE_CLOSED && e->type != UX_EVENT_QUEUE_OPENED) {
                 if (e->type != UX_EVENT_SIMULATOR_PROGRESS) {
-                    LOG_OUT_OF_ORDER(loop_time, e);
+                    LOG_OUT_OF_ORDER(ctx_time, e);
                     goto again;
                 }
             }
-            e->timestamp = bus_get_time(loop);
+            e->timestamp = bus_get_time(ctx);
         }
-        loop->saved_event = e;
+        ctx->saved_event = e;
     }
 
 next:
     // local clock timer
-    if (!heap_is_empty(&loop->timer_heap[UX_CLOCK_LOCAL])) {
-        if (loop->saved_event != NULL) {
-            ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&loop->timer_heap[UX_CLOCK_LOCAL]);
-            if (r->timeout <= loop->saved_event->timestamp) {
-                return (ux_event_t*)timer_heap_pop(&loop->timer_heap[UX_CLOCK_LOCAL]);
+    if (!heap_is_empty(&ctx->timer_heap[UX_CLOCK_LOCAL])) {
+        if (ctx->saved_event != NULL) {
+            ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&ctx->timer_heap[UX_CLOCK_LOCAL]);
+            if (r->timeout <= ctx->saved_event->timestamp) {
+                return (ux_event_t*)timer_heap_pop(&ctx->timer_heap[UX_CLOCK_LOCAL]);
             }
         }
     }
 
     // exchage clock timer
-    if (!heap_is_empty(&loop->timer_heap[UX_CLOCK_EXCHANGE])
-        && loop->saved_event != NULL && event_is_tick(loop->saved_event)) {
-        ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&loop->timer_heap[UX_CLOCK_EXCHANGE]);
-        if (r->timeout <= loop->saved_event->timestamp) {
-            return (ux_event_t*)timer_heap_pop(&loop->timer_heap[UX_CLOCK_EXCHANGE]);
+    if (!heap_is_empty(&ctx->timer_heap[UX_CLOCK_EXCHANGE])
+        && ctx->saved_event != NULL && event_is_tick(ctx->saved_event)) {
+        ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&ctx->timer_heap[UX_CLOCK_EXCHANGE]);
+        if (r->timeout <= ctx->saved_event->timestamp) {
+            return (ux_event_t*)timer_heap_pop(&ctx->timer_heap[UX_CLOCK_EXCHANGE]);
         }
     }
 
     // execution
-    if (!pipe_is_empty(loop, UX_CATEGORY_EXECUTION)) {
-        return event_pop_form_pipe(loop, UX_CATEGORY_EXECUTION);
+    if (!pipe_is_empty(ctx, UX_CATEGORY_EXECUTION)) {
+        return event_pop_form_pipe(ctx, UX_CATEGORY_EXECUTION);
     }
 
     // service
-    if (!pipe_is_empty(loop, UX_CATEGORY_SERVICE)) {
-        return event_pop_form_pipe(loop, UX_CATEGORY_SERVICE);
+    if (!pipe_is_empty(ctx, UX_CATEGORY_SERVICE)) {
+        return event_pop_form_pipe(ctx, UX_CATEGORY_SERVICE);
     }
 
     // command
-    if (!pipe_is_empty(loop, UX_CATEGORY_COMMAND)) {
-        return event_pop_form_pipe(loop, UX_CATEGORY_COMMAND);
+    if (!pipe_is_empty(ctx, UX_CATEGORY_COMMAND)) {
+        return event_pop_form_pipe(ctx, UX_CATEGORY_COMMAND);
     }
 
-    if (loop->saved_event) {
-        ux_event_t* e = loop->saved_event;
-        loop->saved_event = NULL;
-        for (int i = 0; i < loop->attached_count; i++) {
+    if (ctx->saved_event) {
+        ux_event_t* e = ctx->saved_event;
+        ctx->saved_event = NULL;
+        for (int i = 0; i < ctx->attached_count; i++) {
             if (e->type != UX_EVENT_QUEUE_OPENED && e->type != UX_EVENT_QUEUE_CLOSED) {
-                ux_queue_t* q = loop->attached[i];
+                ux_queue_t* q = ctx->attached[i];
                 ux_event_ref(e);
                 ux_queue_push(q, e);
             }
@@ -252,85 +252,85 @@ next:
     return NULL;
 }
 
-static ux_event_t* bus_realtime_dequeue(ux_loop_t *loop)
+static ux_event_t* bus_realtime_dequeue(ux_ctx_t *ctx)
 {
     // market data
-    if (!pipe_is_empty(loop, UX_CATEGORY_MARKET) && loop->saved_event == NULL) {
-        loop->saved_event = event_pop_form_pipe(loop, UX_CATEGORY_MARKET);
+    if (!pipe_is_empty(ctx, UX_CATEGORY_MARKET) && ctx->saved_event == NULL) {
+        ctx->saved_event = event_pop_form_pipe(ctx, UX_CATEGORY_MARKET);
     }
 
     // local clock timer
-    if (!heap_is_empty(&loop->timer_heap[UX_CLOCK_LOCAL])) {
-        ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&loop->timer_heap[UX_CLOCK_LOCAL]);
-        if (r->timeout <= bus_get_time(loop)) {
-            return (ux_event_t*)timer_heap_pop(&loop->timer_heap[UX_CLOCK_LOCAL]);
+    if (!heap_is_empty(&ctx->timer_heap[UX_CLOCK_LOCAL])) {
+        ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&ctx->timer_heap[UX_CLOCK_LOCAL]);
+        if (r->timeout <= bus_get_time(ctx)) {
+            return (ux_event_t*)timer_heap_pop(&ctx->timer_heap[UX_CLOCK_LOCAL]);
         }
     }
 
     // exchage clock timer
-    if (!heap_is_empty(&loop->timer_heap[UX_CLOCK_EXCHANGE]) && loop->saved_event != NULL
-        && event_is_tick(loop->saved_event)) {
-        ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&loop->timer_heap[UX_CLOCK_EXCHANGE]);
-        if (r->timeout <= loop->saved_event->timestamp) {
-            return (ux_event_t*)timer_heap_pop(&loop->timer_heap[UX_CLOCK_EXCHANGE]);
+    if (!heap_is_empty(&ctx->timer_heap[UX_CLOCK_EXCHANGE]) && ctx->saved_event != NULL
+        && event_is_tick(ctx->saved_event)) {
+        ux_event_reminder_t* r = (ux_event_reminder_t*)timer_heap_peek(&ctx->timer_heap[UX_CLOCK_EXCHANGE]);
+        if (r->timeout <= ctx->saved_event->timestamp) {
+            return (ux_event_t*)timer_heap_pop(&ctx->timer_heap[UX_CLOCK_EXCHANGE]);
         }
     }
 
     // execution
-    if (!pipe_is_empty(loop, UX_CATEGORY_EXECUTION)) {
-        return event_pop_form_pipe(loop, UX_CATEGORY_EXECUTION);
+    if (!pipe_is_empty(ctx, UX_CATEGORY_EXECUTION)) {
+        return event_pop_form_pipe(ctx, UX_CATEGORY_EXECUTION);
     }
 
     // command
-    if (!pipe_is_empty(loop, UX_CATEGORY_COMMAND)) {
-        return event_pop_form_pipe(loop, UX_CATEGORY_COMMAND);
+    if (!pipe_is_empty(ctx, UX_CATEGORY_COMMAND)) {
+        return event_pop_form_pipe(ctx, UX_CATEGORY_COMMAND);
     }
 
     // service
-    if (!pipe_is_empty(loop, UX_CATEGORY_SERVICE)) {
-        return event_pop_form_pipe(loop, UX_CATEGORY_SERVICE);
+    if (!pipe_is_empty(ctx, UX_CATEGORY_SERVICE)) {
+        return event_pop_form_pipe(ctx, UX_CATEGORY_SERVICE);
     }
 
-    if (loop->saved_event) {
-        ux_event_t* e = loop->saved_event;
-        loop->saved_event = NULL;
+    if (ctx->saved_event) {
+        ux_event_t* e = ctx->saved_event;
+        ctx->saved_event = NULL;
         return e;
     }
 
     return NULL;
 }
 
-static inline void bus_add_pending_queue(ux_loop_t *loop)
+static inline void bus_add_pending_queue(ux_ctx_t *ctx)
 {
     mpscq_node* node;
-    while ((node = mpscq_pop(&loop->pending_queue))) {
+    while ((node = mpscq_pop(&ctx->pending_queue))) {
         ux_queue_t* q = container_of(node, ux_queue_t, mpsc_node);
-        bus_add_queue(loop, q);
+        bus_add_queue(ctx, q);
     }
 }
 
-ux_event_t* bus_dequeue(ux_loop_t *loop)
+ux_event_t* bus_dequeue(ux_ctx_t *ctx)
 {
-    bus_add_pending_queue(loop);
-    if (loop->mode == UX_BUS_SIMULATION)
-        return bus_simualtion_dequeue(loop);
+    bus_add_pending_queue(ctx);
+    if (ctx->mode == UX_BUS_SIMULATION)
+        return bus_simualtion_dequeue(ctx);
     else
-        return bus_realtime_dequeue(loop);
+        return bus_realtime_dequeue(ctx);
 }
 
-ux_event_reminder_t* bus_timer_peek(ux_loop_t *loop, ux_clock_type type)
+ux_event_reminder_t* bus_timer_peek(ux_ctx_t *ctx, ux_clock_type type)
 {
     assert(type < UX_CLOCK_LAST);
-    return timer_heap_peek(&loop->timer_heap[type]);
+    return timer_heap_peek(&ctx->timer_heap[type]);
 }
 
-ux_event_reminder_t* bus_timer_dequeue(ux_loop_t *loop, ux_clock_type type)
+ux_event_reminder_t* bus_timer_dequeue(ux_ctx_t *ctx, ux_clock_type type)
 {
     assert(type < UX_CLOCK_LAST);
-    return timer_heap_pop(&loop->timer_heap[type]);
+    return timer_heap_pop(&ctx->timer_heap[type]);
 }
 
-void bus_attach(ux_loop_t* src, ux_loop_t* dst)
+void bus_attach(ux_ctx_t* src, ux_ctx_t* dst)
 {
     int num = src->attached_count++;
     src->attached[num] = ux_zalloc(sizeof(ux_queue_t));
@@ -340,12 +340,12 @@ void bus_attach(ux_loop_t* src, ux_loop_t* dst)
     }
 }
 
-void bus_detach(ux_loop_t* src, ux_loop_t* dst)
+void bus_detach(ux_ctx_t* src, ux_ctx_t* dst)
 {
     for (int i = 0; i < src->attached_count; i++) {
         ux_queue_t* q = src->attached[i];
         UX_ASSERT(q != NULL);
-        if (q->loop == dst) {
+        if (q->ctx == dst) {
             bus_remove_queue(dst, q); // todo: add test(remove q from heap when q not insert heap)
             for (int j = i; j < src->attached_count - 1; j++)
                 src->attached[j] = src->attached[j + 1];
@@ -354,154 +354,154 @@ void bus_detach(ux_loop_t* src, ux_loop_t* dst)
     }
 }
 
-void bus_add_queue(ux_loop_t *loop, ux_queue_t* q)
+void bus_add_queue(ux_ctx_t *ctx, ux_queue_t* q)
 {
-    UX_ASSERT(loop != NULL);
+    UX_ASSERT(ctx != NULL);
     UX_ASSERT(q != NULL);
 
-    UX_ASSERT(q->loop == loop || q->loop == NULL);
+    UX_ASSERT(q->ctx == ctx || q->ctx == NULL);
     UX_ASSERT(q->category >= 0 && q->category < UX_CATEGORY_LAST);
 
-    q->loop = loop;
-    q->start_id = loop->counter++;
+    q->ctx = ctx;
+    q->start_id = ctx->counter++;
 
     if (ux_queue_is_empty(q))
         return;
 
-    heap_insert((struct heap*)&loop->queue_heap[q->category],
+    heap_insert((struct heap*)&ctx->queue_heap[q->category],
         (struct heap_node*)&q->heap_node,
         queue_less_than);
 }
 
-void bus_remove_queue(ux_loop_t *loop, ux_queue_t* q)
+void bus_remove_queue(ux_ctx_t *ctx, ux_queue_t* q)
 {
-    UX_ASSERT(loop != NULL);
+    UX_ASSERT(ctx != NULL);
     UX_ASSERT(q != NULL);
 
-    heap_remove((struct heap*)&loop->queue_heap[q->category],
+    heap_remove((struct heap*)&ctx->queue_heap[q->category],
         (struct heap_node*)&q->heap_node,
         queue_less_than);
 }
 
-void bus_add_timer(ux_loop_t *loop, ux_event_reminder_t* timer)
+void bus_add_timer(ux_ctx_t *ctx, ux_event_reminder_t* timer)
 {
-    UX_ASSERT(loop != NULL);
+    UX_ASSERT(ctx != NULL);
     UX_ASSERT(timer != NULL);
 
-    timer->loop = loop;
-    timer->start_id = loop->counter++;
-    heap_insert((struct heap*)&loop->timer_heap[timer->clock_type],
+    timer->ctx = ctx;
+    timer->start_id = ctx->counter++;
+    heap_insert((struct heap*)&ctx->timer_heap[timer->clock_type],
         (struct heap_node*)&timer->heap_node,
         timer_less_than);
 }
 
-void bus_remove_timer(ux_loop_t *loop, ux_event_reminder_t* timer)
+void bus_remove_timer(ux_ctx_t *ctx, ux_event_reminder_t* timer)
 {
-    UX_ASSERT(loop != NULL);
+    UX_ASSERT(ctx != NULL);
     UX_ASSERT(timer != NULL);
 
-    heap_remove((struct heap*)&loop->timer_heap[timer->clock_type],
+    heap_remove((struct heap*)&ctx->timer_heap[timer->clock_type],
         (struct heap_node*)&timer->heap_node,
         timer_less_than);
 }
 
-ux_time_t bus_get_time(ux_loop_t *loop)
+ux_time_t bus_get_time(ux_ctx_t *ctx)
 {
-    UX_ASSERT(loop != NULL);
+    UX_ASSERT(ctx != NULL);
 
-    if (loop->mode == UX_BUS_SIMULATION)
-        return loop->time[UX_CLOCK_LOCAL];
+    if (ctx->mode == UX_BUS_SIMULATION)
+        return ctx->time[UX_CLOCK_LOCAL];
     else
         return ux_time_now();
 }
 
-int bus_set_time(ux_loop_t *loop, ux_time_t time)
+int bus_set_time(ux_ctx_t *ctx, ux_time_t time)
 {
-    UX_ASSERT(loop != NULL);
+    UX_ASSERT(ctx != NULL);
 
-    if (loop->mode == UX_BUS_REALTIME)
+    if (ctx->mode == UX_BUS_REALTIME)
         return -1;
 
-    if (time < loop->time[UX_CLOCK_LOCAL]) {
+    if (time < ctx->time[UX_CLOCK_LOCAL]) {
         return -1;
     }
-    loop->time[UX_CLOCK_LOCAL] = time;
+    ctx->time[UX_CLOCK_LOCAL] = time;
     return 0;
 }
 
-ux_time_t bus_get_exchange_time(ux_loop_t *loop)
+ux_time_t bus_get_exchange_time(ux_ctx_t *ctx)
 {
-    UX_ASSERT(loop != NULL);
+    UX_ASSERT(ctx != NULL);
 
-    return loop->time[UX_CLOCK_EXCHANGE];
+    return ctx->time[UX_CLOCK_EXCHANGE];
 }
 
-int bus_set_exchange_time(ux_loop_t *loop, ux_time_t time)
+int bus_set_exchange_time(ux_ctx_t *ctx, ux_time_t time)
 {
-    UX_ASSERT(loop != NULL);
+    UX_ASSERT(ctx != NULL);
 
-    if (time < loop->time[UX_CLOCK_EXCHANGE]) {
+    if (time < ctx->time[UX_CLOCK_EXCHANGE]) {
         return -1;
     }
-    loop->time[UX_CLOCK_EXCHANGE] = time;
+    ctx->time[UX_CLOCK_EXCHANGE] = time;
     return 0;
 }
 
-void ux_loop_init(ux_loop_t *loop)
+void ux_ctx_init(ux_ctx_t *ctx)
 {
-    uv_mutex_init(&loop->wait_mutex);
-    uv_cond_init(&loop->wait_cond);
-    loop->stop_flag = 0;
-    mpscq_init(&loop->async_queue);
+    uv_mutex_init(&ctx->wait_mutex);
+    uv_cond_init(&ctx->wait_cond);
+    ctx->stop_flag = 0;
+    mpscq_init(&ctx->async_queue);
 
     /* bus init */
-    loop->mode = UX_BUS_SIMULATION;
+    ctx->mode = UX_BUS_SIMULATION;
 
-    mpscq_init(&loop->pending_queue);
+    mpscq_init(&ctx->pending_queue);
     for (int i = 0; i < UX_CATEGORY_LAST; i++)
-        heap_init((struct heap*)&loop->queue_heap[i]);
+        heap_init((struct heap*)&ctx->queue_heap[i]);
 
-    heap_init((struct heap*)&loop->timer_heap[UX_CLOCK_LOCAL]);
-    heap_init((struct heap*)&loop->timer_heap[UX_CLOCK_EXCHANGE]);
+    heap_init((struct heap*)&ctx->timer_heap[UX_CLOCK_LOCAL]);
+    heap_init((struct heap*)&ctx->timer_heap[UX_CLOCK_EXCHANGE]);
 
-    loop->time[UX_CLOCK_LOCAL] = MIN_DATE_TIME;
-    loop->time[UX_CLOCK_EXCHANGE] = MIN_DATE_TIME;
+    ctx->time[UX_CLOCK_LOCAL] = MIN_DATE_TIME;
+    ctx->time[UX_CLOCK_EXCHANGE] = MIN_DATE_TIME;
 
-    loop->counter = 1;
-    loop->saved_event = NULL;
-    loop->is_simulator_stop = 0;
+    ctx->counter = 1;
+    ctx->saved_event = NULL;
+    ctx->is_simulator_stop = 0;
 
-    memset(&loop->attached, '\0', sizeof(loop->attached));
-    loop->attached_count = 0;
+    memset(&ctx->attached, '\0', sizeof(ctx->attached));
+    ctx->attached_count = 0;
 
-    loop->event_count = 0;
+    ctx->event_count = 0;
 }
 
-void ux_loop_destory(ux_loop_t *loop)
+void ux_ctx_destory(ux_ctx_t *ctx)
 {
-    uv_cond_destroy(&loop->wait_cond);
-    uv_mutex_destroy(&loop->wait_mutex);
-    ux_loop_clear(loop);
+    uv_cond_destroy(&ctx->wait_cond);
+    uv_mutex_destroy(&ctx->wait_mutex);
+    ux_ctx_clear(ctx);
 }
 
 
-void ux_loop_clear(ux_loop_t *loop)
+void ux_ctx_clear(ux_ctx_t *ctx)
 {
-    if (loop->saved_event != NULL) {
-        ux_event_unref(loop->saved_event);
-        loop->saved_event = NULL;
+    if (ctx->saved_event != NULL) {
+        ux_event_unref(ctx->saved_event);
+        ctx->saved_event = NULL;
     }
 
     for (int i = 0; i < UX_CATEGORY_LAST; i++)
-        queue_heap_clear(&loop->queue_heap[i]);
+        queue_heap_clear(&ctx->queue_heap[i]);
 
     for (int i = 0; i < UX_CLOCK_LAST; i++)
-        timer_heap_clear(&loop->timer_heap[i]);
+        timer_heap_clear(&ctx->timer_heap[i]);
 
-    for (int i = 0; i < loop->attached_count; i++) {
-        ux_queue_t* q = loop->attached[i];
-        bus_detach(loop, q->loop);
+    for (int i = 0; i < ctx->attached_count; i++) {
+        ux_queue_t* q = ctx->attached[i];
+        bus_detach(ctx, q->ctx);
         ux_queue_destory(q);
     }
-    loop->attached_count = 0;
+    ctx->attached_count = 0;
 }

@@ -92,7 +92,7 @@ struct ux_event_reminder_s {
     ux_time_t timeout;
     uint64_t repeat;
     /*private*/
-    void *loop;
+    void *ctx;
     void* heap_node[3];
     uint64_t start_id;
 };

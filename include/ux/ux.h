@@ -55,10 +55,10 @@ typedef struct ux_queue_s ux_queue_t;
 UX_EXTERN ux_queue_t* ux_queue_new(unsigned int size, ux_queue_category category);
 UX_EXTERN int ux_queue_push(ux_queue_t *q, void *e);
 
-/* loop module */
-typedef struct ux_loop_s ux_loop_t;
+/* context module */
+typedef struct ux_ctx_s ux_ctx_t;
 typedef struct ux_async_s ux_async_t;
-typedef void (*ux_async_cb)(ux_loop_t *loop, void *data);
+typedef void (*ux_async_cb)(ux_ctx_t *ctx, void *data);
 
 struct ux_async_s {
     ux_async_cb async_cb;
@@ -79,11 +79,11 @@ typedef enum {
     UX_RUN_NOWAIT
 }ux_run_mode;
 
-UX_EXTERN ux_loop_t* ux_loop_new(void);
-UX_EXTERN void ux_loop_free(ux_loop_t *loop);
-UX_EXTERN void ux_run(ux_loop_t*loop, ux_run_mode mode);
-UX_EXTERN void ux_stop(ux_loop_t *loop);
-UX_EXTERN void ux_wakeup(ux_loop_t* loop); 
+UX_EXTERN ux_ctx_t* ux_ctx_new(void);
+UX_EXTERN void ux_ctx_free(ux_ctx_t *ctx);
+UX_EXTERN void ux_run(ux_ctx_t *ctx, ux_run_mode mode);
+UX_EXTERN void ux_stop(ux_ctx_t *ctx);
+UX_EXTERN void ux_wakeup(ux_ctx_t *ctx);
 
 /* instrument module */
 typedef enum {
@@ -182,6 +182,7 @@ typedef struct ux_order_s {
     void* commands[2]; // list
     void* reports[2]; // list
     //void* messages[2]; // list
+    void* queue_node[2]; // for instrument manager
 } ux_order_t;
 
 UX_EXTERN void ux_order_init(ux_order_t *order);
@@ -324,14 +325,14 @@ typedef struct ux_execution_simulator_s ux_execution_simulator_t;
     void* bar_filters[2]; \
     ux_commission_provider_t *commission_provider; \
     ux_slippage_provider_t   *slippage_provider; \
-    void (*on_bid)(ux_event_bid_t *bid); \
-    void (*on_ask)(ux_event_bid_t *ask);  \
-    void (*on_trade)(ux_event_trade_t *trade); \
-    void (*on_level2_snapshot)(ux_event_l2snapshot_t *snapshot); \
-    void (*on_level2_update)(ux_event_l2update_t *update); \
-    void (*on_bar_open)(ux_event_bar_t *bar); \
-    void (*on_bar)(ux_event_bar_t *bar); \
-    void (*clear)(void);
+    void (*on_bid)(ux_execution_simulator_t*simulator, ux_event_bid_t *bid); \
+    void (*on_ask)(ux_execution_simulator_t*simulator, ux_event_bid_t *ask);  \
+    void (*on_trade)(ux_execution_simulator_t*simulator, ux_event_trade_t *trade); \
+    void (*on_level2_snapshot)(ux_execution_simulator_t*simulator, ux_event_l2snapshot_t *snapshot); \
+    void (*on_level2_update)(ux_execution_simulator_t*simulator, ux_event_l2update_t *update); \
+    void (*on_bar_open)(ux_execution_simulator_t*simulator, ux_event_bar_t *bar); \
+    void (*on_bar)(ux_execution_simulator_t*simulator, ux_event_bar_t *bar); \
+    void (*clear)(ux_execution_simulator_t*simulator);
 
 struct ux_execution_simulator_s {
     UX_EXECUTION_SIMULATOR_PUBLIC_FIELDS
@@ -391,23 +392,24 @@ typedef enum {
     UX_ACCOUNT_DATA_TYPE_ORDER
 }ux_accout_data_type;
 
-#define PREDEFINE_ACCOUNT_FIELDS(_) \
-    _(SYMBOL,    "Symbol") \
-    _(EXCHANGE,   "Exchange") \
-    _(SECURITY_TYPE, "SecurityType") \
-    _(CURRENCY, "Currency") \
-    _(MATURITY, "Maturity") \
-    _(PUT_OR_CALL, "PutOrCall") \
-    _(STRIKE, "Strike") \
-    _(QTY, "Qty") \
-    _(LONG_QTY, "LongQty") \
-    _(SHORT_QTY, "ShortQty") \
-    _(ORDER_ID, "OrderID") \
-    _(ORDER_TYPE, "OrderType") \
-    _(ORDER_SIDE, "OrderSide") \
-    _(ORDER_STATUS, "OrderStatus") \
-    _(PRICE, "Price") \
-    _(STOP_PX, "StopPx")
+#define PREDEFINE_ACCOUNT_FIELDS(_)    \
+    /* CONSTANTS       | NAME */       \
+    _(SYMBOL,         "Symbol")        \
+    _(EXCHANGE,       "Exchange")      \
+    _(SECURITY_TYPE,  "SecurityType")  \
+    _(CURRENCY,       "Currency")      \
+    _(MATURITY,       "Maturity")      \
+    _(PUT_OR_CALL,    "PutOrCall")     \
+    _(STRIKE,         "Strike")        \
+    _(QTY,            "Qty")           \
+    _(LONG_QTY,       "LongQty")       \
+    _(SHORT_QTY,      "ShortQty")      \
+    _(ORDER_ID,       "OrderID")       \
+    _(ORDER_TYPE,     "OrderType")     \
+    _(ORDER_SIDE,     "OrderSide")     \
+    _(ORDER_STATUS,   "OrderStatus")   \
+    _(PRICE,          "Price")         \
+    _(STOP_PX,        "StopPx")
 
 typedef struct account_field_item_s {
     char *name;
@@ -679,6 +681,34 @@ struct ux_strategy_s {
     void* subscritions[2];
 };
 
+/* barfactory */
+typedef struct ux_barfactory_s ux_barfactory_t;
+typedef struct ux_barfactory_item_s ux_barfactory_item_t;
+typedef void (*ux_on_tick_cb)(ux_barfactory_item_t *item, ux_event_tick_t *tick);
+
+#define UX_BAR_ITEM_PUBLIC_FIELDS \
+    /* private */ \
+    void* queue_node[2];   \
+    /* read only */ \
+    ux_barfactory_t* factory;   \
+    ux_instrument_t* instrument;    \
+    ux_bar_input bar_input; \
+    ux_on_tick_cb on_tick;  \
+    ux_event_bar_t *bar;
+
+
+#define UX_BAR_ITEM_COMMON_FILEDS \
+    int provider_id;    \
+    ux_bar_type bar_type;   \
+    long bar_size;  \
+    int session_enabled;    \
+    ux_timespan_t session1; \
+    ux_timespan_t session2;
+
+
+struct ux_barfactory_item_s {
+    UX_BAR_ITEM_PUBLIC_FIELDS
+};
 #ifdef __cplusplus
 }
 #endif

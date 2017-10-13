@@ -1,18 +1,11 @@
-/******************************************************************************
- * Quantitative Kit Library                                                   *
- *                                                                            *
- * Copyright (C) 2017 Xiaojun Gao                                             *
- *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
- ******************************************************************************/
-
-#include "ux_internal.h"
+#include "../core/ux_macro.h"
 #include "queue.h"
+#include "time_bar.h"
 
-static UX_AINLINE ux_loop_t* get_loop(ux_barfactory_t* factory)
+static UX_AINLINE ux_ctx_t* get_ctx(ux_barfactory_t* factory)
 {
     UX_ASSERT(factory != NULL);
-    return container_of(factory, ux_loop_t, bar_factory);
+    return container_of(factory, ux_ctx_t, bar_factory);
 }
 
 static void time_bar_on_reminder(ux_event_reminder_t* r)
@@ -22,7 +15,7 @@ static void time_bar_on_reminder(ux_event_reminder_t* r)
     if (item->clock_type == UX_CLOCK_LOCAL)
         item->bar->timestamp = r->timeout;
     else
-        item->bar->timestamp = bus_get_exchange_time(get_loop(item->factory));
+        item->bar->timestamp = bus_get_exchange_time(get_ctx(item->factory));
 
     ux_barfactory_emit_bar(item->factory, (ux_barfactory_item_t*)item);
 }

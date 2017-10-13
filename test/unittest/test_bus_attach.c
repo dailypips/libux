@@ -40,7 +40,7 @@ static ux_event_t* tick_init(ux_event_t* e, int provider, int instrument, ux_tim
 
 static int test_attach(ux_bus_mode mode)
 {
-    ux_loop_t loop1, loop2;
+    ux_ctx_t ctx1, ctx2;
 
     ux_queue_t queue[QUEUE_SIZE];
     ux_event_t* event[EVENT_SIZE];
@@ -49,10 +49,10 @@ static int test_attach(ux_bus_mode mode)
         ux_queue_init(&queue[i], 10000, UX_CATEGORY_MARKET);
     }
 
-    ux_loop_init(&loop1);
-    ux_loop_init(&loop2);
-    loop1.mode = mode;
-    loop2.mode = mode;
+    ux_ctx_init(&ctx1);
+    ux_ctx_init(&ctx2);
+    ctx1.mode = mode;
+    ctx2.mode = mode;
 
     /* prepare event */
     for (int i = 0; i < EVENT_SIZE; i++) {
@@ -76,19 +76,19 @@ static int test_attach(ux_bus_mode mode)
         ((ux_event_tick_t*)event[i])->provider = 2;
     }
 
-    bus_add_queue(&loop1, &queue[0]);
-    bus_add_queue(&loop1, &queue[1]);
-    bus_add_queue(&loop1, &queue[2]);
+    bus_add_queue(&ctx1, &queue[0]);
+    bus_add_queue(&ctx1, &queue[1]);
+    bus_add_queue(&ctx1, &queue[2]);
 
 
-    bus_attach(&loop1, &loop2);
+    bus_attach(&ctx1, &ctx2);
 
     /* test event order */
     ux_event_t* e1, *e2;
     int j = 0;
 
-    while ((e1 = bus_dequeue(&loop1)) != NULL) {
-        e2 = bus_dequeue(&loop2);
+    while ((e1 = bus_dequeue(&ctx1)) != NULL) {
+        e2 = bus_dequeue(&ctx2);
         ASSERT_THEN(e1 == e2,
             fprintf(stderr, "index:%d e1: %p, e2:%p\n", j, e1, e2);
        );
@@ -104,9 +104,9 @@ static int test_attach(ux_bus_mode mode)
     }
 
     /* clear bus*/
-    bus_detach(&loop1, &loop2);
-    ux_loop_destory(&loop1);
-    ux_loop_destory(&loop2);
+    bus_detach(&ctx1, &ctx2);
+    ux_ctx_destory(&ctx1);
+    ux_ctx_destory(&ctx2);
     return 0;
 }
 

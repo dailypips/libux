@@ -32,7 +32,6 @@ set(UX_CORE_SRC
         ux_instrument.c
         ux_order.c
         ux_barfactory.c
-        ux_barfactory_items.c
         ux_data_manager.c
         ux_plugin.c
 )
