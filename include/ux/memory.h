@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#include <ux/ux_common.h>
+#include <ux/common.h>
 
 /* memory module */
 typedef void* (*ux_malloc_func)(size_t size);

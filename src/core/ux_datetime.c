@@ -11,7 +11,7 @@
 #include <assert.h>
 #include <sys/time.h>
 #include <time.h>
-#include "ux_internal.h"
+#include <ux/datetime.h>
 
 static const int days_preceding_month[2][13] = {
     { 0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 },

@@ -8,6 +8,7 @@
 
 #include "ux_internal.h"
 #include "queue.h"
+#include "uthash.h"
 
 static void instrument_free(ux_instrument_t *instrument)
 {
@@ -63,4 +64,23 @@ void ux_instrument_unref(ux_instrument_t *instrument)
     if(ux_atomic_full_fetch_add(&instrument->refcount, -1) == 1) {
         instrument_free(instrument);
     }
+}
+
+/* instrument manager */
+ux_instrument_t *ux_get_instrument_by_id(ux_ctx_t *ctx, int id)
+{
+    instrument_hash_node_t *node;
+    HASH_FIND_INT(ctx->instrument_by_id, &id, node);
+    if (!node)
+        return NULL;
+    return node->instrument;
+}
+
+ux_instrument_t *ux_get_instrument_by_symbol(ux_ctx_t *ctx, const char *symbol)
+{
+    instrument_hash_node_t *node;
+    HASH_FIND_STR(ctx->instrument_by_symbol, symbol, node);
+    if (!node)
+        return NULL;
+    return node->instrument;
 }

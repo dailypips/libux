@@ -2,22 +2,29 @@
 #include "queue.h"
 #include "time_bar.h"
 
-static UX_AINLINE ux_ctx_t* get_ctx(ux_barfactory_t* factory)
+static void emit_bar_open(ux_ctx_t *ctx, ux_barfactory_item_t* item)
 {
-    UX_ASSERT(factory != NULL);
-    return container_of(factory, ux_ctx_t, bar_factory);
+    item->bar->status = UX_BAR_STATUS_OPEN;
+    ux_dispatch_event(ctx, (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
 }
 
-static void time_bar_on_reminder(ux_event_reminder_t* r)
+static void emit_bar(ux_ctx_t *ctx, ux_barfactory_item_t* item)
+{
+    item->bar->status = UX_BAR_STATUS_CLOSE;
+    ux_dispatch_event(ctx, (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
+    item->bar = NULL;
+}
+
+static void time_bar_on_reminder(uxe_reminder_t* r)
 {
     time_bar_item_t* item = (time_bar_item_t*)(r->user_data);
 
     if (item->clock_type == UX_CLOCK_LOCAL)
         item->bar->timestamp = r->timeout;
     else
-        item->bar->timestamp = bus_get_exchange_time(get_ctx(item->factory));
+        item->bar->timestamp = bus_get_exchange_time(item->ctx);
 
-    ux_barfactory_emit_bar(item->factory, (ux_barfactory_item_t*)item);
+    emit_bar(item->ctx, (ux_barfactory_item_t*)item);
 }
 
 static ux_time_t round_start_time(time_bar_item_t* item, ux_event_tick_t* tick)
@@ -29,7 +36,7 @@ static ux_time_t round_start_time(time_bar_item_t* item, ux_event_tick_t* tick)
 
 static void time_bar_on_tick(ux_barfactory_item_t* node, ux_event_tick_t* tick)
 {
-    ux_event_bar_t* bar;
+    uxe_bar_t* bar;
     time_bar_item_t* item = (time_bar_item_t*)node;
 
     if (item->bar) {
@@ -55,10 +62,10 @@ static void time_bar_on_tick(ux_barfactory_item_t* node, ux_event_tick_t* tick)
             bar->low = tick->price;
             bar->close = tick->price;
             bar->volume = tick->size;
-            ux_barfactory_emit_bar_open(item->factory, (ux_barfactory_item_t*)item);
+            emit_bar_open(item->ctx, (ux_barfactory_item_t*)item);
         }
     } else {
-        bar = (ux_event_bar_t*)ux_event_malloc(UX_EVENT_BAR);
+        bar = (uxe_bar_t*)uxe_malloc(UXE_BAR);
         item->bar = bar;
         bar->provider = tick->provider;
         bar->instrument = tick->instrument;
@@ -73,18 +80,18 @@ static void time_bar_on_tick(ux_barfactory_item_t* node, ux_event_tick_t* tick)
             bar->low = tick->price;
             bar->close = tick->price;
             bar->volume = tick->size;
-            ux_barfactory_emit_bar_open(item->factory, (ux_barfactory_item_t*)item);
+            emit_bar_open(item->ctx, (ux_barfactory_item_t*)item);
         } else {
             item->start_time = round_start_time(item, tick);
 
-            ux_event_reminder_t* r = (ux_event_reminder_t*)ux_event_malloc(UX_EVENT_REMINDER);
+            uxe_reminder_t* r = (uxe_reminder_t*)uxe_malloc(UXE_REMINDER);
             r->clock_type = item->clock_type;
             r->repeat = item->bar_size * TICKS_PER_SECOND;
             r->timeout = item->start_time + r->repeat;
             r->callback = time_bar_on_reminder;
             r->user_data = item;
 
-            ux_barfactory_add_reminder(item->factory, r);
+            ux_barfactory_add_reminder(item->ctx, r);
         }
     }
     if (UX_LIKELY(item->started))

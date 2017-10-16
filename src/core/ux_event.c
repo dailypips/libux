@@ -7,49 +7,54 @@
  ******************************************************************************/
 
 #include "ux_internal.h"
+#include <ux/datetime.h>
+#include <ux/memory.h>
+#include <ux/event.h>
 
+
+extern uxe_class_vtable_t g_event_vtable[UXE_LAST];
 /* public api */
-size_t ux_event_size(ux_event_type type)
+size_t ux_event_size(uxe_type type)
 {
-    return g_eventclassinfo[type].size;
+    return g_event_vtable[type].size;
 }
 
 static void event_free(ux_event_t *e)
 {
-    event_destory destory = g_eventclassinfo[e->type].destory;
+    event_destory destory = g_event_vtable[e->type].destory;
     if (destory)
         destory(e);
     ux_free(e);
 }
 
-ux_event_t *ux_event_clone(ux_event_t *e)
+ux_event_t *uxe_clone(ux_event_t *e)
 {
     ux_event_t *result;
-    event_clone clone = g_eventclassinfo[e->type].clone;
+    event_clone clone = g_event_vtable[e->type].clone;
     if(clone)
         result = clone(e);
 
     return result;
 }
 
-ux_event_t *ux_event_ref(ux_event_t *event)
+ux_event_t *uxe_ref(ux_event_t *event)
 {
   UX_ASSERT(event != NULL);
   ux_atomic_full_fetch_add(&event->refcount, 1);
   return event;
 }
 
-void ux_event_unref(ux_event_t *event)
+void uxe_unref(ux_event_t *event)
 {
    UX_ASSERT(event != NULL);
    if(ux_atomic_full_fetch_add(&event->refcount, -1) == 1)
        event_free(event);
 }
 
-ux_event_t* ux_event_malloc(ux_event_type type)
+ux_event_t* uxe_malloc(uxe_type type)
 {
-    UX_ASSERT(type < UX_EVENT_LAST);
-    ux_event_t* e = ux_zalloc(g_eventclassinfo[type].size);
+    UX_ASSERT(type < UXE_LAST);
+    ux_event_t* e = ux_zalloc(g_event_vtable[type].size);
     if (e) {
         e->type = type;
         ux_atomic_rel_store(&e->refcount, 1);

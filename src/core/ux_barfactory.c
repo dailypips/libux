@@ -9,54 +9,48 @@
 #include "queue.h"
 #include "ux_internal.h"
 
-void ux_barfactory_init(ux_barfactory_t* factory)
+void ux_barfactory_init(ux_ctx_t *ctx)
 {
-    factory->list_by_instrument_id = NULL;
+    ctx->barfactory_item_list_by_instrument_id = NULL;
 }
 
-void ux_barfactory_destory(ux_barfactory_t* factory)
+void ux_barfactory_destory(ux_ctx_t *ctx)
 {
 }
 
-void ux_barfactory_add_item(ux_barfactory_t* factory, ux_barfactory_item_t* item)
+void ux_barfactory_add_item(ux_ctx_t *ctx, ux_barfactory_item_t* item)
 {
-    item_list_t* list;
+    barfactory_item_list_t* list;
     int instrument_id = item->instrument->id;
 
-    HASH_FIND_INT(factory->list_by_instrument_id, &instrument_id, list);
+    HASH_FIND_INT(ctx->barfactory_item_list_by_instrument_id, &instrument_id, list);
     if (list == NULL) {
-        list = ux_zalloc(sizeof(item_list_t));
+        list = ux_zalloc(sizeof(barfactory_item_list_t));
         QUEUE_INIT(&list->queue);
         list->instrument_id = instrument_id;
-        HASH_ADD_INT(factory->list_by_instrument_id, instrument_id, list);
+        HASH_ADD_INT(ctx->barfactory_item_list_by_instrument_id, instrument_id, list);
     }
-    item->factory = factory;
+    item->ctx = ctx;
     QUEUE_INIT(&item->queue_node);
     QUEUE_INSERT_TAIL(&list->queue, &item->queue_node);
 }
 
-void ux_barfactory_remove_item(ux_barfactory_t* factory, ux_barfactory_item_t* item)
+void ux_barfactory_remove_item(ux_ctx_t *ctx, ux_barfactory_item_t* item)
 {
-    UX_UNUSED(factory);
+    UX_UNUSED(ctx);
     QUEUE_REMOVE(&item->queue_node);
-    item->factory = NULL;
+    item->ctx = NULL;
 }
 
-static UX_AINLINE ux_ctx_t* get_ctx(ux_barfactory_t* factory)
+void ux_barfactory_add_reminder(ux_ctx_t *ctx, uxe_reminder_t* reminder)
 {
-    UX_ASSERT(factory != NULL);
-    return container_of(factory, ux_ctx_t, bar_factory);
-}
-
-void ux_barfactory_add_reminder(ux_barfactory_t* factory, ux_event_reminder_t* reminder)
-{
-    bus_add_timer(get_ctx(factory), reminder);
+    bus_add_timer(ctx, reminder);
 }
 
 static ux_event_tick_t* event_tick_new(ux_event_tick_t* e, ux_event_tick_t* n)
 {
     //TODO: BID ?? TICK?? ASK??
-    ux_event_tick_t* tick = (ux_event_tick_t*)ux_event_malloc(UX_EVENT_BID);
+    ux_event_tick_t* tick = (ux_event_tick_t*)uxe_malloc(UXE_BID);
     tick->timestamp = e->timestamp;
     tick->instrument = e->instrument;
     tick->provider = e->provider;
@@ -65,18 +59,17 @@ static ux_event_tick_t* event_tick_new(ux_event_tick_t* e, ux_event_tick_t* n)
     return tick;
 }
 
-void bar_factory_process_tick(ux_barfactory_t* factory, ux_event_tick_t* e)
+void bar_factory_process_tick(ux_ctx_t *ctx, ux_event_tick_t* e)
 {
     // find item_list by instrument_id
     // 在item_list上迭代，根据input类型
     // bar_factory_item_process_tick(item, e);
-    item_list_t* list;
+    barfactory_item_list_t* list;
     QUEUE* q;
     ux_event_tick_t* tick;
-    ux_ctx_t *ctx = get_ctx(factory);
 
     int key = e->instrument;
-    HASH_FIND_INT((item_list_t*)factory->list_by_instrument_id, &key, list);
+    HASH_FIND_INT((barfactory_item_list_t*)ctx->barfactory_item_list_by_instrument_id, &key, list);
     if (!list)
         return;
 
@@ -87,35 +80,35 @@ void bar_factory_process_tick(ux_barfactory_t* factory, ux_event_tick_t* e)
         switch (item->bar_input) {
 
         case UX_BAR_INPUT_TRADE:
-            if (e->type == UX_EVENT_TRADE)
+            if (e->type == UXE_TRADE)
                 item->on_tick(item, e);
             break;
 
         case UX_BAR_INPUT_BID:
-            if (e->type == UX_EVENT_BID)
+            if (e->type == UXE_BID)
                 item->on_tick(item, e);
             break;
 
         case UX_BAR_INPUT_ASK:
-            if (e->type == UX_EVENT_ASK)
+            if (e->type == UXE_ASK)
                 item->on_tick(item, e);
             break;
 
         case UX_BAR_INPUT_MIDDLE:
             tick = NULL;
-            if (e->type == UX_EVENT_TRADE)
+            if (e->type == UXE_TRADE)
                 break;
 
-            if (e->type == UX_EVENT_BID) {
-                ux_event_ask_t* ask = data_manager_get_ask(&ctx->data_manager, e->instrument);
+            if (e->type == UXE_BID) {
+                uxe_ask_t* ask = data_manager_get_ask(ctx, e->instrument);
                 if (ask)
-                    tick = event_tick_new(e, ask);
+                    tick = event_tick_new(e, (ux_event_tick_t*)ask);
             }
 
-            if (e->type == UX_EVENT_ASK) {
-                ux_event_bid_t* bid = data_manager_get_bid(&ctx->data_manager, e->instrument);
+            if (e->type == UXE_ASK) {
+                uxe_bid_t* bid = data_manager_get_bid(ctx, e->instrument);
                 if (bid)
-                    tick = event_tick_new(e, bid);
+                    tick = event_tick_new(e, (ux_event_tick_t*)bid);
             }
 
             item->on_tick(item, e);
@@ -124,22 +117,22 @@ void bar_factory_process_tick(ux_barfactory_t* factory, ux_event_tick_t* e)
             item->on_tick(item, e);
             break;
         case UX_BAR_INPUT_BIDASK:
-            if (e->type != UX_EVENT_TRADE)
+            if (e->type != UXE_TRADE)
                 item->on_tick(item, e);
             break;
         }
     }
 }
 
-void ux_barfactory_emit_bar_open(ux_barfactory_t* factory, ux_barfactory_item_t* item)
+void ux_barfactory_emit_bar_open(ux_ctx_t *ctx, ux_barfactory_item_t* item)
 {
     item->bar->status = UX_BAR_STATUS_OPEN;
-    ux_dispatch_event(get_ctx(factory), (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
+    ux_dispatch_event(ctx, (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
 }
 
-void ux_barfactory_emit_bar(ux_barfactory_t* factory, ux_barfactory_item_t* item)
+void ux_barfactory_emit_bar(ux_ctx_t *ctx, ux_barfactory_item_t* item)
 {
     item->bar->status = UX_BAR_STATUS_CLOSE;
-    ux_dispatch_event(get_ctx(factory), (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
+    ux_dispatch_event(ctx, (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
     item->bar = NULL;
 }

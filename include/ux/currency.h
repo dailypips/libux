@@ -12,10 +12,10 @@
 extern "C" {
 #endif
 
-#include <ux/ux_common.h>
+#include <ux/common.h>
 
 /* currency module */
-typedef uint16_t ux_currency_t;
+//typedef uint16_t ux_currency_t;
 
 /* iso 4217 */
 #define CURRENCY_DEF(_) \
@@ -204,7 +204,7 @@ typedef uint16_t ux_currency_t;
 //#define ISO4217_CURRENCY_LAST 1024
 
 typedef enum {
-#define CURRENTENUM(name, code) UX_CURRENCY_##name,
+#define CURRENTENUM(name, code) UX_CURRENCY_##name = code,
 CURRENCY_DEF(CURRENTENUM)
 #undef CURRENTENUM
     ISO4217_CURRENCY_LAST = 1024

@@ -41,9 +41,6 @@ extern "C" {
 # include <stdint.h>
 #endif
 
-/* atomic module */
-typedef intptr_t ux_atomic_t;
-
 #ifdef __cplusplus
 }
 #endif

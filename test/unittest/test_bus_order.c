@@ -42,7 +42,7 @@ static ux_time_t all_time[EVENT_SIZE + TIMER_SIZE] = {
     28, 24, 8, 10, 30, // last is timer
     34, 19, 11, 33, 25, 39, 4, 30
 };
-static void on_reminder(ux_event_reminder_t *r)
+static void on_reminder(uxe_reminder_t *r)
 {
     UX_UNUSED(r);
 }
@@ -58,7 +58,7 @@ static ux_event_t* tick_init(ux_event_t* e, int provider, int instrument, ux_tim
     return e;
 }
 
-static void timer_init(ux_event_reminder_t* e, ux_clock_type ctype, ux_time_t timeout)
+static void timer_init(uxe_reminder_t* e, ux_clock_type ctype, ux_time_t timeout)
 {
     e->clock_type = ctype;
     e->callback = on_reminder;
@@ -75,7 +75,7 @@ static int test_event_order(ux_bus_mode mode)
     ux_queue_t queue[QUEUE_SIZE];
 
     ux_event_t* event[EVENT_SIZE];
-    ux_event_reminder_t* timer[TIMER_SIZE];
+    uxe_reminder_t* timer[TIMER_SIZE];
 
     for (int i = 0; i < QUEUE_SIZE; i++) {
         ux_queue_init(&queue[i], 10000, UX_CATEGORY_MARKET);
@@ -86,13 +86,13 @@ static int test_event_order(ux_bus_mode mode)
 
     /* prepare event */
     for (int i = 0; i < EVENT_SIZE; i++) {
-        event[i] = ux_event_malloc(UX_EVENT_ASK);
+        event[i] = uxe_malloc(UXE_ASK);
         tick_init(event[i], i, i + 10000, 0, 1.0, i);
         event[i]->timestamp = etime[i];
     }
 
     for (int i = 0; i < TIMER_SIZE; i++) {
-        timer[i] = (ux_event_reminder_t*)ux_event_malloc(UX_EVENT_REMINDER);
+        timer[i] = (uxe_reminder_t*)uxe_malloc(UXE_REMINDER);
         timer_init(timer[i], UX_CLOCK_LOCAL, timer_time[i]);
         bus_add_timer(&ctx, timer[i]);
     }
@@ -124,7 +124,7 @@ static int test_event_order(ux_bus_mode mode)
     int z= 0;
     while ((e = bus_dequeue(&ctx)) != NULL) {
         ASSERT(e->timestamp == all_time[z]);
-        if (e->type == UX_EVENT_ASK)
+        if (e->type == UXE_ASK)
         {
 #ifndef NDEBUG
             ASSERT_THEN(e->dummy == &queue[except[k].qindex],
@@ -133,7 +133,7 @@ static int test_event_order(ux_bus_mode mode)
 #endif
             k++;
         }
-        ux_event_unref(e);
+        uxe_unref(e);
         z++;
     }
     ASSERT(z == TIMER_SIZE + EVENT_SIZE);

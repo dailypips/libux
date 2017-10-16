@@ -22,7 +22,7 @@ void ux_queue_destory(ux_queue_t* q)
 {
     ux_event_t* e;
     while ((e = ux_queue_pop(q)))
-        ux_event_unref(e);
+        uxe_unref(e);
 
     spscq_destroy(&q->spsc);
 }

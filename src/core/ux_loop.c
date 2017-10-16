@@ -17,7 +17,7 @@ void ux_async_post(ux_ctx_t *ctx, ux_async_cb async_cb, void* data)
 
 static int64_t bus_next_timeout(ux_ctx_t *ctx)
 {
-    ux_event_reminder_t* r = bus_timer_peek(ctx, UX_CLOCK_LOCAL);
+    uxe_reminder_t* r = bus_timer_peek(ctx, UX_CLOCK_LOCAL);
 
     if (r)
         return r->timeout - ux_time_now();
@@ -75,4 +75,29 @@ void ux_ctx_free(ux_ctx_t *ctx)
 {
     ux_ctx_destory(ctx);
     ux_free(ctx);
+}
+
+
+void ux_ctx_init(ux_ctx_t *ctx)
+{
+    uv_mutex_init(&ctx->wait_mutex);
+    uv_cond_init(&ctx->wait_cond);
+    ctx->stop_flag = 0;
+    mpscq_init(&ctx->async_queue);
+
+   bus_init(ctx);
+}
+
+void ux_ctx_destory(ux_ctx_t *ctx)
+{
+    bus_destory(ctx);
+    uv_cond_destroy(&ctx->wait_cond);
+    uv_mutex_destroy(&ctx->wait_mutex);
+    ux_ctx_clear(ctx);
+}
+
+
+void ux_ctx_clear(ux_ctx_t *ctx)
+{
+    bus_clear(ctx);
 }
