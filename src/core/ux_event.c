@@ -13,6 +13,16 @@
 
 
 extern uxe_class_vtable_t g_event_vtable[UXE_LAST];
+
+/* check event is ux defined */
+static int check_event_type(uxe_type type)
+{
+    if (type >= UXE_DEF_LAST)
+        return 1;
+    else
+        return 0;
+}
+
 /* public api */
 size_t ux_event_size(uxe_type type)
 {

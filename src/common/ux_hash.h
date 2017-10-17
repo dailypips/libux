@@ -8,14 +8,28 @@
 #ifndef __UX_HASH_H__
 #define __UX_HASH_H__
 
-#include "uthash.h"
+#include <ux/memory.h>
+#include "khash.h"
+#include "queue.h"
 
 /* undefine the defaults */
-#undef uthash_malloc
-#undef uthash_free
+#undef kcalloc
+#undef kmalloc
+#undef krealloc
+#undef kfree
 
 /* re-define, specifying alternate functions */
-#define uthash_malloc(sz) ux_malloc(sz)
-#define uthash_free(ptr,sz) ux_free(ptr)
+#define kcalloc(N,Z)  ux_calloc(N,Z)
+#define kmalloc(Z)    ux_malloc(Z)
+#define krealloc(P,Z) ux_realloc(P,Z)
+#define kfree(P)      ux_free(P)
+
+typedef struct _list_s {
+    void *queue[2];
+}_list_t;
+
+KHASH_DECLARE(int, khint32_t, void*)
+KHASH_DECLARE(str, kh_cstr_t, void*)
+KHASH_DECLARE(list, khint32_t, _list_t)
 
 #endif // __UX_HASH_H__

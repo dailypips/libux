@@ -4,18 +4,10 @@
 #include <ux/common.h>
 #include <ux/types.h>
 #include <ux/datetime.h>
-#include <ux/event_def.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-#define EVENTENUM(name, lname, destory, clone, processor)	UXE_##name,
-EVENTDEF(EVENTENUM)
-#undef EVENTENUM
-    UXE_LAST
-} uxe_type;
 
 #ifdef NDEBUG
 #define UXE_COMMON_FIELDS \

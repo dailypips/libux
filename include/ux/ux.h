@@ -20,7 +20,6 @@ extern "C" {
 
 #include <ux/common.h>
 #include <ux/types.h>
-#include <ux/enums.h>
 #include <ux/memory.h>
 #include <ux/datetime.h>
 #include <ux/currency.h>

@@ -12,7 +12,6 @@
 #include <ux/datetime.h>
 #include <ux/currency.h>
 #include <ux/types.h>
-#include <ux/enums.h>
 
 #ifdef __cplusplus
 extern "C" {

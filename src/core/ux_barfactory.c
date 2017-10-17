@@ -9,9 +9,17 @@
 #include "queue.h"
 #include "ux_internal.h"
 
+static void* get_key_value(khash_t(int) *hash, int key)
+{
+    khint_t iter = kh_get(int, hash, key);
+    if (iter == kh_end(hash))
+        return NULL;
+    return &kh_value(hash, iter);
+}
+
 void ux_barfactory_init(ux_ctx_t *ctx)
 {
-    ctx->barfactory_item_list_by_instrument_id = NULL;
+    ctx->list_by_instrument_id = NULL;
 }
 
 void ux_barfactory_destory(ux_ctx_t *ctx)
@@ -20,18 +28,18 @@ void ux_barfactory_destory(ux_ctx_t *ctx)
 
 void ux_barfactory_add_item(ux_ctx_t *ctx, ux_barfactory_item_t* item)
 {
-    barfactory_item_list_t* list;
-    int instrument_id = item->instrument->id;
+    _list_t* list;
+    khint_t iter;
+    int ret;
 
-    HASH_FIND_INT(ctx->barfactory_item_list_by_instrument_id, &instrument_id, list);
-    if (list == NULL) {
-        list = ux_zalloc(sizeof(barfactory_item_list_t));
+    iter = kh_get(list, ctx->list_by_instrument_id, item->instrument->id);
+    if (iter == kh_end(ctx->list_by_instrument_id)) { /* not found */
+        iter = kh_put(list, ctx->list_by_instrument_id, item->instrument->id, &ret);
+        UX_ASSERT(ret > 0);
+        list = &(kh_value(ctx->list_by_instrument_id, iter));
         QUEUE_INIT(&list->queue);
-        list->instrument_id = instrument_id;
-        HASH_ADD_INT(ctx->barfactory_item_list_by_instrument_id, instrument_id, list);
     }
     item->ctx = ctx;
-    QUEUE_INIT(&item->queue_node);
     QUEUE_INSERT_TAIL(&list->queue, &item->queue_node);
 }
 
@@ -64,14 +72,16 @@ void bar_factory_process_tick(ux_ctx_t *ctx, ux_event_tick_t* e)
     // find item_list by instrument_id
     // 在item_list上迭代，根据input类型
     // bar_factory_item_process_tick(item, e);
-    barfactory_item_list_t* list;
+    _list_t* list;
     QUEUE* q;
     ux_event_tick_t* tick;
+    khint_t iter;
 
-    int key = e->instrument;
-    HASH_FIND_INT((barfactory_item_list_t*)ctx->barfactory_item_list_by_instrument_id, &key, list);
-    if (!list)
+    iter = kh_get(list, ctx->list_by_instrument_id, e->instrument);
+    if (iter == kh_end(ctx->list_by_instrument_id)) /* not found */
         return;
+
+    list = &(kh_value(ctx->list_by_instrument_id, iter));
 
     QUEUE_FOREACH(q, &list->queue)
     {

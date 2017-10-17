@@ -77,14 +77,8 @@ UX_FUNC int ux_queue_is_full(ux_queue_t *q);
 UX_FUNC void ux_barfactory_item_init(ux_barfactory_item_t *item);
 UX_FUNC void ux_barfactory_item_destory(ux_barfactory_item_t *item);
 
-typedef struct {
-    UT_hash_handle hh;
-    int instrument_id;
-    void* queue[2];
-} barfactory_item_list_t;
-
 #define BAR_FACTORY_PUBLIC_FIELDS \
-    barfactory_item_list_t* barfactory_item_list_by_instrument_id; \
+    khash_t(list) *list_by_instrument_id; \
     void* reminder_items;
 
 struct ux_barfactory_s {
@@ -101,16 +95,10 @@ UX_EXTERN void ux_barfactory_emit_bar_open(ux_ctx_t *factory, ux_barfactory_item
 UX_EXTERN void ux_barfactory_emit_bar(ux_ctx_t *factory, ux_barfactory_item_t *item);
 
 /* data manager module */
-typedef struct tick_hash_node_s {
-    UT_hash_handle hh;
-    int key;
-    ux_event_tick_t *e;
-}tick_hash_node_t;
-
 #define DATA_MANAGER_FIELDS                                 \
-    tick_hash_node_t *dm_ask_hash;                          \
-    tick_hash_node_t *dm_bid_hash;                          \
-    tick_hash_node_t *dm_trade_hash;
+    khash_t(int) *dm_ask_hash;                             \
+    khash_t(int) *dm_bid_hash;                             \
+    khash_t(int) *dm_trade_hash;
 
 
 uxe_ask_t *data_manager_get_ask(ux_ctx_t *ctx, int instrument_id);
@@ -132,17 +120,6 @@ typedef struct risk_plugin_s {
     //void (*on_property_changed)(ux_ctx_t *ctx, uxe_property_changed_t *changed);
 }risk_plugin_t;
 
-typedef struct instrument_node_s {
-    UT_hash_handle hh;
-    ux_instrument_t *instrument;
-}instrument_hash_node_t;
-
-typedef struct order_hash_node_s {
-    UT_hash_handle hh;
-    ux_order_t *order;
-}order_hash_node_t;
-
-
 #define LOOP_FIELDS                                             \
     uv_mutex_t wait_mutex;                                      \
     uv_cond_t  wait_cond;                                       \
@@ -163,13 +140,13 @@ typedef struct order_hash_node_s {
     int is_simulator_stop;
 
 #define INSTRUMENT_MANAGER_FIELDS                               \
-    instrument_hash_node_t *instrument_by_id;                   \
-    instrument_hash_node_t *instrument_by_symbol;
+    khash_t(int) *instrument_by_id;                             \
+    khash_t(str) *instrument_by_symbol;
 
 #define ORDER_MANAGER_FIELDS                                    \
-    order_hash_node_t *order_by_id;                             \
-    order_hash_node_t *order_by_client_id;                      \
-    order_hash_node_t *order_by_server_id;
+    khash_t(int) *order_by_id;                                  \
+    khash_t(str) *order_by_client_id;                           \
+    khash_t(str) *order_by_server_id;
 
 struct ux_ctx_s {
     LOOP_FIELDS

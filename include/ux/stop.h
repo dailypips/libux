@@ -10,7 +10,6 @@
 
 #include <ux/common.h>
 #include <ux/types.h>
-#include <ux/enums.h>
 #include <ux/currency.h>
 
 #ifdef __cplusplus

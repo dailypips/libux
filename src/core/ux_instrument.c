@@ -69,18 +69,16 @@ void ux_instrument_unref(ux_instrument_t *instrument)
 /* instrument manager */
 ux_instrument_t *ux_get_instrument_by_id(ux_ctx_t *ctx, int id)
 {
-    instrument_hash_node_t *node;
-    HASH_FIND_INT(ctx->instrument_by_id, &id, node);
-    if (!node)
+    khint_t iter = kh_get(int, ctx->instrument_by_id, id);
+    if (iter == kh_end(ctx->instrument_by_id))
         return NULL;
-    return node->instrument;
+    return kh_value(ctx->instrument_by_id, iter);
 }
 
 ux_instrument_t *ux_get_instrument_by_symbol(ux_ctx_t *ctx, const char *symbol)
 {
-    instrument_hash_node_t *node;
-    HASH_FIND_STR(ctx->instrument_by_symbol, symbol, node);
-    if (!node)
+    khint_t iter = kh_get(str, ctx->instrument_by_symbol, symbol);
+    if (iter == kh_end(ctx->instrument_by_symbol))
         return NULL;
-    return node->instrument;
+    return kh_value(ctx->instrument_by_symbol, iter);
 }

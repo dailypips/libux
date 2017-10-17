@@ -19,6 +19,7 @@ set(UX_CORE_HEADER
 )
 
 set(UX_CORE_SRC
+	ux_hash.c
         ux_datetime.c
         ux_event.c
         ux_events.c

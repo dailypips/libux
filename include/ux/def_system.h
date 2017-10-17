@@ -47,26 +47,6 @@ typedef void (*ux_reminder_cb)(uxe_reminder_t *timer);
     UXE_QUEUE_FIELDS
 
 
-typedef struct {
-
-}uxe_on_start_t;
-
-typedef struct {
-
-}uxe_on_step_t;
-
-typedef struct {
-
-}uxe_on_stop_t;
-
-typedef struct {
-
-}uxe_on_resume_t;
-
-typedef struct {
-
-}uxe_on_paused_t;
-
 #define UXE_SIMULATOR_START_FIELDS          \
     ux_time_t time1;                        \
     ux_time_t time2;                        \
@@ -78,14 +58,14 @@ typedef struct {
     int percent;                            \
     long long count;
 
-#define UXE_OPTIMIZATION_START_FIELDS          \
+#define UXE_OPTIMIZATION_START_FIELDS       \
     ux_time_t time1;                        \
     ux_time_t time2;                        \
     long long count;
 
 #define UXE_OPTIMIZATION_STOP_FIELDS
 
-#define UXE_OPTIMIZATION_PROGRESS_FIELDS       \
+#define UXE_OPTIMIZATION_PROGRESS_FIELDS    \
     int percent;                            \
     long long count;
 
@@ -203,7 +183,7 @@ typedef enum {
     UX_PORTFOLIO_FIELDS
 
 
-#define UXE_PORTFOLIO_PARENT_CHANGED_FIELDS  \
+#define UXE_PORTFOLIO_PARENT_CHANGED_FIELDS \
     UX_PORTFOLIO_FIELDS
 
 

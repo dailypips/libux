@@ -8,7 +8,87 @@
 
 #include "ux_internal.h"
 
-static void set_key_value(tick_hash_node_t** hash, int key, ux_event_tick_t* tick)
+static void set_key_value(khash_t(int) *hash, int key, ux_event_tick_t* tick)
+{
+    int ret;
+    khint_t k;
+
+    k = kh_put(int, hash, key, &ret);
+
+    if(ret == 0) // key exist
+        ux_event_unref((ux_event_t*)kh_value(hash,k));
+
+    kh_value(hash, k) = tick;
+
+    ux_event_ref((ux_event_t*)tick);
+}
+
+static ux_event_tick_t* get_key_value(khash_t(int) *hash, int key)
+{
+    khint_t iter = kh_get(int, hash, key);
+    if (iter == kh_end(hash))
+        return NULL;
+    return kh_value(hash, iter);
+}
+
+static inline void set_tick(khash_t(int) *hash, ux_event_tick_t* tick)
+{
+    set_key_value(hash, tick->instrument, tick);
+}
+
+void data_manager_set_ask(ux_ctx_t *ctx, uxe_ask_t* ask)
+{
+    set_tick(ctx->dm_ask_hash, (ux_event_tick_t*)ask);
+}
+
+void data_manager_set_bid(ux_ctx_t *ctx, uxe_bid_t* bid)
+{
+    set_tick(ctx->dm_bid_hash, (ux_event_tick_t*)bid);
+}
+
+void data_manager_set_trade(ux_ctx_t *ctx, uxe_trade_t* trade)
+{
+    set_tick(ctx->dm_trade_hash, (ux_event_tick_t*)trade);
+}
+
+uxe_ask_t* data_manager_get_ask(ux_ctx_t *ctx, int instrument_id)
+{
+   return (uxe_ask_t*)get_key_value(ctx->dm_ask_hash, instrument_id);
+}
+
+uxe_bid_t* data_manager_get_bid(ux_ctx_t *ctx, int instrument_id)
+{
+    return (uxe_bid_t*)get_key_value(ctx->dm_bid_hash, instrument_id);
+}
+
+uxe_trade_t* data_manager_get_trade(ux_ctx_t *ctx, int instrument_id)
+{
+    return (uxe_trade_t*)get_key_value(ctx->dm_trade_hash, instrument_id);
+}
+
+void data_manager_init(ux_ctx_t *ctx)
+{
+    ctx->dm_ask_hash = kh_init(int);
+    ctx->dm_bid_hash = kh_init(int);
+    ctx->dm_trade_hash = kh_init(int);
+}
+
+
+static void hash_delete_all(khash_t(int) *hashtable)
+{
+    ux_event_t *val;
+    kh_foreach_value(hashtable, val, ux_event_unref(val));
+    kh_destroy(int, hashtable);
+}
+
+void data_manager_destory(ux_ctx_t *ctx)
+{
+    hash_delete_all(ctx->dm_ask_hash);
+    hash_delete_all(ctx->dm_bid_hash);
+    hash_delete_all(ctx->dm_trade_hash);
+}
+
+/*static void set_key_value(tick_hash_node_t** hash, int key, ux_event_tick_t* tick)
 {
     tick_hash_node_t* node;
 
@@ -99,3 +179,4 @@ void data_manager_destory(ux_ctx_t *ctx)
     hash_delete_all(&ctx->dm_bid_hash);
     hash_delete_all(&ctx->dm_trade_hash);
 }
+*/

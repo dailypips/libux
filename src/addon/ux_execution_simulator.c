@@ -16,19 +16,35 @@ typedef struct {
     double commission;
 }node_t;
 
-typedef struct {
-    UT_hash_handle hh;
-    void* orders[2];
-    int instrument_id;
-}order_list_t;
-
 typedef struct ux_default_execution_simulator_s {
     UX_EXECUTION_SIMULATOR_PUBLIC_FIELDS
-    order_list_t *list_by_instrument_id;
+    khash_t(int) *list_by_instrument_id;
     ux_timespan_t auction1;
     ux_timespan_t auction2;
 }ux_default_execution_simulator_t;
 
+/*static void set_key_value(khash_t(int) *hash, int key, void *val)
+{
+    int ret;
+    khint_t k;
+
+    k = kh_put(int, hash, key, &ret);
+
+    if(ret != 0) {// key exist
+        QUEUE *list = kh_value(hash, k);
+        QUEUE_INSERT_TAIL(list, val);
+    }
+
+    kh_value(hash, k) = tick;
+}*/
+
+static void* get_key_value(khash_t(int) *hash, int key)
+{
+    khint_t iter = kh_get(int, hash, key);
+    if (iter == kh_end(hash))
+        return NULL;
+    return kh_value(hash, iter);
+}
 
 /* provider */
 static int is_enable(ux_provider_t *provider)
@@ -81,16 +97,16 @@ static void process_bid(ux_order_t *order, uxe_bid_t *bid)
 static void on_bid(ux_execution_simulator_t* simulator, uxe_bid_t *bid)
 {
     ux_default_execution_simulator_t *s = (ux_default_execution_simulator_t*)simulator;
-    order_list_t *list;
+    QUEUE *list;
     QUEUE *q;
 
-    int key = bid->instrument;
-    HASH_FIND_INT(s->list_by_instrument_id, &key, list);
+    list = get_key_value(s->list_by_instrument_id, bid->instrument);
+
     if (!list)
         return;
 
     if(s->fill_flag & UX_EXECUTION_SIMULATOR_FLAG_FILL_ON_QUOTE) {
-        QUEUE_FOREACH(q, &list->orders) {
+        QUEUE_FOREACH(q, &list) {
             ux_order_t *order = QUEUE_DATA(q, ux_order_t, queue_node);
             process_bid(order, bid);
         }
