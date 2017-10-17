@@ -74,8 +74,8 @@ UX_FUNC int ux_queue_is_full(ux_queue_t *q);
 //typedef void (*ux_on_tick_cb)(ux_barfactory_item_t *item, ux_event_tick_t *tick);
 
 
-UX_FUNC void ux_barfactory_item_init(ux_barfactory_item_t *item);
-UX_FUNC void ux_barfactory_item_destory(ux_barfactory_item_t *item);
+UX_FUNC void ux_barfactory_item_init(ux_bar_generator_t *item);
+UX_FUNC void ux_barfactory_item_destory(ux_bar_generator_t *item);
 
 #define BAR_FACTORY_PUBLIC_FIELDS \
     khash_t(list) *list_by_instrument_id; \
@@ -87,12 +87,12 @@ struct ux_barfactory_s {
 
 UX_FUNC void ux_barfactory_init(ux_ctx_t *factory);
 UX_FUNC void ux_barfactory_destory(ux_ctx_t *factory);
-UX_EXTERN void ux_barfactory_add_item(ux_ctx_t *ctx, ux_barfactory_item_t* item);
-UX_EXTERN void ux_barfactory_remove_item(ux_ctx_t *ctx, ux_barfactory_item_t* item);
+UX_EXTERN void ux_barfactory_add_item(ux_ctx_t *ctx, ux_bar_generator_t* item);
+UX_EXTERN void ux_barfactory_remove_item(ux_ctx_t *ctx, ux_bar_generator_t* item);
 UX_EXTERN void ux_barfactory_add_reminder(ux_ctx_t *factory, uxe_reminder_t *reminder);
 UX_EXTERN void bar_factory_process_tick(ux_ctx_t *ctx, ux_event_tick_t* e);
-UX_EXTERN void ux_barfactory_emit_bar_open(ux_ctx_t *factory, ux_barfactory_item_t *item);
-UX_EXTERN void ux_barfactory_emit_bar(ux_ctx_t *factory, ux_barfactory_item_t *item);
+UX_EXTERN void ux_barfactory_emit_bar_open(ux_ctx_t *factory, ux_bar_generator_t *item);
+UX_EXTERN void ux_barfactory_emit_bar(ux_ctx_t *factory, ux_bar_generator_t *item);
 
 /* data manager module */
 #define DATA_MANAGER_FIELDS                                 \

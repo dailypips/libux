@@ -18,8 +18,8 @@ extern "C" {
 #endif
 
 /* barfactory */
-typedef struct ux_barfactory_item_s ux_barfactory_item_t;
-typedef void (*ux_on_tick_cb)(ux_barfactory_item_t *item, ux_event_tick_t *tick);
+typedef struct ux_bar_generator_s ux_bar_generator_t;
+typedef void (*ux_on_tick_cb)(ux_bar_generator_t *item, ux_event_tick_t *tick);
 
 #define UX_BAR_ITEM_PUBLIC_FIELDS \
     /* private */ \
@@ -41,7 +41,7 @@ typedef void (*ux_on_tick_cb)(ux_barfactory_item_t *item, ux_event_tick_t *tick)
     ux_timespan_t session2;
 
 
-struct ux_barfactory_item_s {
+struct ux_bar_generator_s {
     UX_BAR_ITEM_PUBLIC_FIELDS
 };
 

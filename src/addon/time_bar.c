@@ -2,13 +2,13 @@
 #include "queue.h"
 #include "time_bar.h"
 
-static void emit_bar_open(ux_ctx_t *ctx, ux_barfactory_item_t* item)
+static void emit_bar_open(ux_ctx_t *ctx, ux_bar_generator_t* item)
 {
     item->bar->status = UX_BAR_STATUS_OPEN;
     ux_dispatch_event(ctx, (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
 }
 
-static void emit_bar(ux_ctx_t *ctx, ux_barfactory_item_t* item)
+static void emit_bar(ux_ctx_t *ctx, ux_bar_generator_t* item)
 {
     item->bar->status = UX_BAR_STATUS_CLOSE;
     ux_dispatch_event(ctx, (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
@@ -24,7 +24,7 @@ static void time_bar_on_reminder(uxe_reminder_t* r)
     else
         item->bar->timestamp = bus_get_exchange_time(item->ctx);
 
-    emit_bar(item->ctx, (ux_barfactory_item_t*)item);
+    emit_bar(item->ctx, (ux_bar_generator_t*)item);
 }
 
 static ux_time_t round_start_time(time_bar_item_t* item, ux_event_tick_t* tick)
@@ -34,7 +34,7 @@ static ux_time_t round_start_time(time_bar_item_t* item, ux_event_tick_t* tick)
     return tick->timestamp;
 }
 
-static void time_bar_on_tick(ux_barfactory_item_t* node, ux_event_tick_t* tick)
+static void time_bar_on_tick(ux_bar_generator_t* node, ux_event_tick_t* tick)
 {
     uxe_bar_t* bar;
     time_bar_item_t* item = (time_bar_item_t*)node;
@@ -62,7 +62,7 @@ static void time_bar_on_tick(ux_barfactory_item_t* node, ux_event_tick_t* tick)
             bar->low = tick->price;
             bar->close = tick->price;
             bar->volume = tick->size;
-            emit_bar_open(item->ctx, (ux_barfactory_item_t*)item);
+            emit_bar_open(item->ctx, (ux_bar_generator_t*)item);
         }
     } else {
         bar = (uxe_bar_t*)ux_event_malloc(UXE_BAR);
@@ -80,7 +80,7 @@ static void time_bar_on_tick(ux_barfactory_item_t* node, ux_event_tick_t* tick)
             bar->low = tick->price;
             bar->close = tick->price;
             bar->volume = tick->size;
-            emit_bar_open(item->ctx, (ux_barfactory_item_t*)item);
+            emit_bar_open(item->ctx, (ux_bar_generator_t*)item);
         } else {
             item->start_time = round_start_time(item, tick);
 

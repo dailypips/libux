@@ -9,14 +9,6 @@
 #include "queue.h"
 #include "ux_internal.h"
 
-static void* get_key_value(khash_t(int) *hash, int key)
-{
-    khint_t iter = kh_get(int, hash, key);
-    if (iter == kh_end(hash))
-        return NULL;
-    return &kh_value(hash, iter);
-}
-
 void ux_barfactory_init(ux_ctx_t *ctx)
 {
     ctx->list_by_instrument_id = NULL;
@@ -26,7 +18,7 @@ void ux_barfactory_destory(ux_ctx_t *ctx)
 {
 }
 
-void ux_barfactory_add_item(ux_ctx_t *ctx, ux_barfactory_item_t* item)
+void ux_barfactory_add_item(ux_ctx_t *ctx, ux_bar_generator_t* item)
 {
     _list_t* list;
     khint_t iter;
@@ -43,7 +35,7 @@ void ux_barfactory_add_item(ux_ctx_t *ctx, ux_barfactory_item_t* item)
     QUEUE_INSERT_TAIL(&list->queue, &item->queue_node);
 }
 
-void ux_barfactory_remove_item(ux_ctx_t *ctx, ux_barfactory_item_t* item)
+void ux_barfactory_remove_item(ux_ctx_t *ctx, ux_bar_generator_t* item)
 {
     UX_UNUSED(ctx);
     QUEUE_REMOVE(&item->queue_node);
@@ -85,7 +77,7 @@ void bar_factory_process_tick(ux_ctx_t *ctx, ux_event_tick_t* e)
 
     QUEUE_FOREACH(q, &list->queue)
     {
-        ux_barfactory_item_t* item = QUEUE_DATA(q, ux_barfactory_item_t, queue_node);
+        ux_bar_generator_t* item = QUEUE_DATA(q, ux_bar_generator_t, queue_node);
 
         switch (item->bar_input) {
 
@@ -134,13 +126,13 @@ void bar_factory_process_tick(ux_ctx_t *ctx, ux_event_tick_t* e)
     }
 }
 
-void ux_barfactory_emit_bar_open(ux_ctx_t *ctx, ux_barfactory_item_t* item)
+void ux_barfactory_emit_bar_open(ux_ctx_t *ctx, ux_bar_generator_t* item)
 {
     item->bar->status = UX_BAR_STATUS_OPEN;
     ux_dispatch_event(ctx, (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
 }
 
-void ux_barfactory_emit_bar(ux_ctx_t *ctx, ux_barfactory_item_t* item)
+void ux_barfactory_emit_bar(ux_ctx_t *ctx, ux_bar_generator_t* item)
 {
     item->bar->status = UX_BAR_STATUS_CLOSE;
     ux_dispatch_event(ctx, (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
