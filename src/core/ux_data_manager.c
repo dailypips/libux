@@ -18,10 +18,10 @@ static void set_key_value(tick_hash_node_t** hash, int key, ux_event_tick_t* tic
         node = ux_zalloc(sizeof(tick_hash_node_t));
         HASH_ADD_INT(*hash, key, node);
     } else {
-        uxe_unref((ux_event_t*)(node->e));
+        ux_event_unref((ux_event_t*)(node->e));
     }
 
-    uxe_ref((ux_event_t*)tick);
+    ux_event_ref((ux_event_t*)tick);
 
     node->e = tick;
 }

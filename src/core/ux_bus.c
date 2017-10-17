@@ -169,7 +169,7 @@ static void timer_heap_clear(min_heap* heap)
         heap_remove((struct heap*)heap,
             (struct heap_node*)node,
             timer_less_than);
-        uxe_unref((ux_event_t*)timer);
+        ux_event_unref((ux_event_t*)timer);
     }
 }
 
@@ -242,7 +242,7 @@ next:
         for (int i = 0; i < ctx->attached_count; i++) {
             if (e->type != UXE_QUEUE_OPENED && e->type != UXE_QUEUE_CLOSED) {
                 ux_queue_t* q = ctx->attached[i];
-                uxe_ref(e);
+                ux_event_ref(e);
                 ux_queue_push(q, e);
             }
         }
@@ -480,7 +480,7 @@ void bus_destory(ux_ctx_t *ctx)
 void bus_clear(ux_ctx_t *ctx)
 {
     if (ctx->saved_event != NULL) {
-        uxe_unref(ctx->saved_event);
+        ux_event_unref(ctx->saved_event);
         ctx->saved_event = NULL;
     }
 

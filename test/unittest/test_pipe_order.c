@@ -61,7 +61,7 @@ static int test_pipe_event_order(ux_bus_mode mode, ux_queue_category category)
 
     /* prepare event */
     for (int i = 0; i < EVENT_SIZE; i++) {
-        event[i] = uxe_malloc(UXE_ASK);
+        event[i] = ux_event_malloc(UXE_ASK);
         tick_init(event[i], i, i + 10000, 0, 1.0, i);
         event[i]->timestamp = etime[i];
     }
@@ -96,7 +96,7 @@ static int test_pipe_event_order(ux_bus_mode mode, ux_queue_category category)
                 fprintf(stderr, "event index:%d time:%" PRIu64 " except [%d] but [%d]\n", j, e->timestamp, except[j].qindex, ((ux_event_tick_t*)e)->provider);
         );
 #endif
-        uxe_unref(e);
+        ux_event_unref(e);
         j++;
     }
 

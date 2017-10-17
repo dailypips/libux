@@ -65,7 +65,7 @@ static void time_bar_on_tick(ux_barfactory_item_t* node, ux_event_tick_t* tick)
             emit_bar_open(item->ctx, (ux_barfactory_item_t*)item);
         }
     } else {
-        bar = (uxe_bar_t*)uxe_malloc(UXE_BAR);
+        bar = (uxe_bar_t*)ux_event_malloc(UXE_BAR);
         item->bar = bar;
         bar->provider = tick->provider;
         bar->instrument = tick->instrument;
@@ -84,7 +84,7 @@ static void time_bar_on_tick(ux_barfactory_item_t* node, ux_event_tick_t* tick)
         } else {
             item->start_time = round_start_time(item, tick);
 
-            uxe_reminder_t* r = (uxe_reminder_t*)uxe_malloc(UXE_REMINDER);
+            uxe_reminder_t* r = (uxe_reminder_t*)ux_event_malloc(UXE_REMINDER);
             r->clock_type = item->clock_type;
             r->repeat = item->bar_size * TICKS_PER_SECOND;
             r->timeout = item->start_time + r->repeat;

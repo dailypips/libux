@@ -50,7 +50,7 @@ void ux_barfactory_add_reminder(ux_ctx_t *ctx, uxe_reminder_t* reminder)
 static ux_event_tick_t* event_tick_new(ux_event_tick_t* e, ux_event_tick_t* n)
 {
     //TODO: BID ?? TICK?? ASK??
-    ux_event_tick_t* tick = (ux_event_tick_t*)uxe_malloc(UXE_BID);
+    ux_event_tick_t* tick = (ux_event_tick_t*)ux_event_malloc(UXE_BID);
     tick->timestamp = e->timestamp;
     tick->instrument = e->instrument;
     tick->provider = e->provider;

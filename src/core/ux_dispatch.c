@@ -47,7 +47,7 @@ static void on_event(ux_ctx_t *ctx, ux_event_t* e)
     // step4: dispatch to other
 
     // step5: unref
-    uxe_unref(e);
+    ux_event_unref(e);
 }
 
 void ux_dispatch_event(ux_ctx_t *ctx, ux_event_t* e, ux_dispatch_mode mode)

@@ -35,10 +35,10 @@ struct ux_event_s {
 };
 
 UX_EXTERN size_t ux_event_size(uxe_type type);
-UX_EXTERN ux_event_t* uxe_malloc(uxe_type type);
-UX_EXTERN ux_event_t* uxe_ref(ux_event_t *e);
-UX_EXTERN void uxe_unref(ux_event_t *e);
-UX_EXTERN ux_event_t* uxe_clone(ux_event_t *e);
+UX_EXTERN ux_event_t* ux_event_malloc(uxe_type type);
+UX_EXTERN ux_event_t* ux_event_ref(ux_event_t *e);
+UX_EXTERN void ux_event_unref(ux_event_t *e);
+UX_EXTERN ux_event_t* ux_event_clone(ux_event_t *e);
 
 #ifdef __cplusplug
 }

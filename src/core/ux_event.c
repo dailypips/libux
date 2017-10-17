@@ -27,7 +27,7 @@ static void event_free(ux_event_t *e)
     ux_free(e);
 }
 
-ux_event_t *uxe_clone(ux_event_t *e)
+ux_event_t *ux_event_clone(ux_event_t *e)
 {
     ux_event_t *result;
     event_clone clone = g_event_vtable[e->type].clone;
@@ -37,21 +37,21 @@ ux_event_t *uxe_clone(ux_event_t *e)
     return result;
 }
 
-ux_event_t *uxe_ref(ux_event_t *event)
+ux_event_t *ux_event_ref(ux_event_t *event)
 {
   UX_ASSERT(event != NULL);
   ux_atomic_full_fetch_add(&event->refcount, 1);
   return event;
 }
 
-void uxe_unref(ux_event_t *event)
+void ux_event_unref(ux_event_t *event)
 {
    UX_ASSERT(event != NULL);
    if(ux_atomic_full_fetch_add(&event->refcount, -1) == 1)
        event_free(event);
 }
 
-ux_event_t* uxe_malloc(uxe_type type)
+ux_event_t* ux_event_malloc(uxe_type type)
 {
     UX_ASSERT(type < UXE_LAST);
     ux_event_t* e = ux_zalloc(g_event_vtable[type].size);

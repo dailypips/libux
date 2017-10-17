@@ -15,5 +15,11 @@ const char* currency_table[ISO4217_CURRENCY_LAST] = {
 #undef CLASSENUM
 };
 
-ux_currency_t ux_currency_from_name(const char *name);
-const char* ux_currency_to_name(ux_currency_t currency);
+ux_currency_t ux_currency_from_name(const char *name)
+{
+
+}
+const char* ux_currency_to_name(ux_currency_t currency)
+{
+
+}

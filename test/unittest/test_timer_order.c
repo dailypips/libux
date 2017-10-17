@@ -56,7 +56,7 @@ static int test_timer_event_order(ux_bus_mode mode, ux_clock_type ctype)
 
     /* prepare event */
     for (int i = 0; i < EVENT_SIZE; i++) {
-        event[i] = (uxe_reminder_t*)uxe_malloc(UXE_REMINDER);
+        event[i] = (uxe_reminder_t*)ux_event_malloc(UXE_REMINDER);
         timer_init(event[i], ctype, etime[i]);
         bus_add_timer(&ctx, event[i]);
     }
@@ -71,7 +71,7 @@ static int test_timer_event_order(ux_bus_mode mode, ux_clock_type ctype)
         ASSERT_THEN(e->timestamp == except[j],
                     fprintf(stderr, "[%d] except %"PRIu64" but %"PRIu64"\n", j, except[j], e->timestamp);
                 );
-        uxe_unref((ux_event_t*)e);
+        ux_event_unref((ux_event_t*)e);
         j++;
     }
 
