@@ -15,17 +15,17 @@ extern "C" {
 #endif
 
 typedef uint64_t ux_time_t;
-typedef int64_t  ux_timespan_t;
+typedef int64_t ux_timespan_t;
 
 typedef intptr_t ux_atomic_t;
 
 /* ids */
-typedef uint16_t ux_iid_t;   /* for instrument id, range[1..65534] */
+typedef uint16_t ux_iid_t; /* for instrument id, range[1..65534] */
 #define UX_INSTRUMENT_ID_MIN 1
 #define UX_INSTRUMENT_ID_MAX 65534
 
-typedef uint8_t ux_pid_t;   /* for provider id, range[1..254] */
-typedef uint8_t ux_rid_t;   /* for route id, range[1..254] */
+typedef uint8_t ux_pid_t; /* for provider id, range[1..254] */
+typedef uint8_t ux_rid_t; /* for route id, range[1..254] */
 //TODO: 可以取 -1
 #define UX_UNKNOWN_PROVDER -1
 #define UX_PROVIDER_ID_MIN 1
@@ -52,51 +52,48 @@ typedef struct ux_strategy_s ux_strategy_t;
 
 typedef struct ux_ctx_s ux_ctx_t;
 typedef struct ux_async_s ux_async_t;
-typedef void (*ux_async_cb)(ux_ctx_t *ctx, void *data);
-
-
+typedef void (*ux_async_cb)(ux_ctx_t* ctx, void* data);
 
 typedef enum {
-#define EVENTENUM(name, lname, destory, clone, processor)	UXE_##name,
-EVENTDEF(EVENTENUM)
+#define EVENTENUM(name, lname, destory, clone, processor) UXE_##name,
+    EVENTDEF(EVENTENUM)
 #undef EVENTENUM
-    UXE_DEF_LAST,
+        UXE_DEF_LAST,
     UXE_CUSTOM = 512,
     UXE_LAST = 1024
-}uxe_type;
+} uxe_type;
 
-#define EVENTETYPE(name, lname, destory, clone, processor)	typedef struct uxe_##lname##_s uxe_##lname##_t;
+#define EVENTETYPE(name, lname, destory, clone, processor) typedef struct uxe_##lname##_s uxe_##lname##_t;
 EVENTDEF(EVENTETYPE)
 #undef EVENTETYPE
 
 /* list all error code */
-#define UX_OK   0
-
+#define UX_OK 0
 
 /* enums */
 typedef enum {
     UX_BUS_SIMULATION,
     UX_BUS_REALTIME,
     UX_BUS_MODE_LAST
-}ux_bus_mode;
+} ux_bus_mode;
 
 typedef enum {
     UX_RUN_DEFAULT = 0,
     UX_RUN_ONCE,
     UX_RUN_NOWAIT
-}ux_run_mode;
+} ux_run_mode;
 
 typedef enum {
     UX_L2_ACTION_NEW,
     UX_L2_ACTION_CHANGE,
     UX_L2_ACTION_DELETE,
     UX_L2_ACTION_RESET
-}ux_level2_action;
+} ux_level2_action;
 
 typedef enum {
     UX_L2SIDE_BID,
     UX_L2SIDE_ASK,
-}ux_level2_side;
+} ux_level2_side;
 
 typedef enum {
     UX_BAR_TYPE_NONE = 0,
@@ -107,7 +104,7 @@ typedef enum {
     UX_BAR_TYPE_SESSION,
     UX_BAR_TYPE_RENKO,
     UX_BAR_TYPE_CUSTOM
-}ux_bar_type;
+} ux_bar_type;
 
 typedef enum {
     UX_BAR_STATUS_INCOMPLETE,
@@ -116,7 +113,7 @@ typedef enum {
     UX_BAR_STATUS_HIGH,
     UX_BAR_STATUS_LOW,
     UX_BAR_STATUS_CLOSE
-}ux_bar_status;
+} ux_bar_status;
 
 typedef enum {
     UX_BAR_INPUT_TRADE,
@@ -125,7 +122,7 @@ typedef enum {
     UX_BAR_INPUT_MIDDLE,
     UX_BAR_INPUT_TICK,
     UX_BAR_INPUT_BIDASK
-}ux_bar_input;
+} ux_bar_input;
 
 typedef enum {
     UX_EXEC_NEW,
@@ -144,7 +141,7 @@ typedef enum {
     UX_EXEC_ORDER_STATUS,
     UX_EXEC_PENDING_NEW,
     UX_EXEC_CLEARING_HOLD
-}ux_exec_type;
+} ux_exec_type;
 
 typedef enum {
     UX_ORDER_TYPE_MARKET,
@@ -155,7 +152,7 @@ typedef enum {
     UX_ORDER_TYPE_PEGGED,
     UX_ORDER_TYPE_TRAILING_STOP,
     UX_ORDER_TYPE_TRAILING_STOP_LIMIT
-}ux_order_type;
+} ux_order_type;
 
 typedef enum {
     UX_ORDER_STATUS_NOT_SENT,
@@ -169,7 +166,7 @@ typedef enum {
     UX_ORDER_STATUS_EXPIRED,
     UX_ORDER_STATUS_PENDING_REPLACE,
     UX_ORDER_STATUS_REPLACED
-}ux_order_status;
+} ux_order_status;
 
 typedef enum {
     UX_TIF_ATC,
@@ -183,12 +180,31 @@ typedef enum {
     UX_TIF_GTD,
     UX_TIF_GFS,
     UX_TIF_AUC
-}ux_tif;
+} ux_tif;
 
 typedef enum {
     UX_SIDE_BUY,
     UX_SIDE_SELL
-}ux_order_side;
+} ux_order_side;
+
+typedef enum {
+    UX_STRATEGY_STATUS_TYPE_STARTED,
+    UX_STRATEGY_STATUS_TYPE_STOPPED
+}ux_strategy_status_type;
+
+typedef struct ux_strategy_status_info_s {
+    ux_strategy_status_type type;
+    char *solution;
+    char *mode;
+}ux_strategy_status_info_t;
+
+typedef enum {
+    UX_STRATEGY_PERSISTENCE_NONE,
+    UX_STRATEGY_PERSISTENCE_FULL,
+    UX_STRATEGY_PERSISTENCE_SAVE,
+    UX_STRATEGY_PERSISTENCE_LOAD
+}ux_strategy_persistence;
+
 
 #ifdef __cplusplus
 }

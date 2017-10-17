@@ -104,6 +104,9 @@ UX_EXTERN void ux_barfactory_emit_bar(ux_ctx_t *factory, ux_bar_generator_t *ite
 uxe_ask_t *data_manager_get_ask(ux_ctx_t *ctx, int instrument_id);
 uxe_bid_t *data_manager_get_bid(ux_ctx_t *ctx, int instrument_id);
 uxe_trade_t *data_manager_get_trade(ux_ctx_t *ctx, int instrument_id);
+void data_manager_set_ask(ux_ctx_t *ctx, uxe_ask_t* ask);
+void data_manager_set_bid(ux_ctx_t *ctx, uxe_bid_t* bid);
+void data_manager_set_trade(ux_ctx_t *ctx, uxe_trade_t* trade);
 
 /* ctx module */
 typedef struct {
@@ -160,8 +163,9 @@ struct ux_ctx_s {
     BAR_FACTORY_PUBLIC_FIELDS
     //BAR_FACTORY_PUBLIC_FIELDS
     DATA_MANAGER_FIELDS
-
+    //STRATEGY_MANAGER_FIELDS
     /* simulator */
+
     ux_data_simulator_t *data_simulator;
     ux_execution_simulator_t *execution_simulator;
     /* logger */

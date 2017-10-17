@@ -91,8 +91,9 @@ void event_bid_dispatch(ux_ctx_t *ctx, ux_event_t *e)
          bus_set_exchange_time(ctx, bid->exchange_timestamp);
 
      bar_factory_process_tick(ctx, (ux_event_tick_t*)e);
-
+     data_manager_set_bid(ctx, bid);
      ctx->execution_simulator->on_bid(ctx->execution_simulator, bid);
+
 
 
     /*
