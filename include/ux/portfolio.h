@@ -56,7 +56,6 @@ typedef struct account_position_s {
     double value;
 }account_position_t;
 
-
 typedef struct ux_fill_series_s {
     char *name;
     int count;
@@ -122,7 +121,6 @@ typedef struct ux_trade_detector_s {
     ux_portfolio_t *portfolio;
     // TODO
 }ux_trade_detector_t;
-
 
 struct ux_portfolio_statistics_s {
     ux_portfolio_t *portfolio;

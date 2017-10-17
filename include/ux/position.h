@@ -42,7 +42,7 @@ struct ux_transaction_s {
 };
 
 typedef enum {
-    UX_POSITION_SIDE_LOG,
+    UX_POSITION_SIDE_LONG,
     UX_POSITION_SIDE_SHORT
 }ux_position_side;
 

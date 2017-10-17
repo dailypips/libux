@@ -40,7 +40,7 @@ extern "C" {
 #include <ux/stop.h>
 #include <ux/strategy.h>
 #include <ux/subscribe.h>
-#include <ux/all_event.h>
+#include <ux/ux_event.h>
 
 #ifdef __cplusplus
 }
