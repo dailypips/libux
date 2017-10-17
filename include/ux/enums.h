@@ -32,12 +32,6 @@ typedef enum {
     UX_L2SIDE_ASK,
 }ux_level2_side;
 
-typedef struct {
-    ux_level2_side side;
-    ux_level2_action action;
-    int position;
-}ux_level2_t;
-
 typedef enum {
     UX_BAR_TYPE_NONE = 0,
     UX_BAR_TYPE_TIME,

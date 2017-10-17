@@ -23,8 +23,12 @@
     long size;
 
 #define UXE_ASK_FIELDS   UXE_TICK_COMMON_FIELDS
+
 #define UXE_BID_FIELDS   UXE_TICK_COMMON_FIELDS
-#define UXE_TRADE_FIELDS UXE_TICK_COMMON_FIELDS
+
+#define UXE_TRADE_FIELDS                        \
+    UXE_TICK_COMMON_FIELDS                      \
+    int8_t direction;
 
 #define UXE_NEWS_FIELDS                         \
     UXE_MARKET_COMMON_FIELDS                    \
@@ -45,7 +49,14 @@ typedef struct {
     UXE_MARKET_COMMON_EXCHANGE_FIELDS           \
     size_t num_bids;                            \
     size_t num_asks;                            \
-    ux_tick_info_t* ticks;
+    ux_tick_info_t* bids;                       \
+    ux_tick_info_t* asks;
+
+typedef struct {
+    ux_level2_side side;
+    ux_level2_action action;
+    int position;
+}ux_level2_t;
 
 #define UXE_LEVEL2_UPDATE_FIELDS                \
     UXE_MARKET_COMMON_EXCHANGE_FIELDS           \

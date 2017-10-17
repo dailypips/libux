@@ -93,6 +93,17 @@ typedef enum {
     char* clientID;
 
 
+typedef struct ux_account_data_fields_s {
+    // TODO
+}ux_account_data_fields_t;
+
+#define UXE_ACCOUNT_DATA_FIELDS             \
+    ux_account_data_type account_data_type; \
+    char *account;                          \
+    int provider_id;                        \
+    int route_id;                           \
+    ux_account_data_fields_t fields;
+
 struct uxe_on_fill_s{
     ux_fill_t *fill;
     ux_portfolio_t *portfolio;

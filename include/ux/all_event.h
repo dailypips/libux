@@ -12,9 +12,9 @@
 extern "C" {
 #endif
 
-#include <ux/market_def.h>
-#include <ux/execution_def.h>
-#include <ux/system_def.h>
+#include <ux/def_market.h>
+#include <ux/def_execution.h>
+#include <ux/def_system.h>
 
 struct uxe_reminder_s {
   UXE_COMMON_FIELDS
@@ -76,6 +76,16 @@ struct uxe_fundamental_s {
   UXE_FUNDAMENTAL_FIELDS
 };
 
+struct uxe_instrument_def_s {
+    UXE_COMMON_FIELDS
+    UXE_INSTRUMENT_DEF_FIELDS
+};
+
+struct uxe_instrument_def_end_s {
+    UXE_COMMON_FIELDS
+    UXE_INSTRUMENT_DEF_END_FIELDS
+};
+
 struct uxe_instrument_added_s {
   UXE_COMMON_FIELDS
   UXE_INSTRUMENT_ADDED_FIELDS
@@ -94,6 +104,11 @@ struct uxe_historical_data_s {
 struct uxe_historical_data_end_s {
   UXE_COMMON_FIELDS
   UXE_HISTORICAL_DATA_END_FIELDS
+};
+
+struct uxe_account_data_s {
+    UXE_COMMON_FIELDS
+    UXE_ACCOUNT_DATA_FIELDS
 };
 
 struct uxe_account_report_s {
@@ -268,6 +283,21 @@ struct uxe_simulator_stop_s {
 struct uxe_simulator_progress_s {
   UXE_COMMON_FIELDS
   UXE_SIMULATOR_PROGRESS_FIELDS
+};
+
+struct uxe_optimization_start_s {
+  UXE_COMMON_FIELDS
+  UXE_OPTIMIZATION_START_FIELDS
+};
+
+struct uxe_optimization_stop_s {
+  UXE_COMMON_FIELDS
+  UXE_OPTIMIZATION_STOP_FIELDS
+};
+
+struct uxe_optimization_progress_s {
+  UXE_COMMON_FIELDS
+  UXE_OPTIMIZATION_PROGRESS_FIELDS
 };
 
 struct uxe_provider_added_s {

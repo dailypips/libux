@@ -24,7 +24,7 @@ typedef enum {
     UX_ACCOUNT_DATA_TYPE_ACCTVALUE,
     UX_ACCOUNT_DATA_TYPE_POSITION,
     UX_ACCOUNT_DATA_TYPE_ORDER
-}ux_accout_data_type;
+}ux_account_data_type;
 
 #define PREDEFINE_ACCOUNT_FIELDS(_)    \
     /* CONSTANTS       | NAME */       \

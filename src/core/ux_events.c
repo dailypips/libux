@@ -64,17 +64,27 @@ static void event_level2_snapshot_destory(ux_event_t* e)
 {
     assert(e->type == UXE_LEVEL2_SNAPSHOT);
     uxe_level2_snapshot_t* snapshot = (uxe_level2_snapshot_t*)e;
-    free_if(snapshot->ticks);
+    free_if(snapshot->bids);
+    free_if(snapshot->asks);
 }
 
 static ux_event_t* event_level2_snapshot_clone(ux_event_t* e)
 {
-    uxe_level2_snapshot_t* snapshot = (uxe_level2_snapshot_t*)event_default_clone(e);
-    size_t size = (snapshot->num_bids + snapshot->num_asks) * sizeof(ux_tick_info_t);
-    ux_tick_info_t* info = ux_malloc(size);
-    memcpy(info, snapshot->ticks, size);
-    snapshot->ticks = info;
-    return (ux_event_t*)snapshot;
+    uxe_level2_snapshot_t* dst = (uxe_level2_snapshot_t*)event_default_clone(e);
+
+    size_t bid_size = dst->num_bids * sizeof(ux_tick_info_t);
+    size_t ask_size = dst->num_asks * sizeof(ux_tick_info_t);
+
+    ux_tick_info_t* bids = ux_malloc(bid_size);
+    ux_tick_info_t* asks = ux_malloc(ask_size);
+
+    memcpy(bids, dst->bids, bid_size);
+    memcpy(asks, dst->asks, ask_size);
+
+    dst->bids = bids;
+    dst->asks = asks;
+
+    return (ux_event_t*)dst;
 }
 
 static void event_level2_update_destory(ux_event_t* e)

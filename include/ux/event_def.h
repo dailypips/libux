@@ -15,8 +15,9 @@ extern "C" {
 /* event module */
 #define EVENTDEF(_)                                                                                   \
     /* UppercaseName        LowcaseName         destory            clone              dispatch*/      \
-     /* market events */                                                                              \
+    /* timer event */                                                                                 \
     _(REMINDER,             reminder,           default,           default,           reminder)       \
+     /* market events */                                                                              \
     _(ASK,                  ask,                default,           default,           ask)            \
     _(BID,                  bid,                default,           default,           bid)            \
     _(TRADE,                trade,              default,           default,           trade)          \
@@ -28,12 +29,15 @@ extern "C" {
     _(NEWS,                 news,               news,              news,              default)        \
     _(FUNDAMENTAL,          fundamental,        default,           default,           default)        \
     /* instrument */ \
+    _(INSTRUMENT_DEF,       instrument_def,     default,           default,           default)        \
+    _(INSTRUMENT_DEF_END,   instrument_def_end, default,           default,           default)        \
     _(INSTRUMENT_ADDED,     instrument_added,   default,           default,           default)        \
     _(INSTRUMENT_REMOVED,   instrument_removed, default,           default,           default)        \
     /* historical event */ \
     _(HISTORICAL_DATA,      historical_data,    default,           default,           default)        \
     _(HISTORICAL_DATA_END,  historical_data_end,default,           default,           default)        \
     /* execution events */                                                                            \
+    _(ACCOUNT_DATA,         account_data,       default,           default,           default)        \
     _(ACCOUNT_REPORT,       account_report,     account_report,    account_report,    default)        \
     _(EXECUTION_REPORT,     execution_report,   execution_report,  execution_report,  default)        \
     _(EXECUTION_COMMAND,    execution_command,  execution_command, execution_command, default)        \
@@ -60,6 +64,10 @@ extern "C" {
     _(POSITION_OPENED,      position_opened,    default,           default,           default)        \
     _(POSITION_CLOSED,      position_closed,    default,           default,           default)        \
     _(POSITION_CHANGED,     position_changed,   default,           default,           default)        \
+    /* fill */ \
+    _(ON_FILL,              on_fill,            default,           default,           default)        \
+    _(ON_TRANSACETION,      on_transaction,     default,           default,           default)        \
+    /* stop events */ \
     _(STOP_EXECUTED,        stop_executed,      default,           default,           default)        \
     _(STOP_CANCELLED,       stop_cancelled,     default,           default,           default)        \
     _(STOP_STATUS_CHANGED,  stop_status_changed,default,           default,           default)        \
@@ -69,20 +77,25 @@ extern "C" {
     /* internal events */                                                                             \
     _(QUEUE_OPENED,         queue_opened,       default,           default,           default)        \
     _(QUEUE_CLOSED,         queue_closed,       default,           default,           default)        \
+    /* */ \
     _(SIMULATOR_START,      simulator_start,    default,           default,           default)        \
     _(SIMULATOR_STOP,       simulator_stop,     default,           default,           default)        \
     _(SIMULATOR_PROGRESS,   simulator_progress, default,           default,           default)        \
+    /* */ \
+    _(OPTIMIZATION_START,   optimization_start, default,           default,           default)        \
+    _(OPTIMIZATION_STOP,    optimization_stop,  default,           default,           default)        \
+    _(OPTIMIZATION_PROGRESS,optimization_progress,default,         default,           default)        \
     /* provider event */ \
     _(PROVIDER_ADDED,       provider_added,     default,           default,           default)        \
     _(PROVIDER_REMOVED,     provider_removed,   default,           default,           default)        \
     _(PROVIDER_CONNECTED,   provider_connected, default,           default,           default)        \
     _(PROVIDER_DISCONNECTED,provider_disconnected, default,        default,           default)        \
     _(PROVIDER_STATUS_CHANGED,provider_status_changed,default,     default,           default)        \
-    _(PROVIDER_ERROR,       provider_error,     default,    default,    default)        \
+    _(PROVIDER_ERROR,       provider_error,     default,    default,    default)                      \
     /* output event */ \
-    _(OUTPUT,               output,             default,            default,            default)        \
+    _(OUTPUT,               output,             default,            default,            default)      \
     /* group event */ \
-    _(GROUP,                group,              default,             default,             default)        \
+    _(GROUP,                group,              default,             default,             default)    \
     _(GROUP_UPDATE,         group_update,       default,           default,           default)        \
     _(GROUP_EVENT,          group_event,        default,           default,           default)        \
     /* exception */ \

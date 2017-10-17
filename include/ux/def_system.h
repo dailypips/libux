@@ -78,6 +78,17 @@ typedef struct {
     int percent;                            \
     long long count;
 
+#define UXE_OPTIMIZATION_START_FIELDS          \
+    ux_time_t time1;                        \
+    ux_time_t time2;                        \
+    long long count;
+
+#define UXE_OPTIMIZATION_STOP_FIELDS
+
+#define UXE_OPTIMIZATION_PROGRESS_FIELDS       \
+    int percent;                            \
+    long long count;
+
 
 #define UXE_EXCEPTION_FIELDS                \
     char *source;
@@ -121,6 +132,24 @@ typedef enum {
 
 #define UX_INSTRUMENT_FIELDS                \
     ux_instrument_t *instrument;
+
+#define UXE_INSTRUMENT_DEF_FIELDS           \
+    char *request_id;                       \
+    int   provider_id;                      \
+    int   total_num;                        \
+    ux_instrument_t* instruments[1];
+
+typedef enum {
+    UX_REQUEST_RESULT_COMPLETED,
+    UX_REQUEST_RESULT_CANCELLED,
+    UX_REQUEST_RESULT_ERROR
+}ux_request_result;
+
+#define UXE_INSTRUMENT_DEF_END_FIELDS       \
+    char *request_id;                       \
+    ux_request_result result;               \
+    char *text;
+
 
 #define UXE_INSTRUMENT_ADDED_FIELDS         \
     UX_INSTRUMENT_FIELDS
@@ -189,15 +218,9 @@ typedef enum {
     void *data;
 
 
-typedef enum {
-    UX_REQUEST_RESULT_COMPLETED,
-    UX_REQUEST_RESULT_CANCELLED,
-    UX_REQUEST_RESULT_ERROR
-}ux_request_result_t;
-
 #define UXE_HISTORICAL_DATA_END_FIELDS      \
     char *request_id;                       \
-    ux_request_result_t result;             \
+    ux_request_result result;               \
     char *text;
 
 
