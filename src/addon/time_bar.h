@@ -12,7 +12,7 @@ typedef struct time_bar_item_s {
 }time_bar_item_t;
 
 void time_bar_item_init(time_bar_item_t *item);
-void time_bar_item_destory(time_bar_item_t *item);
+void time_bar_item_destroy(time_bar_item_t *item);
 
 
 #endif // __TIME_BAR_H__

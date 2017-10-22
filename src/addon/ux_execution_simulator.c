@@ -18,12 +18,12 @@ typedef struct {
 
 typedef struct ux_default_execution_simulator_s {
     UX_EXECUTION_SIMULATOR_PUBLIC_FIELDS
-    khash_t(int) *list_by_instrument_id;
+    ux_ihash_t *list_by_instrument_id;
     ux_timespan_t auction1;
     ux_timespan_t auction2;
 }ux_default_execution_simulator_t;
 
-/*static void set_key_value(khash_t(int) *hash, int key, void *val)
+/*static void set_key_value(ux_ihash_t *hash, int key, void *val)
 {
     int ret;
     khint_t k;
@@ -38,7 +38,7 @@ typedef struct ux_default_execution_simulator_s {
     kh_value(hash, k) = tick;
 }*/
 
-static void* get_key_value(khash_t(int) *hash, int key)
+static void* get_key_value(ux_ihash_t *hash, int key)
 {
     khint_t iter = kh_get(int, hash, key);
     if (iter == kh_end(hash))

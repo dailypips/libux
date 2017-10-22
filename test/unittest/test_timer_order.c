@@ -83,7 +83,7 @@ static int test_timer_event_order(ux_bus_mode mode, ux_clock_type ctype)
 
     /* clear bus*/
 
-    ux_ctx_destory(&ctx);
+    ux_ctx_destroy(&ctx);
 
     return 0;
 }

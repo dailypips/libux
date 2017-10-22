@@ -433,7 +433,7 @@ struct cp_plugin_info_s {
 	
 	/**
 	 * Path of the plugin directory or NULL if not known. This is the
-	 * (absolute or relative) path to the plug-in directory containing
+     * (absolute or relative) path to the plug-in directory containing
 	 * plug-in data and the plug-in runtime library. The value corresponds
 	 * to the path specified to ::cp_load_plugin_descriptor when loading
 	 * the plug-in.

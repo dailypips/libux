@@ -110,7 +110,7 @@ static int test_pipe_event_order(ux_bus_mode mode, ux_queue_category category)
 
     /* clear bus*/
 
-    ux_ctx_destory(&ctx);
+    ux_ctx_destroy(&ctx);
     return 0;
 }
 

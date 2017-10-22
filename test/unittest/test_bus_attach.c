@@ -105,8 +105,8 @@ static int test_attach(ux_bus_mode mode)
 
     /* clear bus*/
     bus_detach(&ctx1, &ctx2);
-    ux_ctx_destory(&ctx1);
-    ux_ctx_destory(&ctx2);
+    ux_ctx_destroy(&ctx1);
+    ux_ctx_destroy(&ctx2);
     return 0;
 }
 

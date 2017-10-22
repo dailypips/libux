@@ -108,7 +108,7 @@ void time_bar_item_init(time_bar_item_t* item)
     item->started = 0;
 }
 
-void time_bar_item_destory(time_bar_item_t* item)
+void time_bar_item_destroy(time_bar_item_t* item)
 {
-    //ux_barfactory_item_destory((ux_barfactory_item_t*)item);
+    //ux_barfactory_item_destroy((ux_barfactory_item_t*)item);
 }

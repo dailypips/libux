@@ -116,7 +116,7 @@ void ux_default_data_simulator_init(ux_default_data_simulator_t *simulator)
     simulator->time2 = MAX_DATE_TIME;
 }
 
-void ux_default_data_simulator_destory(ux_default_data_simulator_t *simulator)
+void ux_default_data_simulator_destroy(ux_default_data_simulator_t *simulator)
 {
 
 }

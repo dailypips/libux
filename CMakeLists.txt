@@ -184,7 +184,7 @@ add_subdirectory(src)
 # enable tests if not disabled
 if (LIBUX_ENABLE_TESTING)
     enable_testing()
-    add_subdirectory(test)
+    #add_subdirectory(test)
 endif()
 ################################################################################
 #                                print summary                                 #
