@@ -8,11 +8,11 @@
 #ifndef __UX_PROVIDER_H__
 #define __UX_PROVIDER_H__
 
-#include <ux/common.h>
-#include <ux/datetime.h>
-#include <ux/currency.h>
-#include <ux/instrument.h>
-#include <ux/order.h>
+#include <ux/base/ux_common.h>
+#include <ux/base/ux_datetime.h>
+#include <ux/base/ux_currency.h>
+#include <ux/domain/ux_instrument.h>
+#include <ux/event/tick.h>
 
 #ifdef __cplusplus
 extern "C" {

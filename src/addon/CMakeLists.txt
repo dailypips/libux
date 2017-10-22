@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 project(addon C)
 
 set(UX_ADDON_HEADER
-  ../../include/ux/ux.h
 )
 
 set(UX_ADDON_SRC
@@ -10,4 +9,4 @@ set(UX_ADDON_SRC
 )
 
 add_library(uxaddon SHARED  ${UX_ADDON_HEADER} ${UX_ADDON_SRC})
-target_link_libraries(uxaddon uxcore cpcore ${UX_EXTERNAL_LIBRARIES})
+target_link_libraries(uxaddon uxbus  ${UX_EXTERNAL_LIBRARIES})

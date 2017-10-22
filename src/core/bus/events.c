@@ -5,13 +5,15 @@
  *                                                                            *
  * Distributed under the terms and conditions of the BSD 3-Clause License.    *
  ******************************************************************************/
-#include "i.h"
+#include "event_vtable.h"
+#include <ux/event/ux_events.h>
+#include "atomic.h"
 
 #define free_if(x) \
     if (x)         \
         ux_free(x);
 
-static void event_news_destroy(ux_event_t* e)
+void event_news_destroy(ux_event_t* e)
 {
     uxe_news_t* news = (uxe_news_t*)e;
     free_if(news->urgency);
@@ -20,7 +22,7 @@ static void event_news_destroy(ux_event_t* e)
     free_if(news->text);
 }
 
-static ux_event_t* event_news_clone(ux_event_t* event)
+ux_event_t* event_news_clone(ux_event_t* event)
 {
     assert(event->type == UXE_NEWS);
     uxe_news_t* e = (uxe_news_t*)event;
@@ -36,13 +38,13 @@ static ux_event_t* event_news_clone(ux_event_t* event)
     return (ux_event_t*)news;
 }
 
-static void event_exception_destroy(ux_event_t* e)
+void event_exception_destroy(ux_event_t* e)
 {
     uxe_exception_t* exception = (uxe_exception_t*)e;
     free_if(exception->source);
 }
 
-static ux_event_t* event_exception_clone(ux_event_t* e)
+ux_event_t* event_exception_clone(ux_event_t* e)
 {
     assert(e->type == UXE_EXCEPTION);
     uxe_exception_t* exception = (uxe_exception_t*)e;
@@ -51,7 +53,7 @@ static ux_event_t* event_exception_clone(ux_event_t* e)
     return (ux_event_t*)item;
 }
 
-static ux_event_t* event_default_clone(ux_event_t* e)
+ux_event_t* event_default_clone(ux_event_t* e)
 {
     UX_ASSERT(e->type < UXE_LAST);
     ux_event_t* result = ux_event_malloc(e->type);
@@ -60,7 +62,7 @@ static ux_event_t* event_default_clone(ux_event_t* e)
     return result;
 }
 
-static void event_level2_snapshot_destroy(ux_event_t* e)
+void event_level2_snapshot_destroy(ux_event_t* e)
 {
     assert(e->type == UXE_LEVEL2_SNAPSHOT);
     uxe_level2_snapshot_t* snapshot = (uxe_level2_snapshot_t*)e;
@@ -68,7 +70,7 @@ static void event_level2_snapshot_destroy(ux_event_t* e)
     free_if(snapshot->asks);
 }
 
-static ux_event_t* event_level2_snapshot_clone(ux_event_t* e)
+ux_event_t* event_level2_snapshot_clone(ux_event_t* e)
 {
     uxe_level2_snapshot_t* dst = (uxe_level2_snapshot_t*)event_default_clone(e);
 
@@ -87,14 +89,14 @@ static ux_event_t* event_level2_snapshot_clone(ux_event_t* e)
     return (ux_event_t*)dst;
 }
 
-static void event_level2_update_destroy(ux_event_t* e)
+void event_level2_update_destroy(ux_event_t* e)
 {
     assert(e->type == UXE_LEVEL2_UPDATE);
     uxe_level2_update_t* update = (uxe_level2_update_t*)e;
     free_if(update->entries);
 }
 
-static ux_event_t* event_level2_update_clone(ux_event_t* e)
+ux_event_t* event_level2_update_clone(ux_event_t* e)
 {
     uxe_level2_update_t* update = (uxe_level2_update_t*)event_default_clone(e);
     size_t size = (update->num_entries) * sizeof(ux_level2_t);
@@ -104,31 +106,31 @@ static ux_event_t* event_level2_update_clone(ux_event_t* e)
     return (ux_event_t*)update;
 }
 // TODO:
-static void event_account_report_destroy(ux_event_t *e)
+void event_account_report_destroy(ux_event_t *e)
 {
 
 }
 
-static ux_event_t* event_account_report_clone(ux_event_t *e)
-{
-    return e;
-}
-
-static void event_execution_report_destroy(ux_event_t *e)
-{
-
-}
-
-static ux_event_t* event_execution_report_clone(ux_event_t *e)
+ux_event_t* event_account_report_clone(ux_event_t *e)
 {
     return e;
 }
-static void event_execution_command_destroy(ux_event_t *e)
+
+void event_execution_report_destroy(ux_event_t *e)
 {
 
 }
 
-static ux_event_t* event_execution_command_clone(ux_event_t *e)
+ux_event_t* event_execution_report_clone(ux_event_t *e)
+{
+    return e;
+}
+void event_execution_command_destroy(ux_event_t *e)
+{
+
+}
+
+ux_event_t* event_execution_command_clone(ux_event_t *e)
 {
     return e;
 }

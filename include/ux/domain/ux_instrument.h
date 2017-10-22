@@ -17,6 +17,8 @@
 extern "C" {
 #endif
 
+typedef struct ux_instrument_s ux_instrument_t;
+
 /* instrument module */
 typedef enum {
     UX_INSTRUMENT_TYPE_NONE = 0,

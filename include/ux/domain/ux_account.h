@@ -8,9 +8,9 @@
 #ifndef __UX_ACCOUNT_H__
 #define __UX_ACCOUNT_H__
 
-#include <ux/common.h>
-#include <ux/types.h>
-#include <ux/currency.h>
+#include <ux/base/ux_common.h>
+#include <ux/base/ux_types.h>
+#include <ux/base/ux_currency.h>
 
 #ifdef __cplusplus
 extern "C" {

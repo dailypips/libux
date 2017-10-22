@@ -37,9 +37,4 @@ typedef struct {
 #define UXE_FUNDAMENTAL_FIELDS                  \
     UXE_MARKET_COMMON_FIELDS
 
-typedef struct {
-    double price;
-    long size;
-}ux_tick_info_t;
-
 #endif // __UXE_MARKET_DATA_H__

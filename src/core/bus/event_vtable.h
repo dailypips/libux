@@ -28,6 +28,15 @@ typedef struct _uxe_class_vtable_t {
 
 extern uxe_class_vtable_t g_event_vtable[UXE_LAST];
 
+
+#define CLASSENUM(euname, elname, edestroy, eclone, edispatch)   \
+    void event_##edestroy##_destroy(ux_event_t *e);\
+     ux_event_t* event_##eclone##_clone(ux_event_t *e);\
+     void event_##edispatch##_dispatch(ux_ctx_t *ctx, ux_event_t *e);
+    EVENTDEF(CLASSENUM)
+#undef CLASSENUM
+
+
 #ifdef __cplusplus
 }
 #endif

@@ -13,6 +13,8 @@ set(UX_BUS_SRC
         context.c
         dispatch.c
         bar_generator.c
+        events.c
+        dispatch_market.c
 )
 
 add_library(uxbus STATIC  ${UX_BUS_HEADER} ${UX_BUS_SRC})

@@ -8,12 +8,12 @@
 #ifndef SUBSCRIBE_H
 #define SUBSCRIBE_H
 
-#include <ux/common.h>
-#include <ux/types.h>
-#include <ux/currency.h>
-#include <ux/event.h>
-#include <ux/position.h>
-#include <ux/provider.h>
+#include <ux/base/ux_common.h>
+#include <ux/base/ux_types.h>
+#include <ux/base/ux_currency.h>
+#include <ux/event/ux_event.h>
+#include <ux/domain/ux_position.h>
+#include <ux/domain/ux_provider.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -8,24 +8,24 @@
 #ifndef __UX_PORTFOLIO_H__
 #define __UX_PORTFOLIO_H__
 
-#include <ux/account.h>
-#include <ux/common.h>
-#include <ux/currency.h>
-#include <ux/datetime.h>
-#include <ux/instrument.h>
-#include <ux/order.h>
-#include <ux/position.h>
-#include <ux/id_array.h>
+#include <ux/base/ux_common.h>
+#include <ux/base/ux_currency.h>
+#include <ux/base/ux_datetime.h>
+#include <ux/domain/ux_account.h>
+#include <ux/domain/ux_instrument.h>
+#include <ux/domain/ux_order.h>
+#include <ux/domain/ux_position.h>
+#include <ux/base/ux_idarray.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum {
+/*typedef enum {
     UX_ACCOUNT_DATA_TYPE_ACCTVALUE,
     UX_ACCOUNT_DATA_TYPE_POSITION,
     UX_ACCOUNT_DATA_TYPE_ORDER
-} ux_account_data_type;
+} ux_account_data_type;*/
 
 #define PREDEFINE_ACCOUNT_FIELDS(_)  \
     /* CONSTANTS       | NAME */     \

@@ -14,6 +14,7 @@
 #include <ux/event/ux_event.h>
 #include <ux/base/ux_logger.h>
 #include <ux/base/ux_idarray.h>
+#include <ux/domain/ux_provider.h>
 #include "bar_generator.h"
 #include "event_bus.h"
 #include "hash.h"
@@ -22,8 +23,7 @@
 extern "C" {
 #endif
 
-typedef struct ux_data_simulator_s ux_data_simulator_t;
-typedef struct ux_execution_simulator_t ux_execution_simulator_t;
+
 typedef struct ux_stop_s ux_stop_t;
 
 #define LOOP_FIELDS                                                            \

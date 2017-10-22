@@ -1,6 +1,7 @@
-#include "../core/ux_macro.h"
+#include <ux/base/ux_common.h>
 #include "queue.h"
 #include "time_bar.h"
+#include "dispatch.h"
 
 static void emit_bar_open(ux_ctx_t *ctx, ux_bar_generator_t* item)
 {
@@ -91,24 +92,24 @@ static void time_bar_on_tick(ux_bar_generator_t* node, ux_event_tick_t* tick)
             r->callback = time_bar_on_reminder;
             r->user_data = item;
 
-            ux_barfactory_add_reminder(item->ctx, r);
+            ux_bar_factory_add_reminder(item->ctx, r);
         }
     }
     if (UX_LIKELY(item->started))
         item->bar->tick_count++;
 }
 
-void time_bar_item_init(time_bar_item_t* item)
+void time_bar_generator_init(time_bar_item_t* item)
 {
-    //ux_barfactory_item_init((ux_barfactory_item_t*)item);
     QUEUE_INIT(&item->queue_node);
     item->clock_type = UX_CLOCK_LOCAL;
     item->on_tick = time_bar_on_tick;
     item->start_time = MIN_DATE_TIME;
     item->started = 0;
+    item->bar_type = UX_BAR_TYPE_TIME;
+    item->bar_size = 60; // default 1m bar
 }
 
-void time_bar_item_destroy(time_bar_item_t* item)
+void time_bar_generator_destroy(time_bar_item_t* item)
 {
-    //ux_barfactory_item_destroy((ux_barfactory_item_t*)item);
 }

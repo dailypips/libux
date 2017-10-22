@@ -6,6 +6,8 @@
 #include <ux/base/ux_datetime.h>
 #include <ux/event/ux_event.h>
 #include <ux/base/ux_types.h>
+#include <ux/domain/ux_provider.h>
+#include <ux/domain/ux_portfolio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,61 +39,6 @@ struct uxe_level2_update_s {
     UXE_COMMON_FIELDS
     UXE_LEVEL2_UPDATE_FIELDS
 };
-
-/*struct ux_event_tick_s {
-    UXE_COMMON_FIELDS
-    UXE_TICK_COMMON_FIELDS
-};
-
-struct uxe_ask_s {
-    UXE_COMMON_FIELDS
-    UXE_ASK_FIELDS
-};
-
-struct uxe_bid_s {
-    UXE_COMMON_FIELDS
-    UXE_BID_FIELDS
-};
-
-struct uxe_trade_s {
-    UXE_COMMON_FIELDS
-    UXE_TRADE_FIELDS
-};
-
-struct uxe_level2_snapshot_s {
-    UXE_COMMON_FIELDS
-    UXE_LEVEL2_SNAPSHOT_FIELDS
-};
-
-struct uxe_level2_update_s {
-    UXE_COMMON_FIELDS
-    UXE_LEVEL2_UPDATE_FIELDS
-};
-
-struct uxe_bar_s {
-    UXE_COMMON_FIELDS
-    UXE_BAR_FIELDS
-};
-
-struct uxe_bar_open_s {
-    UXE_COMMON_FIELDS
-    UXE_BAR_OPEN_FIELDS
-};
-
-struct uxe_bar_slice_s {
-    UXE_COMMON_FIELDS
-    UXE_BARSLICE_FIELDS
-};
-
-struct uxe_news_s {
-    UXE_COMMON_FIELDS
-    UXE_NEWS_FIELDS
-};
-
-struct uxe_fundamental_s {
-    UXE_COMMON_FIELDS
-    UXE_FUNDAMENTAL_FIELDS
-};*/
 
 struct uxe_instrument_def_s {
     UXE_COMMON_FIELDS
