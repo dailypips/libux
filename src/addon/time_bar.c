@@ -3,22 +3,22 @@
 #include "time_bar.h"
 #include "dispatch.h"
 
-static void emit_bar_open(ux_ctx_t *ctx, ux_bar_generator_t* item)
+static void emit_bar_open(ux_ctx_t *ctx, ux_bar_generator_t* generator)
 {
-    item->bar->status = UX_BAR_STATUS_OPEN;
-    ux_dispatch_event(ctx, (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
+    generator->bar->status = UX_BAR_STATUS_OPEN;
+    ux_dispatch_event(ctx, (ux_event_t*)generator->bar, UX_DISPATCH_IMMEDIATELY);
 }
 
-static void emit_bar(ux_ctx_t *ctx, ux_bar_generator_t* item)
+static void emit_bar(ux_ctx_t *ctx, ux_bar_generator_t* generator)
 {
-    item->bar->status = UX_BAR_STATUS_CLOSE;
-    ux_dispatch_event(ctx, (ux_event_t*)item->bar, UX_DISPATCH_IMMEDIATELY);
-    item->bar = NULL;
+    generator->bar->status = UX_BAR_STATUS_CLOSE;
+    ux_dispatch_event(ctx, (ux_event_t*)generator->bar, UX_DISPATCH_IMMEDIATELY);
+    generator->bar = NULL;
 }
 
 static void time_bar_on_reminder(uxe_reminder_t* r)
 {
-    time_bar_item_t* item = (time_bar_item_t*)(r->user_data);
+    time_bar_generator_t* item = (time_bar_generator_t*)(r->user_data);
 
     if (item->clock_type == UX_CLOCK_LOCAL)
         item->bar->timestamp = r->timeout;
@@ -28,17 +28,17 @@ static void time_bar_on_reminder(uxe_reminder_t* r)
     emit_bar(item->ctx, (ux_bar_generator_t*)item);
 }
 
-static ux_time_t round_start_time(time_bar_item_t* item, ux_event_tick_t* tick)
+static ux_time_t round_start_time(time_bar_generator_t* generator, ux_event_tick_t* tick)
 {
     /* bar_size 表达秒数 */
-    int bar_size = item->bar_size;
+    int bar_size = generator->bar_size;
     return tick->timestamp;
 }
 
 static void time_bar_on_tick(ux_bar_generator_t* node, ux_event_tick_t* tick)
 {
     uxe_bar_t* bar;
-    time_bar_item_t* item = (time_bar_item_t*)node;
+    time_bar_generator_t* item = (time_bar_generator_t*)node;
 
     if (item->bar) {
 
@@ -66,7 +66,7 @@ static void time_bar_on_tick(ux_bar_generator_t* node, ux_event_tick_t* tick)
             emit_bar_open(item->ctx, (ux_bar_generator_t*)item);
         }
     } else {
-        bar = (uxe_bar_t*)ux_event_malloc(UXE_BAR);
+        bar = (uxe_bar_t*)ux_event_zalloc(UXE_BAR);
         item->bar = bar;
         bar->provider = tick->provider;
         bar->instrument = tick->instrument;
@@ -85,7 +85,7 @@ static void time_bar_on_tick(ux_bar_generator_t* node, ux_event_tick_t* tick)
         } else {
             item->start_time = round_start_time(item, tick);
 
-            uxe_reminder_t* r = (uxe_reminder_t*)ux_event_malloc(UXE_REMINDER);
+            uxe_reminder_t* r = (uxe_reminder_t*)ux_event_zalloc(UXE_REMINDER);
             r->clock_type = item->clock_type;
             r->repeat = item->bar_size * TICKS_PER_SECOND;
             r->timeout = item->start_time + r->repeat;
@@ -99,17 +99,20 @@ static void time_bar_on_tick(ux_bar_generator_t* node, ux_event_tick_t* tick)
         item->bar->tick_count++;
 }
 
-void time_bar_generator_init(time_bar_item_t* item)
+void time_bar_generator_init(time_bar_generator_t* generator, long bar_size)
 {
-    QUEUE_INIT(&item->queue_node);
-    item->clock_type = UX_CLOCK_LOCAL;
-    item->on_tick = time_bar_on_tick;
-    item->start_time = MIN_DATE_TIME;
-    item->started = 0;
-    item->bar_type = UX_BAR_TYPE_TIME;
-    item->bar_size = 60; // default 1m bar
+    QUEUE_INIT(&generator->queue_node);
+    generator->clock_type = UX_CLOCK_LOCAL;
+    generator->on_tick = time_bar_on_tick;
+    generator->start_time = MIN_DATE_TIME;
+    generator->started = 0;
+    generator->bar_type = UX_BAR_TYPE_TIME;
+    generator->bar_size = bar_size;
 }
 
-void time_bar_generator_destroy(time_bar_item_t* item)
+void time_bar_generator_destroy(time_bar_generator_t* generator)
 {
+    if(generator->bar) {
+        ux_event_unref((ux_event_t*)generator->bar);
+    }
 }

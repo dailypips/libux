@@ -1,90 +1,26 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
+
 #ifndef __UX_PORTFOLIO_H__
 #define __UX_PORTFOLIO_H__
 
-#include <ux/base/ux_common.h>
-#include <ux/base/ux_currency.h>
-#include <ux/base/ux_datetime.h>
-#include <ux/domain/ux_account.h>
-#include <ux/domain/ux_instrument.h>
-#include <ux/domain/ux_order.h>
-#include <ux/domain/ux_position.h>
-#include <ux/base/ux_idarray.h>
+#include <ux/base/ux_type.h>
+#include <ux/domain/ux_series.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*typedef enum {
-    UX_ACCOUNT_DATA_TYPE_ACCTVALUE,
-    UX_ACCOUNT_DATA_TYPE_POSITION,
-    UX_ACCOUNT_DATA_TYPE_ORDER
-} ux_account_data_type;*/
-
-#define PREDEFINE_ACCOUNT_FIELDS(_)  \
-    /* CONSTANTS       | NAME */     \
-    _(SYMBOL, "Symbol")              \
-    _(EXCHANGE, "Exchange")          \
-    _(SECURITY_TYPE, "SecurityType") \
-    _(CURRENCY, "Currency")          \
-    _(MATURITY, "Maturity")          \
-    _(PUT_OR_CALL, "PutOrCall")      \
-    _(STRIKE, "Strike")              \
-    _(QTY, "Qty")                    \
-    _(LONG_QTY, "LongQty")           \
-    _(SHORT_QTY, "ShortQty")         \
-    _(ORDER_ID, "OrderID")           \
-    _(ORDER_TYPE, "OrderType")       \
-    _(ORDER_SIDE, "OrderSide")       \
-    _(ORDER_STATUS, "OrderStatus")   \
-    _(PRICE, "Price")                \
-    _(STOP_PX, "StopPx")
-
-typedef struct account_field_item_s {
-    char* name;
-    ux_currency_t currency;
-    uintptr_t value;
-} account_field_item_t;
-
-typedef struct account_position_s {
-    ux_currency_t currency;
-    double value;
-} account_position_t;
-
-typedef struct ux_fill_series_s {
-    char* name;
-    int count;
-    ux_fill_t* min;
-    ux_fill_t* max;
-    ux_fill_t* fills;
-} ux_fill_series_t;
-
+//TODO series 直接嵌入到字段里，而不是现在的指针
 typedef struct ux_pricer_s {
     double (*get_price)(ux_position_t* position);
     double (*get_value)(ux_portfolio_t* position);
 } ux_pricer_t;
-
-typedef struct ux_time_series_item_s {
-    ux_time_t timestamp;
-    double value;
-} ux_time_series_item_t;
-
-typedef struct ux_time_series_s {
-    int id;
-    char* name;
-    char* description;
-    ux_time_series_item_t* min;
-    ux_time_series_item_t* max;
-    void* indicators[2];
-    int count;
-    ux_time_series_item_t* series;
-} ux_time_series_t;
 
 typedef struct ux_portfolio_performance_s {
     ux_portfolio_t* portfolio;
@@ -103,9 +39,9 @@ typedef struct ux_portfolio_statistics_item_s {
     double total_value;
     double long_value;
     double short_value;
-    ux_time_series_t totals;
-    ux_time_series_t longs;
-    ux_time_series_t shorts;
+    ux_time_series_t *totals;
+    ux_time_series_t *longs;
+    ux_time_series_t *shorts;
     ux_portfolio_t* portfolio;
     ux_portfolio_statistics_t* statistics;
     /* private */
@@ -129,22 +65,22 @@ struct ux_portfolio_statistics_s {
     void* statistics[2];
 };
 
-typedef struct {
+/*typedef struct {
     ux_fill_t fill;
     int portfolio_id;
     ux_fill_series_t* fills;
     void* transactions[2];
     void* positions[2];
-} uxe_fill_t;
+} uxe_fill_t;*/
 
 struct ux_portfolio_s {
     ux_ctx_t *ctx;
     ux_instrument_t *instrument;
-    int id;
+    ux_id_t id;
     char* name;
     char* description;
     ux_account_t* account;
-    ux_fill_series_t fills;
+    ux_fill_series_t *fills;
     void* transactions[2];
     void* positions[2];
     ux_idarray_t transaction_by_order_id;

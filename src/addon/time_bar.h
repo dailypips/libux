@@ -10,10 +10,10 @@ typedef struct time_bar_item_s {
     ux_clock_type clock_type;
     ux_time_t start_time;
     int started;
-}time_bar_item_t;
+}time_bar_generator_t;
 
-void time_bar_generator_init(time_bar_item_t *item);
-void time_bar_generator_destroy(time_bar_item_t *item);
+void time_bar_generator_init(time_bar_generator_t *generator, long bar_size);
+void time_bar_generator_destroy(time_bar_generator_t *generator);
 
 
 #endif // __TIME_BAR_H__

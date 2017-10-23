@@ -1,14 +1,27 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
+
 #ifndef __UXE_MARKET_DATA_H__
 #define __UXE_MARKET_DATA_H__
 
 /* market data event */
+typedef enum {
+    UX_L2_ACTION_NEW,
+    UX_L2_ACTION_CHANGE,
+    UX_L2_ACTION_DELETE,
+    UX_L2_ACTION_RESET
+} ux_level2_action;
+
+typedef enum {
+    UX_L2SIDE_BID,
+    UX_L2SIDE_ASK,
+} ux_level2_side;
+
 #define UXE_LEVEL2_SNAPSHOT_FIELDS              \
     UXE_MARKET_COMMON_EXCHANGE_FIELDS           \
     size_t num_bids;                            \

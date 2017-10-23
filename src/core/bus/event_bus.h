@@ -1,17 +1,17 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
+
 #ifndef __EVENT_BUS_H__
 #define __EVENT_BUS_H__
 
 #include <ux/base/ux_memory.h>
 #include <ux/bus/ux_context.h>
 #include <ux/event/ux_event.h>
-#include <ux/bus/ux_bus.h>
 #include "mpscq.h"
 #include "spscq.h"
 #include <ux/bus/ux_queue.h>
@@ -20,6 +20,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef struct {
+  void *min;
+  unsigned int nelts;
+} min_heap;
+
+typedef enum {
+    UX_BUS_SIMULATION,
+    UX_BUS_REALTIME,
+    UX_BUS_MODE_LAST
+} ux_bus_mode;
 
 #define EVENT_BUS_FIELDS                                                       \
   ux_bus_mode mode;                                                            \
@@ -34,6 +45,8 @@ extern "C" {
   int attached_count;                                                          \
   int is_simulator_stop;
 
+#define EVENT_BUS_INIT(ctx)         bus_init(ctx)
+#define EVENT_BUS_DESTROY(ctx)      bus_destroy(ctx)
 
 UX_FUNC void bus_init(ux_ctx_t *ctx);
 UX_FUNC void bus_destroy(ux_ctx_t *ctx);

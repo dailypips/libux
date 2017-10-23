@@ -1,12 +1,13 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
-#ifndef EXECUTION_H
-#define EXECUTION_H
+
+#ifndef __UXE_EXECUTION_H__
+#define __UXE_EXECUTION_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -155,4 +156,4 @@ struct uxe_on_transaction_s {
 }
 #endif
 
-#endif // EXECUTION_H
+#endif // __UXE_EXECUTION_H__

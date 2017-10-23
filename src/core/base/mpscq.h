@@ -20,7 +20,6 @@
 #define __MPSCQ_H__
 
 #include <stdbool.h>
-#include <stddef.h>
 #include <ux/base/ux_common.h>
 #include "atomic.h"
 

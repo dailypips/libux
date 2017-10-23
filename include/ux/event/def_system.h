@@ -3,11 +3,11 @@
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#ifndef __UX_EVENTS_H__
-#define __UX_EVENTS_H__
+#ifndef __UXE_SYSTEM_H__
+#define __UXE_SYSTEM_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -211,4 +211,4 @@ typedef enum {
 }
 #endif
 
-#endif /*__UX_EVENTS_H__*/
+#endif /*__UXE_SYSTEM_H__*/

@@ -1,25 +1,38 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
-#ifndef __INSTRUMENT_H__
-#define __INSTRUMENT_H__
 
+#ifndef __INSTRUMENT_MANAGER_H__
+#define __INSTRUMENT_MANAGER_H__
+
+#include "context.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define INSTRUMENT_MANAGER_FIELDS                                              \
+  ux_atomic_t next_instrument_id;                                              \
+  ux_idarray_t instrument_by_id;                                               \
+  ux_shash_t *instrument_by_symbol;                                            \
+  void *instruments[2];
+
+#define INSTRUMENT_MANAGER_INIT(ctx) instrument_manager_init(ctx)
+#define INSTRUMENT_MANAGER_DESTROY(ctx) instrument_manager_destroy(ctx)
+
+void instrument_manager_init(ux_ctx_t *ctx);
+void instrument_manager_destroy(ux_ctx_t *ctx);
 
 ux_instrument_t *ux_get_instrument_by_id(ux_ctx_t *ctx, int instrument_id);
 ux_instrument_t *ux_get_instrument_by_symbol(ux_ctx_t *ctx, const char *symbol);
+int ux_add_instrument(ux_ctx_t *ctx, ux_instrument_t *instrument);
 
-#define UX_ORDER_RESULT_OK       0
-#define UX_ORDER_HAS_REGISTERED -1
-#define UX_ORDER_SENT           -2
-int ux_register_order(ux_ctx_t *ctx, ux_order_t *order);
-void ux_reject_order(ux_ctx_t *ctx, ux_order_t *order);
-int ux_send_order(ux_ctx_t *ctx, ux_order_t *order);
-int ux_cancel_order(ux_ctx_t *ctx, ux_order_t *order);
-int ux_replace_order(ux_ctx_t *ctx, ux_order_t *order, double price, double stop_price, double qty);
+#ifdef __cplusplus
+}
+#endif
 
-
-#endif // __INSTRUMENT_H__
+#endif // __INSTRUMENT_MANAGER_H__

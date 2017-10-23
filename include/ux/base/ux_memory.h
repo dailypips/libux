@@ -1,18 +1,19 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
+
 #ifndef __UX_MEMORY_H__
 #define __UX_MEMORY_H__
+
+#include <ux/base/ux_common.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <ux/base/ux_common.h>
 
 /* memory module */
 typedef void* (*ux_malloc_func)(size_t size);

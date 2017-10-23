@@ -1,3 +1,11 @@
+/******************************************************************************
+ * Automated Trading System                                                   *
+ *                                                                            *
+ * Copyright (C) 2017 Xiaojun Gao                                             *
+ *                                                                            *
+ * Distributed under the terms and conditions of the MIT License.             *
+ ******************************************************************************/
+
 #include "dispatch.h"
 #include "context.h"
 #include "event_vtable.h"
@@ -28,7 +36,7 @@ void event_bid_dispatch(ux_ctx_t *ctx, ux_event_t *e)
          bus_set_exchange_time(ctx, bid->exchange_timestamp);
 
      bar_factory_process_tick(ctx, (ux_event_tick_t*)e);
-     data_manager_set_bid(ctx, bid);
+     ux_update_bid(ctx, bid);
      ctx->execution_simulator->on_bid(ctx->execution_simulator, bid);
 
      sm_on_bid(ctx, ux_get_instrument_by_id(ctx, bid->instrument), bid);

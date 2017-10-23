@@ -1,3 +1,11 @@
+/******************************************************************************
+ * Automated Trading System                                                   *
+ *                                                                            *
+ * Copyright (C) 2017 Xiaojun Gao                                             *
+ *                                                                            *
+ * Distributed under the terms and conditions of the MIT License.             *
+ ******************************************************************************/
+
 #ifndef __UXE_EVENTS_H__
 #define __UXE_EVENTS_H__
 
@@ -5,9 +13,10 @@
 #include <ux/base/ux_currency.h>
 #include <ux/base/ux_datetime.h>
 #include <ux/event/ux_event.h>
-#include <ux/base/ux_types.h>
+#include <ux/base/ux_type.h>
 #include <ux/domain/ux_provider.h>
 #include <ux/domain/ux_portfolio.h>
+#include <ux/domain/ux_order.h>
 
 #ifdef __cplusplus
 extern "C" {

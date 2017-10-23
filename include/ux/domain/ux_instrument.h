@@ -1,23 +1,20 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
+
 #ifndef __UX_INSTRUMENT_H__
 #define __UX_INSTRUMENT_H__
 
-#include <ux/base/ux_common.h>
-#include <ux/base/ux_datetime.h>
-#include <ux/base/ux_currency.h>
+#include <ux/base/ux_type.h>
 #include <ux/event/ux_event.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct ux_instrument_s ux_instrument_t;
 
 /* instrument module */
 typedef enum {
@@ -53,7 +50,7 @@ typedef struct ux_instrument_leg_s {
 
 struct ux_instrument_s {
     ux_atomic_t refcount;
-    int id;
+    ux_iid_t id;
     ux_instrument_type type;
     char* symbol;
     char* description;

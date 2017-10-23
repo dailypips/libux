@@ -132,19 +132,6 @@ typedef struct risk_plugin_s {
   int attached_count;                                                          \
   int is_simulator_stop;
 
-#define INSTRUMENT_MANAGER_FIELDS                                              \
-  ux_atomic_t next_instrument_id;                                              \
-  ux_idarray_t instrument_by_id;                                               \
-  ux_shash_t *instrument_by_symbol;                                            \
-  void *instruments[2];
-
-#define ORDER_MANAGER_FIELDS                                                   \
-  ux_atomic_t next_order_id;                                                   \
-  ux_idarray_t order_by_id;                                                    \
-  ux_shash_t *order_by_client_oid;                                             \
-  ux_shash_t *order_by_provider_oid;                                           \
-  ux_list_shash_t *order_list_by_oca;                                          \
-  void *orders[2];
 
 struct ux_ctx_s {
   LOOP_FIELDS

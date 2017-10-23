@@ -1,3 +1,11 @@
+/******************************************************************************
+ * Automated Trading System                                                   *
+ *                                                                            *
+ * Copyright (C) 2017 Xiaojun Gao                                             *
+ *                                                                            *
+ * Distributed under the terms and conditions of the MIT License.             *
+ ******************************************************************************/
+
 #ifndef __UX_QUEUE_H__
 #define __UX_QUEUE_H__
 

@@ -1,19 +1,16 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
-#ifndef SERIES_H
-#define SERIES_H
 
-#include <ux/base/ux_common.h>
-#include <ux/base/ux_types.h>
-#include <ux/base/ux_currency.h>
-#include <ux/event/ux_event.h>
-#include <ux/domain/ux_position.h>
-#include <ux/domain/ux_provider.h>
+#ifndef __UX_SERIES_H__
+#define __UX_SERIES_H__
+
+#include <ux/base/ux_type.h>
+#include <ux/event/tick.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,8 +35,32 @@ typedef struct ux_bar_series_s {
     void* indicators[2];
 }ux_bar_series_t;
 
+struct ux_fill_series_s {
+    char* name;
+    int count;
+    ux_fill_t* min;
+    ux_fill_t* max;
+    ux_fill_t* fills;
+};
+
+typedef struct ux_time_series_item_s {
+    ux_time_t timestamp;
+    double value;
+} ux_time_series_item_t;
+
+struct ux_time_series_s {
+    int id;
+    char* name;
+    char* description;
+    ux_time_series_item_t* min;
+    ux_time_series_item_t* max;
+    void* indicators[2];
+    int count;
+    ux_time_series_item_t* series;
+};
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif // SERIES_H
+#endif // __UX_SERIES_H__

@@ -1,12 +1,13 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
-#ifndef ATOMIC_H
-#define ATOMIC_H
+
+#ifndef __UX_ATOMIC_H__
+#define __UX_ATOMIC_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,4 +19,4 @@ typedef intptr_t ux_atomic_t;
 }
 #endif
 
-#endif // ATOMIC_H
+#endif // __UX_ATOMIC_H__

@@ -1,18 +1,17 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
+
 #ifndef __UX_PROVIDER_H__
 #define __UX_PROVIDER_H__
 
-#include <ux/base/ux_common.h>
-#include <ux/base/ux_datetime.h>
-#include <ux/base/ux_currency.h>
-#include <ux/domain/ux_instrument.h>
+#include <ux/base/ux_type.h>
 #include <ux/event/tick.h>
+#include <ux/domain/ux_instrument.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,7 +44,7 @@ typedef struct ux_bar_filter_item_s {
 #define UX_PROVIDER_PUBLIC_FIELDS \
     /* info */ \
     int (*is_enable)(ux_provider_t *provider); \
-    int (*get_id)(ux_provider_t *provider); \
+    ux_pid_t (*get_id)(ux_provider_t *provider); \
     const char* (*get_name)(ux_provider_t *provider); \
     /* method */    \
     ux_provider_status (*get_status)(ux_provider_t *provider); \

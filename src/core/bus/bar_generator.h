@@ -1,16 +1,19 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
+
 #ifndef __BAR_GENERATOR_H__
 #define __BAR_GENERATOR_H__
 
 #include <ux/base/ux_common.h>
 #include <ux/bus/ux_bar_generator.h>
 #include "hash.h"
+
+typedef struct ux_bar_factory_s ux_bar_factory_t;
 
 UX_FUNC void ux_bar_generator_init(ux_bar_generator_t *item);
 UX_FUNC void ux_bar_generator_destroy(ux_bar_generator_t *item);

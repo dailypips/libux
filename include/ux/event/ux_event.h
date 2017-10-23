@@ -1,5 +1,13 @@
-#ifndef __UXE_H__
-#define __UXE_H__
+/******************************************************************************
+ * Automated Trading System                                                   *
+ *                                                                            *
+ * Copyright (C) 2017 Xiaojun Gao                                             *
+ *                                                                            *
+ * Distributed under the terms and conditions of the MIT License.             *
+ ******************************************************************************/
+
+#ifndef __UX_EVENT_H__
+#define __UX_EVENT_H__
 
 #include <ux/base/ux_atomic.h>
 #include <ux/base/ux_common.h>
@@ -41,7 +49,7 @@ typedef struct ux_event_s {
 } ux_event_t;
 
 UX_EXTERN size_t ux_event_size(uxe_type type);
-UX_EXTERN ux_event_t *ux_event_malloc(uxe_type type);
+UX_EXTERN ux_event_t *ux_event_zalloc(uxe_type type);
 UX_EXTERN ux_event_t *ux_event_ref(ux_event_t *e);
 UX_EXTERN void ux_event_unref(ux_event_t *e);
 UX_EXTERN ux_event_t *ux_event_clone(ux_event_t *e);
@@ -50,4 +58,4 @@ UX_EXTERN ux_event_t *ux_event_clone(ux_event_t *e);
 }
 #endif
 
-#endif // __UXE_H__
+#endif // __UX_EVENT_H__

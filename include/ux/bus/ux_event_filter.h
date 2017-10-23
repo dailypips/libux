@@ -1,12 +1,13 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
-#ifndef EVENT_FILTER_H
-#define EVENT_FILTER_H
+
+#ifndef __UX_EVENT_FILTER_H__
+#define __UX_EVENT_FILTER_H__
 
 #include <ux/bus/ux_context.h>
 #include <ux/event/ux_event.h>
@@ -28,4 +29,4 @@ int ux_unregister_event_filter(ux_ctx_t *ctx, ux_event_filter_t *filter);
 }
 #endif
 
-#endif // EVENT_FILTER_H
+#endif // __UX_EVENT_FILTER_H__

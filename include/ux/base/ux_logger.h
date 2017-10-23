@@ -1,12 +1,15 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
-#ifndef __UXE_LOGGER_H__
-#define __UXE_LOGGER_H__
+
+#ifndef __UX_LOGGER_H__
+#define __UX_LOGGER_H__
+
+#include <ux/base/ux_common.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,4 +32,4 @@ struct uxe_logger_s {
 }
 #endif
 
-#endif // __UXE_LOGGER_H__
+#endif // __UX_LOGGER_H__

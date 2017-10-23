@@ -1,9 +1,9 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
 #include "event_vtable.h"
@@ -58,7 +58,7 @@ void ux_event_unref(ux_event_t *event)
        event_free(event);
 }
 
-ux_event_t* ux_event_malloc(uxe_type type)
+ux_event_t* ux_event_zalloc(uxe_type type)
 {
     UX_ASSERT(type < UXE_LAST);
     ux_event_t* e = ux_zalloc(g_event_vtable[type].size);

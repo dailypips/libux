@@ -1,9 +1,9 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
 #include "queue.h"
@@ -47,7 +47,7 @@ void ux_bar_factory_add_reminder(ux_ctx_t *ctx, uxe_reminder_t* reminder)
 static ux_event_tick_t* event_tick_new(ux_event_tick_t* e, ux_event_tick_t* n)
 {
     //TODO: BID ?? TICK?? ASK??
-    ux_event_tick_t* tick = (ux_event_tick_t*)ux_event_malloc(UXE_BID);
+    ux_event_tick_t* tick = (ux_event_tick_t*)ux_event_zalloc(UXE_BID);
     tick->timestamp = e->timestamp;
     tick->instrument = e->instrument;
     tick->provider = e->provider;
@@ -95,13 +95,13 @@ void bar_factory_process_tick(ux_ctx_t *ctx, ux_event_tick_t* e)
                 break;
 
             if (e->type == UXE_BID) {
-                uxe_ask_t* ask = data_manager_get_ask(ctx, e->instrument);
+                uxe_ask_t* ask = ux_get_last_ask(ctx, e->instrument);
                 if (ask)
                     tick = event_tick_new(e, (ux_event_tick_t*)ask);
             }
 
             if (e->type == UXE_ASK) {
-                uxe_bid_t* bid = data_manager_get_bid(ctx, e->instrument);
+                uxe_bid_t* bid = ux_get_last_bid(ctx, e->instrument);
                 if (bid)
                     tick = event_tick_new(e, (ux_event_tick_t*)bid);
             }

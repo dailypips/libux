@@ -1,10 +1,11 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
+
 #include "event_vtable.h"
 #include <ux/event/ux_events.h>
 #include "atomic.h"
@@ -26,7 +27,7 @@ ux_event_t* event_news_clone(ux_event_t* event)
 {
     assert(event->type == UXE_NEWS);
     uxe_news_t* e = (uxe_news_t*)event;
-    uxe_news_t* news = (uxe_news_t*)ux_event_malloc(UXE_NEWS);
+    uxe_news_t* news = (uxe_news_t*)ux_event_zalloc(UXE_NEWS);
 
     news->provider = e->provider;
     news->instrument = e->instrument;
@@ -48,7 +49,7 @@ ux_event_t* event_exception_clone(ux_event_t* e)
 {
     assert(e->type == UXE_EXCEPTION);
     uxe_exception_t* exception = (uxe_exception_t*)e;
-    uxe_exception_t* item = (uxe_exception_t*)ux_event_malloc(UXE_EXCEPTION);
+    uxe_exception_t* item = (uxe_exception_t*)ux_event_zalloc(UXE_EXCEPTION);
     item->source = ux_strdup(exception->source);
     return (ux_event_t*)item;
 }
@@ -56,7 +57,7 @@ ux_event_t* event_exception_clone(ux_event_t* e)
 ux_event_t* event_default_clone(ux_event_t* e)
 {
     UX_ASSERT(e->type < UXE_LAST);
-    ux_event_t* result = ux_event_malloc(e->type);
+    ux_event_t* result = ux_event_zalloc(e->type);
     memcpy(result, e, g_event_vtable[e->type].size);
     ux_atomic_rel_store(&e->refcount, 1);
     return result;

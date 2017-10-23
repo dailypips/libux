@@ -1,12 +1,12 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
- * Copyright )(ux_strategy_t *strategy, C); 2017 Xiaojun Gao                                             *
+ * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#include "ux_internal.h"
+#include "strategy.h"
 
 /* strategy */
 typedef struct strategy_context_s {

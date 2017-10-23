@@ -1,15 +1,15 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
-#ifndef STRATEGY_H
-#define STRATEGY_H
+
+#ifndef __UX_STRATEGY_H__
+#define __UX_STRATEGY_H__
 
 #include <ux/base/ux_common.h>
-#include <ux/base/ux_types.h>
 #include <ux/base/ux_currency.h>
 #include <ux/event/ux_event.h>
 #include <ux/domain/ux_position.h>
@@ -20,12 +20,31 @@
 extern "C" {
 #endif
 
+typedef struct ux_strategy_s ux_strategy_t;
+
 typedef struct parameter_s {
     char *name;
     uintptr_t value;
     char *type_name;
 }parameter_t;
 
+typedef enum {
+    UX_STRATEGY_STATUS_TYPE_STARTED,
+    UX_STRATEGY_STATUS_TYPE_STOPPED
+}ux_strategy_status_type;
+
+typedef struct ux_strategy_status_info_s {
+    ux_strategy_status_type type;
+    char *solution;
+    char *mode;
+}ux_strategy_status_info_t;
+
+typedef enum {
+    UX_STRATEGY_PERSISTENCE_NONE,
+    UX_STRATEGY_PERSISTENCE_FULL,
+    UX_STRATEGY_PERSISTENCE_SAVE,
+    UX_STRATEGY_PERSISTENCE_LOAD
+}ux_strategy_persistence;
 
 typedef enum {
     UX_STRATEGY_MODE_BACKTEST,
@@ -148,4 +167,4 @@ struct ux_strategy_s {
 }
 #endif
 
-#endif // STRATEGY_H
+#endif // __UX_STRATEGY_H__

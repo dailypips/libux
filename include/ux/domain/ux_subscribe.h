@@ -1,15 +1,15 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
-#ifndef SUBSCRIBE_H
-#define SUBSCRIBE_H
+
+#ifndef __UX_SUBSCRIBE_H__
+#define __UX_SUBSCRIBE_H__
 
 #include <ux/base/ux_common.h>
-#include <ux/base/ux_types.h>
 #include <ux/base/ux_currency.h>
 #include <ux/event/ux_event.h>
 #include <ux/domain/ux_position.h>
@@ -25,13 +25,13 @@ typedef struct ux_subscription_s {
     int source_id;
     ux_instrument_t *instrument;
     ux_data_provider_t *provider;
-    int instrument_id;
-    int provider_id;
-    int route_id;
+    ux_iid_t instrument_id;
+    ux_pid_t provider_id;
+    ux_pid_t route_id;
 }ux_subscription_t;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // SUBSCRIBE_H
+#endif // __UX_SUBSCRIBE_H__

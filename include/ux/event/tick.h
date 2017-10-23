@@ -1,15 +1,18 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
-#ifndef TICK_H
-#define TICK_H
+
+#ifndef __UX_TICK_H__
+#define __UX_TICK_H__
 
 #include <ux/event/ux_event.h>
 #include <ux/event/def_tick.h>
+
+typedef struct ux_event_tick_s ux_event_tick_t;
 
 typedef enum {
     UX_BAR_TYPE_NONE = 0,
@@ -88,4 +91,29 @@ struct uxe_reminder_s {
     UXE_REMINDER_FIELDS
 };
 
-#endif // TICK_H
+static inline double ux_bar_get_range(uxe_bar_t *bar)
+{
+    return bar->high - bar->low;
+}
+
+static inline double ux_bar_get_median(uxe_bar_t *bar)
+{
+    return (bar->high + bar->low) / 2.0;
+}
+
+static inline double ux_bar_get_typical(uxe_bar_t *bar)
+{
+    return (bar->high + bar->low + bar->close) / 3.0;
+}
+
+static inline double ux_bar_get_weighted(uxe_bar_t *bar)
+{
+    return (bar->high + bar->low + bar->close * 2.0) / 4.0;
+}
+
+static inline double ux_bar_get_average(uxe_bar_t *bar)
+{
+    return (bar->high + bar->low + bar->open+ bar->close) / 4.0;
+}
+
+#endif // __UX_TICK_H__

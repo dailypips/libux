@@ -1,3 +1,11 @@
+/******************************************************************************
+ * Automated Trading System                                                   *
+ *                                                                            *
+ * Copyright (C) 2017 Xiaojun Gao                                             *
+ *                                                                            *
+ * Distributed under the terms and conditions of the MIT License.             *
+ ******************************************************************************/
+
 #include <stdlib.h> /* malloc */
 #include <string.h> /* memset */
 

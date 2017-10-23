@@ -3,7 +3,7 @@
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 #ifndef UX_CORE_EVENT_H
 #define UX_CORE_EVENT_H

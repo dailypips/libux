@@ -1,25 +1,26 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
+
 #ifndef __UX_BAR_GENERATOR_H__
 #define __UX_BAR_GENERATOR_H__
 
 #include <ux/base/ux_common.h>
 #include <ux/base/ux_currency.h>
 #include <ux/base/ux_datetime.h>
-#include <ux/base/ux_types.h>
 #include <ux/event/tick.h>
+#include <ux/event/ux_event.h>
+#include <ux/domain/ux_order.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* bar generator */
-typedef struct ux_bar_factory_s ux_bar_factory_t;
 typedef struct ux_bar_generator_s ux_bar_generator_t;
 
 typedef void (*ux_on_tick_cb)(ux_bar_generator_t *generator, ux_event_tick_t *tick);

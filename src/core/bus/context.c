@@ -1,9 +1,19 @@
+/******************************************************************************
+ * Automated Trading System                                                   *
+ *                                                                            *
+ * Copyright (C) 2017 Xiaojun Gao                                             *
+ *                                                                            *
+ * Distributed under the terms and conditions of the MIT License.             *
+ ******************************************************************************/
+
 #include <uv.h>
 #include <ux/bus/ux_context.h>
 #include "context.h"
 #include "mpscq.h"
 #include "spscq.h"
 #include "dispatch.h"
+#include "event_bus.h"
+#include "instrument_manager.h"
 
 
 void ux_wakeup(ux_ctx_t *ctx)
@@ -91,12 +101,14 @@ void ux_ctx_init(ux_ctx_t *ctx)
     ctx->stop_flag = 0;
     mpscq_init(&ctx->async_queue);
 
-   bus_init(ctx);
+   EVENT_BUS_INIT(ctx);
+   INSTRUMENT_MANAGER_INIT(ctx);
 }
 
 void ux_ctx_destroy(ux_ctx_t *ctx)
 {
-    bus_destroy(ctx);
+    EVENT_BUS_DESTROY(ctx);
+    INSTRUMENT_MANAGER_DESTROY(ctx);
     uv_cond_destroy(&ctx->wait_cond);
     uv_mutex_destroy(&ctx->wait_mutex);
     ux_ctx_clear(ctx);

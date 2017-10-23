@@ -1,16 +1,18 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
+
 #ifndef __UX_STOP_H__
 #define __UX_STOP_H__
 
 #include <ux/base/ux_common.h>
-#include <ux/base/ux_types.h>
 #include <ux/base/ux_currency.h>
+#include <ux/event/tick.h>
+#include <ux/domain/ux_strategy.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,10 +1,11 @@
 /******************************************************************************
- * Quantitative Kit Library                                                   *
+ * Automated Trading System                                                   *
  *                                                                            *
  * Copyright (C) 2017 Xiaojun Gao                                             *
  *                                                                            *
- * Distributed under the terms and conditions of the BSD 3-Clause License.    *
+ * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
+
 #ifndef __CONTEXT_H__
 #define __CONTEXT_H__
 
@@ -18,6 +19,9 @@
 #include "bar_generator.h"
 #include "event_bus.h"
 #include "hash.h"
+#include "instrument_manager.h"
+#include "order_manager.h"
+#include "data_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,24 +36,6 @@ typedef struct ux_stop_s ux_stop_t;
   int stop_flag;                                                               \
   mpscq_t async_queue;
 
-#define INSTRUMENT_MANAGER_FIELDS                                              \
-  ux_atomic_t next_instrument_id;                                              \
-  ux_idarray_t instrument_by_id;                                               \
-  ux_shash_t *instrument_by_symbol;                                            \
-  void *instruments[2];
-
-#define ORDER_MANAGER_FIELDS                                                   \
-  ux_atomic_t next_order_id;                                                   \
-  ux_idarray_t order_by_id;                                                    \
-  ux_shash_t *order_by_client_oid;                                             \
-  ux_shash_t *order_by_provider_oid;                                           \
-  ux_list_shash_t *order_list_by_oca;                                          \
-  void *orders[2];
-
-#define DATA_MANAGER_FIELDS                                                    \
-  ux_idarray_t dm_asks;                                                        \
-  ux_idarray_t dm_bids;                                                        \
-  ux_idarray_t dm_trades;
 
 struct ux_ctx_s {
   LOOP_FIELDS
