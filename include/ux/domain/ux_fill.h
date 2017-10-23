@@ -6,8 +6,8 @@
  * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#ifndef __ORDER_H__
-#define __ORDER_H__
+#ifndef __UX_FILL_H__
+#define __UX_FILL_H__
 
 #include <ux/base/ux_type.h>
 #include <ux/domain/ux_order.h>
@@ -16,16 +16,23 @@
 extern "C" {
 #endif
 
-
-UX_EXTERN void ux_order_on_execution_report(ux_order_t *order, uxe_execution_report_t *report);
-UX_EXTERN void ux_order_on_execution_command(ux_order_t *order, uxe_execution_command_t *command);
-
-void delete_by_series_name(char *series_name);
-
-void load(char *name /*null*/, int clientId /* -1 */);
+struct ux_fill_s {
+    void *queue_node[2];
+    ux_order_t *order;
+    ux_instrument_t *instrument;
+    int order_id;
+    int portfolio_id;
+    int instrument_id;
+    ux_currency_t currency;
+    ux_order_side side;
+    double qty;
+    double price;
+    char *text;
+    double commission;
+};
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // __ORDER_H__
+#endif // __UX_FILL_H__

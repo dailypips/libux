@@ -6,26 +6,26 @@
  * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#ifndef __ORDER_H__
-#define __ORDER_H__
+#ifndef __UX_TRANSACTION_H__
+#define __UX_TRANSACTION_H__
 
 #include <ux/base/ux_type.h>
-#include <ux/domain/ux_order.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-UX_EXTERN void ux_order_on_execution_report(ux_order_t *order, uxe_execution_report_t *report);
-UX_EXTERN void ux_order_on_execution_command(ux_order_t *order, uxe_execution_command_t *command);
-
-void delete_by_series_name(char *series_name);
-
-void load(char *name /*null*/, int clientId /* -1 */);
+struct ux_transaction_s {
+    void *queue_node[2];
+    double qty;
+    double price;
+    double commission;
+    double is_done;
+    void*  fills[2];
+};
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // __ORDER_H__
+#endif // __UX_TRANSACTION_H__
