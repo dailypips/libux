@@ -12,14 +12,8 @@
 #include "fill.h"
 #include "math.h"
 #include "queue.h"
-
-
-double ux_fill_get_value(ux_fill_t *fill)
-{
-    if (fill->instrument->factor != 0.0)
-        return fill->price * fill->qty * fill->instrument->factor;
-    return fill->price * fill->qty;
-}
+#include "fill.h"
+#include "portfolio.h"
 
 static double get_value(ux_position_t *position, double val)
 {
@@ -87,4 +81,14 @@ void ux_position_add_fill(ux_position_t *position, ux_fill_t *fill)
         position->qty_sold += fill->qty;
     update_fill(position, fill);
     position->amount = position->qty_bought - position->qty_sold;
+}
+
+double ux_position_get_value(ux_position_t *position)
+{
+    return position->portfolio->pricer->get_value(position->portfolio->pricer, position);
+}
+
+double ux_position_get_price(ux_position_t *position)
+{
+    return position->portfolio->pricer->get_price(position->portfolio->pricer, position);
 }

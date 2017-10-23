@@ -12,6 +12,7 @@
 #include <ux/domain/ux_provider.h>
 #include "data_manager.h"
 #include "bar_factory.h"
+#include "strategy_manager.h"
 
 void event_reminder_dispatch(ux_ctx_t *ctx, ux_event_t *e)
 {
@@ -39,7 +40,7 @@ void event_bid_dispatch(ux_ctx_t *ctx, ux_event_t *e)
      ux_update_bid(ctx, bid);
      ctx->execution_simulator->on_bid(ctx->execution_simulator, bid);
 
-     sm_on_bid(ctx, ux_get_instrument_by_id(ctx, bid->instrument), bid);
+     strategy_manager_on_bid(ctx, ux_get_instrument_by_id(ctx, bid->instrument), bid);
 
     /*
      framework.dataManager.method_2(bid);

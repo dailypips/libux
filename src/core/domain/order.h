@@ -16,13 +16,17 @@
 extern "C" {
 #endif
 
+static inline int order_is_done(ux_order_t *order)
+{
+    return order->orderStatus == UX_ORDER_STATUS_FILLED ||
+            order->orderStatus == UX_ORDER_STATUS_CANCELLED||
+            order->orderStatus == UX_ORDER_STATUS_REJECTED ||
+            order->orderStatus == UX_ORDER_STATUS_EXPIRED;
+}
 
-UX_EXTERN void ux_order_on_execution_report(ux_order_t *order, uxe_execution_report_t *report);
-UX_EXTERN void ux_order_on_execution_command(ux_order_t *order, uxe_execution_command_t *command);
+UX_FUNC void order_on_execution_report(ux_order_t *order, uxe_execution_report_t *report);
+UX_FUNC void order_on_execution_command(ux_order_t *order, uxe_execution_command_t *command);
 
-void delete_by_series_name(char *series_name);
-
-void load(char *name /*null*/, int clientId /* -1 */);
 
 #ifdef __cplusplus
 }

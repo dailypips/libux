@@ -66,7 +66,7 @@ struct ux_instrument_s {
     double margin;
     char* price_format;
     char* formula;
-    ux_instrument_alt_t alts[1024]; // max provider is 1024
+    ux_instrument_alt_t alts[UX_PID_MAX]; // max provider is 1024
     void* legs[2];
     uxe_trade_t *trade;
     uxe_ask_t *ask;
@@ -76,8 +76,8 @@ struct ux_instrument_s {
     int is_deleted    :1;
     int is_persistent :1;
 
-    void* data_provider;
-    void* execution_provider;
+    ux_data_provider_t *data_provider;
+    ux_execution_provider_t *execution_provider;
 };
 
 UX_EXTERN void ux_instrument_init(ux_instrument_t *instrument);

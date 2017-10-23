@@ -16,6 +16,8 @@
 extern "C" {
 #endif
 
+double ux_position_get_value(ux_position_t *position);
+double ux_position_get_price(ux_position_t *position);
 void ux_position_add_fill(ux_position_t *position, ux_fill_t *fill);
 
 #ifdef __cplusplus

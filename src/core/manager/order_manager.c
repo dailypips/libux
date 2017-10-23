@@ -34,7 +34,7 @@ void order_manager_destroy(ux_ctx_t *ctx) {
   kh_destroy(slist, ctx->order_list_by_oca);
 }
 
-ux_order_t *ux_get_order_by_id(ux_ctx_t *ctx, int id) {
+ux_order_t *ux_get_order_by_id(ux_ctx_t *ctx, ux_oid_t id) {
   return (ux_order_t *)ida_get(&ctx->order_by_id, id);
 }
 
@@ -151,7 +151,7 @@ int ux_send_order(ux_ctx_t *ctx, ux_order_t *order) {
   command->clientID = ux_strdup(order->clientID);
   command->client_id = order->clientId;
   VEC_ADD(&ctx->execution_commands, command);
-  ux_order_on_execution_command(order, command);
+  order_on_execution_command(order, command);
   DISPATCH_EVENT(command);
   //uxe_order_pending_new_t *pending = (uxe_order_pending_new_t*)ux_event_zalloc(UXE_ORDER_PENDING_NEW);
   uxe_order_pending_new_t *pending = EVENT_NEW(UXE_ORDER_PENDING_NEW);
@@ -193,7 +193,7 @@ int ux_cancel_order(ux_ctx_t *ctx, ux_order_t *order) {
   command->clientID = ux_strdup(order->clientID);
   command->client_id = order->clientId;
   VEC_ADD(&ctx->execution_commands, command);
-  ux_order_on_execution_command(order, command);
+  order_on_execution_command(order, command);
   DISPATCH_EVENT(command);
   // TODO: save, send
   // order->execution_provider.send(command);
@@ -214,7 +214,7 @@ int ux_replace_order(ux_ctx_t *ctx, ux_order_t *order, double price,
   command->stop_price = stop_price;
   command->qty = qty;
   VEC_ADD(&ctx->execution_commands, command);
-  ux_order_on_execution_command(order, command);
+  order_on_execution_command(order, command);
   DISPATCH_EVENT(command);
   // TODO:save send
   order->execution_provider->send(order->execution_provider, command,

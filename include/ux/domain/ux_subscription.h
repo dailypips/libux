@@ -6,8 +6,8 @@
  * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#ifndef __UX_SUBSCRIBE_H__
-#define __UX_SUBSCRIBE_H__
+#ifndef __UX_SUBSCRIPTION_H__
+#define __UX_SUBSCRIPTION_H__
 
 #include <ux/base/ux_type.h>
 #include <ux/event/ux_event.h>
@@ -32,4 +32,4 @@ typedef struct ux_subscription_s {
 }
 #endif
 
-#endif // __UX_SUBSCRIBE_H__
+#endif // __UX_SUBSCRIPTION_H__

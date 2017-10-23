@@ -6,5 +6,5 @@
  * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#include "ux_internal.h"
+#include <ux/base/ux_type.h>
 

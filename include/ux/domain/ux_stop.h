@@ -68,6 +68,9 @@ typedef struct ux_stop_s {
     long filter_bar_size;
     ux_bar_type filter_bar_type;
     ux_stop_fill_mode fill_mode;
+    double (*get_price)(ux_stop_t *stop, double price);
+    double (*get_instrument_price)(ux_stop_t *stop);
+    double (*get_stop_price)(ux_stop_t *stop);
 }ux_stop_t;
 
 #ifdef __cplusplus

@@ -209,6 +209,10 @@ CURRENCY_DEF(CURRENTENUM)
 ux_currency_t ux_currency_from_name(const char *name);
 const char* ux_currency_to_name(ux_currency_t currency);
 
+typedef struct currency_converter_s {
+    double (*convert)(double amount, ux_currency_t from, ux_currency_t to);
+}currency_converter_t;
+
 #ifdef __cplusplus
 }
 #endif

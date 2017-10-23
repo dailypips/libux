@@ -81,7 +81,7 @@ void ux_instrument_unref(ux_instrument_t *instrument) {
 }
 
 const char *ux_instrument_get_symbol(ux_instrument_t *instrument,
-                                     int provider_id) {
+                                     ux_pid_t provider_id) {
   UX_ASSERT(provider_id < UX_PID_MAX);
   if (instrument->alts[provider_id].symbol != NULL)
     return instrument->alts[provider_id].symbol;
@@ -89,7 +89,7 @@ const char *ux_instrument_get_symbol(ux_instrument_t *instrument,
 }
 
 const char* ux_instrument_get_exchange(ux_instrument_t *instrument,
-                                       int provider_id) {
+                                       ux_pid_t provider_id) {
   UX_ASSERT(provider_id < UX_PID_MAX);
   if (instrument->alts[provider_id].exchange != NULL)
     return instrument->alts[provider_id].exchange;
@@ -97,14 +97,14 @@ const char* ux_instrument_get_exchange(ux_instrument_t *instrument,
 }
 
 ux_currency_t ux_instrument_get_currency(ux_instrument_t *instrument,
-                                         int provider_id) {
+                                         ux_pid_t provider_id) {
   UX_ASSERT(provider_id < UX_PID_MAX);
-  if (instrument->alts[provider_id].currency != 0)
+  if (instrument->alts[provider_id].currency != UX_CURRENCY_NONE)
     return instrument->alts[provider_id].currency;
   return instrument->currency;
 }
 
-void ux_instrument_add_leg(ux_instrument_t *instrument, ux_instrument_t *leg,
+ux_instrument_leg_t* ux_instrument_add_leg(ux_instrument_t *instrument, ux_instrument_t *leg,
                            double weight) {
   ux_instrument_leg_t *node = ux_zalloc(sizeof(*node));
   ux_instrument_ref(leg);
@@ -113,108 +113,32 @@ void ux_instrument_add_leg(ux_instrument_t *instrument, ux_instrument_t *leg,
   QUEUE_INSERT_TAIL(&instrument->legs, &node->queue_node);
 }
 
-typedef struct queue_node_s {
-  void *queue_node[2];
-  void *event;
-}queue_node_t;
-
-static void order_free(ux_order_t *order) {
-  UX_ASSERT(order != NULL);
-  ux_order_destroy(order);
-  ux_free(order);
+void ux_instrument_remove_leg(ux_instrument_t *instrument, ux_instrument_leg_t *leg)
+{
+    UX_UNUSED(instrument);
+    QUEUE_REMOVE(&leg->queue_node);
 }
 
-UX_EXTERN void ux_order_init(ux_order_t *order) {
-  order->refcount = 1;
-  order->id = -1;
-  order->clId = -1;
-  order->algoId = -1;
-  order->providerOrderId = NULL;
-  order->clOrderId = NULL;
-  order->instrumentId = -1;
-  order->portfolioId = -1;
-  order->strategyId = -1;
-  order->execInst = NULL;
-  order->oca = NULL;
-  order->text = NULL;
-
-  QUEUE_INIT(&order->commands);
-  QUEUE_INIT(&order->reports);
+static inline void destory_alt(ux_instrument_alt_t *alt)
+{
+    if_free(alt->symbol);
+    if_free(alt->exchange);
+    alt->currency = UX_CURRENCY_NONE;
 }
 
-UX_EXTERN void ux_order_destroy(ux_order_t *order) {
-  if_free(order->providerOrderId);
-  if_free(order->clOrderId);
-  if_free(order->execInst);
-  if_free(order->oca);
-  if_free(order->text);
-  if_free(order->account);
-  if_free(order->clientID);
-
-  QUEUE *q;
-  while (!QUEUE_EMPTY(&order->commands)) {
-    q = QUEUE_HEAD(&order->commands);
-    queue_node_t *node = QUEUE_DATA(q, queue_node_t, queue_node);
-    ux_event_unref(node->event);
-    QUEUE_REMOVE(q);
-    ux_free(node);
-  }
-
-  while (!QUEUE_EMPTY(&order->reports)) {
-    q = QUEUE_HEAD(&order->reports);
-    queue_node_t *node = QUEUE_DATA(q, queue_node_t, queue_node);
-    ux_event_unref(node->event);
-    QUEUE_REMOVE(q);
-    ux_free(node);
-  }
+void ux_instrument_add_alt(ux_instrument_t *instrument, ux_pid_t provider_id, const char *symbol, const char *exchange, ux_currency_t currency)
+{
+    ux_instrument_alt_t *alt = &instrument->alts[provider_id];
+    destory_alt(alt);
+    alt->symbol = ux_strdup(symbol);
+    alt->exchange = ux_strdup(exchange);
+    alt->currency = currency;
 }
 
-UX_EXTERN void ux_order_ref(ux_order_t *order) {
-  UX_ASSERT(order != NULL);
-  ux_atomic_full_fetch_add(&order->refcount, 1);
-}
-
-UX_EXTERN void ux_order_unref(ux_order_t *order) {
-  UX_ASSERT(order != NULL);
-  if (ux_atomic_full_fetch_add(&order->refcount, -1) == 1) {
-    order_free(order);
-  }
-}
-
-UX_EXTERN void ux_order_add_command(ux_order_t *order,
-                                    uxe_execution_command_t *command) {
-  queue_node_t *node = ux_zalloc(sizeof(*node)); // queue node size
-  node->event = command;
-  QUEUE_INSERT_TAIL(&order->commands, &node->queue_node);
-  ux_event_ref((ux_event_t *)command);
-}
-
-UX_EXTERN void ux_order_add_report(ux_order_t *order,
-                                   uxe_execution_report_t *report) {
-  queue_node_t *node = ux_zalloc(sizeof(*node)); // queue node size
-  node->event = report;
-  QUEUE_INSERT_TAIL(&order->reports, &node->queue_node);
-  ux_event_ref((ux_event_t *)report);
-}
-
-UX_EXTERN void ux_order_on_execution_report(ux_order_t *order,
-                                            uxe_execution_report_t *report) {
-  order->orderStatus = report->order_status;
-  if (report->exec_type == UX_EXEC_TRADE)
-    order->avgPx =
-        (order->avgPx * order->cumQty + report->last_price * report->last_qty) /
-        (order->cumQty + report->last_qty);
-  order->cumQty = report->cum_qty;
-  order->leavesQty = report->leaves_qty;
-  if (report->exec_type == UX_EXEC_NEW)
-    report->provider_order_id = ux_strdup(report->provider_order_id);
-  if (report->exec_type == UX_EXEC_REPLACE) {
-    order->orderType = report->order_type;
-    order->price = report->price;
-    order->stopPx = report->stop_price;
-    order->qty = report->order_qty;
-  }
-  ux_order_add_report(order, report);
+void ux_instrument_remove_alt(ux_instrument_t *instrument, ux_pid_t provider_id)
+{
+    ux_instrument_alt_t *alt = &instrument->alts[provider_id];
+    destory_alt(alt);
 }
 
 #undef if_free

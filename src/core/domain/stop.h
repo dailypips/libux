@@ -19,6 +19,15 @@ extern "C" {
 void ux_stop_init(ux_stop_t *stop);
 void ux_stop_destroy(ux_stop_t *stop);
 
+void ux_stop_cancel(ux_stop_t *stop);
+void ux_stop_disconnect(ux_stop_t *stop);
+
+UX_FUNC void stop_on_bar(ux_stop_t *stop, uxe_bar_t *bar);
+UX_FUNC void stop_on_bar_open(ux_stop_t *stop, uxe_bar_t *bar);
+UX_FUNC void stop_on_trade(ux_stop_t *stop, uxe_trade_t *bar);
+UX_FUNC void stop_on_ask(ux_stop_t *stop, uxe_ask_t *bar);
+UX_FUNC void stop_on_bid(ux_stop_t *stop, uxe_bid_t *bar);
+
 #ifdef __cplusplus
 }
 #endif

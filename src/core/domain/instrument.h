@@ -16,7 +16,22 @@
 extern "C" {
 #endif
 
+const char *ux_instrument_get_symbol(ux_instrument_t *instrument,
+                                     ux_pid_t provider_id);
+const char *ux_instrument_get_exchange(ux_instrument_t *instrument,
+                                       ux_pid_t provider_id);
+ux_currency_t ux_instrument_get_currency(ux_instrument_t *instrument,
+                                         ux_pid_t provider_id);
+ux_instrument_leg_t *ux_instrument_add_leg(ux_instrument_t *instrument,
+                                           ux_instrument_t *leg, double weight);
+void ux_instrument_remove_leg(ux_instrument_t *instrument,
+                              ux_instrument_leg_t *leg);
 
+void ux_instrument_add_alt(ux_instrument_t *instrument, ux_pid_t provider_id,
+                           const char *symbol, const char *exchange,
+                           ux_currency_t currency);
+void ux_instrument_remove_alt(ux_instrument_t *instrument,
+                              ux_pid_t provider_id);
 
 #ifdef __cplusplus
 }

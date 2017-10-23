@@ -54,9 +54,11 @@ set(UX_DOMAIN_HEADER
   ${DOMAIN_DIR}/order.h
   ${DOMAIN_DIR}/portfolio.h
   ${DOMAIN_DIR}/position.h
+  ${DOMAIN_DIR}/pricer.h
+  #${DOMAIN_DIR}/provider.h
   ${DOMAIN_DIR}/stop.h
   ${DOMAIN_DIR}/strategy.h
-  ${DOMAIN_DIR}/subscribe.h
+  #${DOMAIN_DIR}/subscription.h
   ${DOMAIN_DIR}/transaction.h
 )
 
@@ -67,10 +69,12 @@ set(UX_DOMAIN_SRC
   ${DOMAIN_DIR}/order.c
   ${DOMAIN_DIR}/portfolio.c
   ${DOMAIN_DIR}/position.c
+  ${DOMAIN_DIR}/pricer.c
+  #${DOMAIN_DIR}/provider.c
   ${DOMAIN_DIR}/stop.c
   ${DOMAIN_DIR}/strategy.c
-  ${DOMAIN_DIR}/subscribe.c
-  ${DOMAIN_DIR}/transaction.c
+  #${DOMAIN_DIR}/subscription.c
+  #${DOMAIN_DIR}/transaction.c
 )
 
 set(UX_MANAGER_HEADER
@@ -80,6 +84,7 @@ set(UX_MANAGER_HEADER
   ${MANAGER_DIR}/portfolio_manager.h
   ${MANAGER_DIR}/position_manager.h
   ${MANAGER_DIR}/strategy_manager.h
+  ${MANAGER_DIR}/subscription_manager.h
 )
 
 set(UX_MANAGER_SRC
@@ -89,6 +94,7 @@ set(UX_MANAGER_SRC
   ${MANAGER_DIR}/portfolio_manager.c
   ${MANAGER_DIR}/position_manager.c
   ${MANAGER_DIR}/strategy_manager.c
+  ${MANAGER_DIR}/subscription_manager.c
 )
 
 set(UX_UTIL_HEADER

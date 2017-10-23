@@ -22,6 +22,8 @@
 #include "event_bus.h"
 #include "instrument_manager.h"
 #include "order_manager.h"
+#include "subscription_manager.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,6 +45,7 @@ struct ux_ctx_s {
   BAR_FACTORY_FIELDS
 
   DATA_MANAGER_FIELDS
+  SUBSCRIPTION_MANANGER_FIELDS
   // STRATEGY_MANAGER_FIELDS
   /* simulator */
 
@@ -50,6 +53,8 @@ struct ux_ctx_s {
   ux_execution_simulator_t *execution_simulator;
   /* logger */
   ux_event_logger_t *event_logger;
+  /* currency converter */
+  currency_converter_t *currency_converter;
 };
 
 UX_FUNC void ux_ctx_init(ux_ctx_t *ctx);

@@ -24,7 +24,7 @@ typedef enum {
 
 struct ux_position_s {
     void *queue_node[2];
-    void *portfolio;
+    ux_portfolio_t *portfolio;
     ux_instrument_t *instrument;
     ux_position_side side;
     ux_id_t portfolio_id;

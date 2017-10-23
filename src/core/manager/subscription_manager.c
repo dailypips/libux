@@ -6,20 +6,17 @@
  * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#ifndef __FILL_H__
-#define __FILL_H__
+#include "subscription_manager.h"
+#include "context.h"
+#include "instrument.h"
 
-#include <ux/domain/ux_fill.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-double ux_fill_get_value(ux_fill_t *fill);
-
-#ifdef __cplusplus
+void subscription_manager_init(ux_ctx_t *ctx)
+{
+    ctx->subscriptions = kh_init(int);
 }
-#endif
 
-
-#endif // __FILL_H__
+void subscription_manager_destroy(ux_ctx_t *ctx)
+{
+    //TODO foreach clear
+    kh_destroy(int, ctx->subscriptions);
+}
