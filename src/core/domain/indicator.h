@@ -35,6 +35,7 @@ struct iseries_t {
     double (*get_min)(ux_time_t start, ux_time_t end);
     double (*get_max)(ux_time_t start, ux_time_t end);
 };
+// MultiSeries, TickSeries, TimeSeries
 
 struct indicator_s {
     ux_time_series_t *input;
