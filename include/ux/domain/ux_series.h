@@ -16,16 +16,16 @@
 extern "C" {
 #endif
 
-typedef struct ux_tick_series_s {
+struct ux_tick_series_s {
     char *name;
     char *description;
     int count;
     ux_event_tick_t* ticks;
     ux_event_tick_t* min;
     ux_event_tick_t* max;
-}ux_tick_series_t;
+};
 
-typedef struct ux_bar_series_s {
+struct ux_bar_series_s {
     int id;
     char *name;
     int count;
@@ -33,7 +33,7 @@ typedef struct ux_bar_series_s {
     uxe_bar_t *min;
     uxe_bar_t *max;
     void* indicators[2];
-}ux_bar_series_t;
+};
 
 struct ux_fill_series_s {
     char* name;

@@ -9,15 +9,11 @@
 #ifndef __UX_LOGGER_H__
 #define __UX_LOGGER_H__
 
-#include <ux/base/ux_common.h>
+#include <ux/base/ux_type.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct uxe_logger_s ux_event_logger_t;
-
-typedef struct ux_ctx_s ux_ctx_t;
 
 struct uxe_logger_s {
     void (*init)(ux_ctx_t *ctx, const char *name);

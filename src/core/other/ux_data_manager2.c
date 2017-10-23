@@ -81,7 +81,7 @@ static void hash_delete_all(ux_ihash_t *hashtable)
     kh_destroy(int, hashtable);
 }
 
-void dm_destroy(ux_ctx_t *ctx)
+void data_manager_destroy(ux_ctx_t *ctx)
 {
     hash_delete_all(ctx->dm_asks);
     hash_delete_all(ctx->dm_bids);

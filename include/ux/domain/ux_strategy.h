@@ -9,12 +9,8 @@
 #ifndef __UX_STRATEGY_H__
 #define __UX_STRATEGY_H__
 
-#include <ux/base/ux_common.h>
-#include <ux/base/ux_currency.h>
+#include <ux/base/ux_type.h>
 #include <ux/event/ux_event.h>
-#include <ux/domain/ux_position.h>
-#include <ux/domain/ux_provider.h>
-#include <ux/domain/ux_series.h>
 
 #ifdef __cplusplus
 extern "C" {

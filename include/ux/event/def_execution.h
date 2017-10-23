@@ -6,8 +6,8 @@
  * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#ifndef __UXE_EXECUTION_H__
-#define __UXE_EXECUTION_H__
+#ifndef __UX_DEF_EXECUTION_H__
+#define __UX_DEF_EXECUTION_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -156,4 +156,4 @@ struct uxe_on_transaction_s {
 }
 #endif
 
-#endif // __UXE_EXECUTION_H__
+#endif // __UX_DEF_EXECUTION_H__

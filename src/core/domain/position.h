@@ -9,6 +9,7 @@
 #ifndef __POSITION_H__
 #define __POSITION_H__
 
+#include <ux/base/ux_type.h>
 #include <ux/domain/ux_position.h>
 
 #ifdef __cplusplus

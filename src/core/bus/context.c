@@ -102,12 +102,14 @@ void ux_ctx_init(ux_ctx_t *ctx)
     mpscq_init(&ctx->async_queue);
 
    EVENT_BUS_INIT(ctx);
+   BAR_FACTORY_INIT(ctx);
    INSTRUMENT_MANAGER_INIT(ctx);
 }
 
 void ux_ctx_destroy(ux_ctx_t *ctx)
 {
     EVENT_BUS_DESTROY(ctx);
+    BAR_FACTORY_DESTROY(ctx);
     INSTRUMENT_MANAGER_DESTROY(ctx);
     uv_cond_destroy(&ctx->wait_cond);
     uv_mutex_destroy(&ctx->wait_mutex);

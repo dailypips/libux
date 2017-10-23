@@ -9,6 +9,7 @@
 #ifndef __ORDER_H__
 #define __ORDER_H__
 
+#include <ux/base/ux_type.h>
 #include <ux/domain/ux_order.h>
 
 #ifdef __cplusplus

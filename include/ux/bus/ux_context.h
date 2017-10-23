@@ -9,11 +9,7 @@
 #ifndef __UX_CONTEXT_H__
 #define __UX_CONTEXT_H__
 
-#include <ux/base/ux_common.h>
-#include <ux/base/ux_memory.h>
-#include <ux/base/ux_datetime.h>
-#include <ux/base/ux_currency.h>
-#include <ux/base/ux_atomic.h>
+#include <ux/base/ux_type.h>
 
 #ifdef __cplusplus
 extern "C" {

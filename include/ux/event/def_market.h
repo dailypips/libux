@@ -6,8 +6,8 @@
  * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#ifndef __UXE_MARKET_DATA_H__
-#define __UXE_MARKET_DATA_H__
+#ifndef __UX_DEF_MARKET_DATA_H__
+#define __UX_DEF_MARKET_DATA_H__
 
 /* market data event */
 typedef enum {
@@ -50,4 +50,4 @@ typedef struct {
 #define UXE_FUNDAMENTAL_FIELDS                  \
     UXE_MARKET_COMMON_FIELDS
 
-#endif // __UXE_MARKET_DATA_H__
+#endif // __UX_DEF_MARKET_DATA_H__

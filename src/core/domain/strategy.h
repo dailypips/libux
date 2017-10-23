@@ -9,6 +9,7 @@
 #ifndef __STRATEGY_H__
 #define __STRATEGY_H__
 
+#include <ux/base/ux_type.h>
 #include <ux/domain/ux_strategy.h>
 
 #ifdef __cplusplus

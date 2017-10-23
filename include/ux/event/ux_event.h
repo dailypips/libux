@@ -9,9 +9,7 @@
 #ifndef __UX_EVENT_H__
 #define __UX_EVENT_H__
 
-#include <ux/base/ux_atomic.h>
-#include <ux/base/ux_common.h>
-#include <ux/base/ux_datetime.h>
+#include <ux/base/ux_type.h>
 #include <ux/event/event_def.h>
 
 #ifdef __cplusplus

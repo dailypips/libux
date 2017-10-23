@@ -9,10 +9,8 @@
 #ifndef __UX_SUBSCRIBE_H__
 #define __UX_SUBSCRIBE_H__
 
-#include <ux/base/ux_common.h>
-#include <ux/base/ux_currency.h>
+#include <ux/base/ux_type.h>
 #include <ux/event/ux_event.h>
-#include <ux/domain/ux_position.h>
 #include <ux/domain/ux_provider.h>
 
 #ifdef __cplusplus

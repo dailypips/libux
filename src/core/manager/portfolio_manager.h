@@ -17,8 +17,8 @@ extern "C" {
 
 #define PORTFOLIO_MANAGER_FIELDS
 
-#define PORTFOLIO_MANAGER_INIT(ctx) portfolio_manager_init(ctx)
-#define PORTFOLIO_MANAGER_DESTROY(ctx) portfolio_manager_destroy(ctx)
+#define PORTFOLIO_MANAGER_INIT(ctx) portfolio_manager_init((ctx))
+#define PORTFOLIO_MANAGER_DESTROY(ctx) portfolio_manager_destroy((ctx))
 
 UX_FUNC void portfolio_manager_init(ux_ctx_t *ctx);
 UX_FUNC void portfolio_manager_destroy(ux_ctx_t *ctx);

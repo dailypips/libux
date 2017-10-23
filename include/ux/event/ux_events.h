@@ -6,8 +6,8 @@
  * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#ifndef __UXE_EVENTS_H__
-#define __UXE_EVENTS_H__
+#ifndef __UX_EVENTS_H__
+#define __UX_EVENTS_H__
 
 #include <ux/base/ux_common.h>
 #include <ux/base/ux_currency.h>
@@ -322,4 +322,4 @@ struct uxe_exception_s {
 }
 #endif
 
-#endif // __UXE_EVENTS_H__
+#endif // __UX_EVENTS_H__

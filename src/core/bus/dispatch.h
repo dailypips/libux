@@ -15,7 +15,7 @@
 #include <ux/event/ux_event.h>
 #include <ux/base/ux_logger.h>
 #include <ux/base/ux_idarray.h>
-#include "bar_generator.h"
+#include "bar_factory.h"
 #include "event_bus.h"
 #include "hash.h"
 

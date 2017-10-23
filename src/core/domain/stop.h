@@ -9,6 +9,7 @@
 #ifndef __STOP_H__
 #define __STOP_H__
 
+#include <ux/base/ux_type.h>
 #include <ux/domain/ux_stop.h>
 
 #ifdef __cplusplus

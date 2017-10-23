@@ -9,8 +9,8 @@
 #ifndef __ACCOUNT_H__
 #define __ACCOUNT_H__
 
+#include <ux/base/ux_type.h>
 #include <ux/domain/ux_account.h>
-#include <ux/base/ux_datetime.h>
 
 #ifdef __cplusplus
 extern "C" {

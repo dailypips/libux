@@ -85,15 +85,6 @@ UX_EXTERN void ux_instrument_destroy(ux_instrument_t *instrument);
 UX_EXTERN void ux_instrument_ref(ux_instrument_t *instrument);
 UX_EXTERN void ux_instrument_unref(ux_instrument_t *instrument);
 
-/* manager */
-ux_instrument_t *ux_get_instrument_by_id(ux_ctx_t *ctx, int id);
-ux_instrument_t *ux_get_instrument_by_symbol(ux_ctx_t *ctx, const char *symbol);
-int ux_add_instrument(ux_ctx_t *ctx, ux_instrument_t *instrument);
-void ux_delete_instrument(ux_ctx_t *ctx, ux_instrument_t *instrument);
-/* Load/Save/Dump/Clear */
-
-
-
 #ifdef __cplusplus
 }
 #endif

@@ -9,6 +9,7 @@
 #ifndef __PORTFOLIO_H__
 #define __PORTFOLIO_H__
 
+#include <ux/base/ux_type.h>
 #include <ux/domain/ux_portfolio.h>
 
 #ifdef __cplusplus

@@ -9,6 +9,7 @@
 #ifndef __UX_SERIES_H__
 #define __UX_SERIES_H__
 
+#include <ux/base/ux_type.h>
 #include <ux/domain/ux_series.h>
 
 #include "fill.h"

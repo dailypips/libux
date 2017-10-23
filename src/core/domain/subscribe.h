@@ -9,6 +9,7 @@
 #ifndef __SUBSCRIBE_H__
 #define __SUBSCRIBE_H__
 
+#include <ux/base/ux_type.h>
 #include <ux/domain/ux_subscribe.h>
 
 #ifdef __cplusplus

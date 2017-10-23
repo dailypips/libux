@@ -9,8 +9,7 @@
 #ifndef __UX_STOP_H__
 #define __UX_STOP_H__
 
-#include <ux/base/ux_common.h>
-#include <ux/base/ux_currency.h>
+#include <ux/base/ux_type.h>
 #include <ux/event/tick.h>
 #include <ux/domain/ux_strategy.h>
 

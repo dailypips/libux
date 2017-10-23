@@ -11,7 +11,7 @@
 #include "event_vtable.h"
 #include <ux/domain/ux_provider.h>
 #include "data_manager.h"
-#include "bar_generator.h"
+#include "bar_factory.h"
 
 void event_reminder_dispatch(ux_ctx_t *ctx, ux_event_t *e)
 {

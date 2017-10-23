@@ -6,8 +6,8 @@
  * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#ifndef __UXE_SYSTEM_H__
-#define __UXE_SYSTEM_H__
+#ifndef __UX_DEF_SYSTEM_H__
+#define __UX_DEF_SYSTEM_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -211,4 +211,4 @@ typedef enum {
 }
 #endif
 
-#endif /*__UXE_SYSTEM_H__*/
+#endif /*__UX_DEF_SYSTEM_H__*/

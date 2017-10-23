@@ -10,35 +10,29 @@
 #define __CONTEXT_H__
 
 #include <uv.h>
-#include <ux/base/ux_memory.h>
-#include <ux/bus/ux_context.h>
-#include <ux/event/ux_event.h>
-#include <ux/base/ux_logger.h>
 #include <ux/base/ux_idarray.h>
+#include <ux/base/ux_logger.h>
+#include <ux/base/ux_type.h>
+#include <ux/bus/ux_context.h>
 #include <ux/domain/ux_provider.h>
-#include "bar_generator.h"
-#include "event_bus.h"
+#include <ux/event/ux_event.h>
 #include "hash.h"
+#include "bar_factory.h"
+#include "data_manager.h"
+#include "event_bus.h"
 #include "instrument_manager.h"
 #include "order_manager.h"
-#include "data_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-typedef struct ux_stop_s ux_stop_t;
-
-#define LOOP_FIELDS                                                            \
-  uv_mutex_t wait_mutex;                                                       \
-  uv_cond_t wait_cond;                                                         \
-  int stop_flag;                                                               \
-  mpscq_t async_queue;
-
-
 struct ux_ctx_s {
-  LOOP_FIELDS
+  /* loop */
+  uv_mutex_t wait_mutex;
+  uv_cond_t wait_cond;
+  int stop_flag;
+  mpscq_t async_queue;
   EVENT_BUS_FIELDS
   /* stat */
   uint64_t event_count;
@@ -46,8 +40,8 @@ struct ux_ctx_s {
   INSTRUMENT_MANAGER_FIELDS
   ORDER_MANAGER_FIELDS
   /* bar factory */
-  BAR_GENERATOR_MANAGER_PUBLIC_FIELDS
-  // BAR_GENERATOR_PUBLIC_FIELDS
+  BAR_FACTORY_FIELDS
+
   DATA_MANAGER_FIELDS
   // STRATEGY_MANAGER_FIELDS
   /* simulator */
@@ -64,7 +58,6 @@ UX_FUNC void ux_ctx_clear(ux_ctx_t *ctx);
 
 /* thread safe */
 UX_EXTERN void ux_async_post(ux_ctx_t *ctx, ux_async_cb async_cb, void *data);
-
 
 #ifdef __cplusplus
 }

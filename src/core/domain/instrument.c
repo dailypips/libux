@@ -7,6 +7,7 @@
  ******************************************************************************/
 
 #include "instrument.h"
+#include "order.h"
 #include "queue.h"
 #include "hash.h"
 

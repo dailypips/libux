@@ -14,6 +14,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <ux/base/ux_type.h>
 
 #ifdef __cplusplus
 extern "C" {

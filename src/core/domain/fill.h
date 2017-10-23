@@ -9,7 +9,7 @@
 #ifndef __FILL_H__
 #define __FILL_H__
 
-#include <ux/domain/ux_strategy.h>
+#include <ux/base/ux_type.h>
 
 #ifdef __cplusplus
 extern "C" {

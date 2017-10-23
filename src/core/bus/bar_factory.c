@@ -7,7 +7,7 @@
  ******************************************************************************/
 
 #include "queue.h"
-#include "bar_generator.h"
+#include "bar_factory.h"
 #include "context.h"
 #include <string.h>
 #include "hash.h"

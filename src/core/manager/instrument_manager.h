@@ -21,8 +21,8 @@ extern "C" {
   ux_shash_t *instrument_by_symbol;                                            \
   void *instruments[2];
 
-#define INSTRUMENT_MANAGER_INIT(ctx) instrument_manager_init(ctx)
-#define INSTRUMENT_MANAGER_DESTROY(ctx) instrument_manager_destroy(ctx)
+#define INSTRUMENT_MANAGER_INIT(ctx) instrument_manager_init((ctx))
+#define INSTRUMENT_MANAGER_DESTROY(ctx) instrument_manager_destroy((ctx))
 
 void instrument_manager_init(ux_ctx_t *ctx);
 void instrument_manager_destroy(ux_ctx_t *ctx);

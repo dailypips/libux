@@ -6,8 +6,8 @@
  * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#ifndef __UXE_TICK_H__
-#define __UXE_TICK_H__
+#ifndef __UX_DEF_TICK_H__
+#define __UX_DEF_TICK_H__
 
 /* market data event */
 #define UXE_MARKET_COMMON_FIELDS                \
@@ -69,4 +69,4 @@ typedef struct {
     uint64_t start_id;
 
 
-#endif // __UXE_TICK_H__
+#endif // __UX_DEF_TICK_H__

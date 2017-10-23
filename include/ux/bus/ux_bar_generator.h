@@ -9,9 +9,7 @@
 #ifndef __UX_BAR_GENERATOR_H__
 #define __UX_BAR_GENERATOR_H__
 
-#include <ux/base/ux_common.h>
-#include <ux/base/ux_currency.h>
-#include <ux/base/ux_datetime.h>
+#include <ux/base/ux_type.h>
 #include <ux/event/tick.h>
 #include <ux/event/ux_event.h>
 #include <ux/domain/ux_order.h>

@@ -56,7 +56,7 @@ uxe_trade_t* ux_get_last_trade(ux_ctx_t *ctx, int instrument_id)
     return (uxe_trade_t*)kv_get(&ctx->dm_trades, instrument_id);
 }
 
-void dm_init(ux_ctx_t *ctx)
+void data_manager_init(ux_ctx_t *ctx)
 {
     kv_init(&ctx->dm_asks);
     kv_init(&ctx->dm_bids);
@@ -69,7 +69,7 @@ static inline void delete_all(ux_idarray_t *v)
         ux_event_unref((ux_event_t*)kv_get(v, i));
     kv_destroy(v);
 }
-void dm_destroy(ux_ctx_t *ctx)
+void data_manager_destroy(ux_ctx_t *ctx)
 {
     delete_all(&ctx->dm_asks);
     delete_all(&ctx->dm_bids);
