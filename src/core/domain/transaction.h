@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+void ux_transaction_add_fill(ux_transaction_t *transaction, ux_fill_t *fill);
 
 #ifdef __cplusplus
 }

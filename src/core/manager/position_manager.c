@@ -7,3 +7,5 @@
  ******************************************************************************/
 
 #include "position_manager.h"
+#include "position.h"
+#include "context.h"

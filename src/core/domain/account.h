@@ -61,6 +61,9 @@ struct ux_account_s {
     int update_parent;
 };
 
+void ux_account_init(ux_account_t *account);
+void ux_account_destroy(ux_account_t *account);
+
 double ux_account_get_value(ux_account_t *account);
 double ux_account_get_value_by_currency(ux_account_t *account);
 ux_account_position_t* ux_account_get_position_by_currency(ux_account_t* account, ux_currency_t currency);

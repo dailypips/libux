@@ -9,7 +9,8 @@
 #ifndef __INSTRUMENT_MANAGER_H__
 #define __INSTRUMENT_MANAGER_H__
 
-#include "context.h"
+#include <ux/base/ux_type.h>
+#include <ux/event/tick.h>
 
 #ifdef __cplusplus
 extern "C" {

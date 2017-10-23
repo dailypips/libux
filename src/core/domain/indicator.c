@@ -6,21 +6,5 @@
  * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#ifndef __STRATEGY_H__
-#define __STRATEGY_H__
+#include "indicator.h"
 
-#include <ux/base/ux_type.h>
-#include <ux/domain/ux_strategy.h>
-#include <ux/domain/ux_provider.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // __STRATEGY_H__

@@ -12,6 +12,7 @@
 #include <ux/base/ux_type.h>
 #include <ux/event/tick.h>
 #include <ux/domain/ux_strategy.h>
+#include <ux/domain/ux_position.h>
 
 #ifdef __cplusplus
 extern "C" {

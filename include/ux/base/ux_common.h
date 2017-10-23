@@ -33,13 +33,20 @@ extern "C" {
 # define UX_EXTERN /* nothing */
 #endif
 
-
 #include <stddef.h>
 
 #if defined(_MSC_VER) && _MSC_VER < 1600
 # include "stdint-msvc2008.h"
 #else
 # include <stdint.h>
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
 #endif
 
 #include <assert.h>
@@ -98,7 +105,7 @@ extern "C" {
 
 /* Static assertions. */
 #define UX_ASSERT_NAME2(name, line)	name ## line
-#define UX_ASSERT_NAME(line)		UX_ASSERT_NAME2(lj_assert_, line)
+#define UX_ASSERT_NAME(line)		UX_ASSERT_NAME2(lj_assert_, line)   //todo lj_assert_
 #ifdef __COUNTER__
 #define UX_STATIC_ASSERT(cond) \
   extern void UX_ASSERT_NAME(__COUNTER__)(int STATIC_ASSERTION_FAILED[(cond)?1:-1])

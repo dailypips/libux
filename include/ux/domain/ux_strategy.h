@@ -11,6 +11,7 @@
 
 #include <ux/base/ux_type.h>
 #include <ux/event/ux_event.h>
+#include <ux/domain/ux_series.h>
 
 #ifdef __cplusplus
 extern "C" {

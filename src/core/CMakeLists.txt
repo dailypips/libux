@@ -105,4 +105,4 @@ set(UX_UTIL_SRC
 
 add_library(uxcore ${LIBUX_BUILD_TYPE} ${UX_BASE_HEADER} ${UX_BASE_SRC} ${UX_BUS_HEADER} ${UX_BUS_SRC} ${UX_DOMAIN_HEADER} ${UX_DOMAIN_SRC}
   ${UX_MANAGER_HEADER} ${UX_MANAGER_SRC} ${UX_UTIL_HEADER} ${UX_UTIL_SRC})
-target_link_libraries(uxcore cpcore ${UX_EXTERNAL_LIBRARIES})
+target_link_libraries(uxcore ${UX_EXTERNAL_LIBRARIES})

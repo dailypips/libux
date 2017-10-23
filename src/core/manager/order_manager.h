@@ -9,7 +9,9 @@
 #ifndef __ORDER_MANAGER_H__
 #define __ORDER_MANAGER_H__
 
-#include "context.h"
+#include "hash.h"
+#include <ux/base/ux_type.h>
+#include <ux/event/tick.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,13 +23,15 @@ extern "C" {
   ux_shash_t *order_by_client_oid;                                             \
   ux_shash_t *order_by_provider_oid;                                           \
   ux_list_shash_t *order_list_by_oca;                                          \
-  void *orders[2];
+  void *orders[2];                                                             \
+  ux_vec_t execution_commands;                                                    \
+  ux_vec_t execution_reports;
 
 #define ORDER_MANAGER_INIT(ctx) order_manager_init((ctx))
 #define ORDER_MANAGER_DESTROY(ctx) order_manager_destroy((ctx))
 
 #define UX_ORDER_HAS_REGISTERED -1
-#define UX_ORDER_SENT           -2
+#define UX_ORDER_SENT -2
 
 UX_FUNC void order_manager_init(ux_ctx_t *ctx);
 UX_FUNC void order_manager_destroy(ux_ctx_t *ctx);

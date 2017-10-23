@@ -7,3 +7,5 @@
  ******************************************************************************/
 
 #include "portfolio_manager.h"
+#include "portfolio.h"
+#include "context.h"

@@ -6,12 +6,16 @@
  * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-void ux_stop_init()
+#include "stop.h"
+#include <ux/event/tick.h>
+#include "position.h"
+
+void ux_stop_init(ux_stop_t *stop)
 {
 
 }
 
-void ux_stop_destroy()
+void ux_stop_destroy(ux_stop_t *stop)
 {
 
 }

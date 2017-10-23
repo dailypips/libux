@@ -30,6 +30,8 @@ UX_EXTERN void ux_dispatch_event(ux_ctx_t *ctx, ux_event_t *e,
                                  ux_dispatch_mode mode);
 UX_FUNC void ux_emit_bufferd_events(ux_ctx_t *ctx);
 
+#define DISPATCH_EVENT(e) ux_dispatch_event(ctx, (ux_event_t*)(e), UX_DISPATCH_IMMEDIATELY)
+#define DISPATCH_EVENT_DELAY(e) ux_dispatch_event(ctx, (ux_event_t*)(e), UX_DISPATCH_LATE)
 
 #ifdef __cplusplus
 }

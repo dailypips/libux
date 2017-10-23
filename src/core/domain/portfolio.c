@@ -6,7 +6,18 @@
  * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#include "ux_internal.h"
+#include <ux/event/ux_event.h>
+#include <ux/event/ux_events.h>
+#include "portfolio.h"
+#include "queue.h"
+#include "position.h"
+#include "instrument.h"
+#include "order.h"
+#include "account.h"
+#include "transaction.h"
+#include "fill.h"
+#include "dispatch.h"
+#include "math.h"
 
 void ux_portfolio_init(ux_ctx_t *ctx, ux_portfolio_t *portfolio)
 {
@@ -19,9 +30,9 @@ void ux_portfolio_init(ux_ctx_t *ctx, ux_portfolio_t *portfolio)
     QUEUE_INIT(&portfolio->children);
     QUEUE_INIT(&portfolio->transactions);
     QUEUE_INIT(&portfolio->positions);
-    kv_init(&portfolio->transaction_by_order_id);
-    kv_init(&portfolio->position_by_instrument_id);
-    ux_account_init(&portfolio->account);
+    ida_int(&portfolio->transaction_by_order_id);
+    ida_int(&portfolio->position_by_instrument_id);
+    ux_account_init(portfolio->account);
 }
 
 void ux_portfolio_destroy(ux_portfolio_t *portfolio)
@@ -36,7 +47,7 @@ double ux_portfolio_get_active_orders_value(ux_portfolio_t *portfolio)
 
 ux_position_t* ux_portfolio_get_position_by_instrument_id(ux_portfolio_t *portfolio, int instrument_id)
 {
-    ux_position_t *position = (ux_position_t*)kv_get(&portfolio->position_by_instrument_id, instrument_id);
+    ux_position_t *position = (ux_position_t*)ida_get(&portfolio->position_by_instrument_id, instrument_id);
     return position;
 }
 
@@ -46,21 +57,21 @@ static ux_position_t* get_or_create_position_by_instrument(ux_portfolio_t *portf
     if (!position) {
         position = ux_zalloc(sizeof(ux_position_t));
         QUEUE_INSERT_TAIL(&portfolio->positions, &position->queue_node);
-        kv_set(&portfolio->position_by_instrument_id, instrument->id, (uintptr_t)position);
+        ida_set(&portfolio->position_by_instrument_id, instrument->id, (uintptr_t)position);
     }
     return position;
 }
 
 ux_transaction_t* ux_portfolio_get_transaction_by_order_id(ux_portfolio_t *portfolio, int order_id)
 {
-    ux_transaction_t *transaction = (ux_transaction_t*)kv_get(&portfolio->transaction_by_order_id, order_id);
+    ux_transaction_t *transaction = (ux_transaction_t*)ida_get(&portfolio->transaction_by_order_id, order_id);
     return transaction;
 }
 
 void ux_portfolio_add_transaction(ux_portfolio_t *portfolio, ux_transaction_t *transacation, int order_id, int queued)
 {
     QUEUE_INSERT_TAIL(&portfolio->transactions, &transacation->queue_node);
-    kv_set(&portfolio->transaction_by_order_id, order_id, (uintptr_t)transacation);
+    ida_set(&portfolio->transaction_by_order_id, order_id, (uintptr_t)transacation);
     if(portfolio->parent && portfolio->update_parent)
         ux_portfolio_add_transaction(portfolio->parent, transacation, order_id, queued);
 }
@@ -68,7 +79,7 @@ void ux_portfolio_add_transaction(ux_portfolio_t *portfolio, ux_transaction_t *t
 void ux_portfolio_add_fill(ux_portfolio_t *portfolio, ux_fill_t *fill, int queued)
 {
     //TODO: fills.add(fill)
-    ux_event_t *e = ux_event_malloc(UXE_ON_FILL);
+    ux_event_t *e = ux_event_zalloc(UXE_ON_FILL);
     ((uxe_on_fill_t*)e)->portfolio = portfolio;
     ((uxe_on_fill_t*)e)->fill = fill;
     ux_dispatch_event(portfolio->ctx, e, queued);
@@ -79,7 +90,7 @@ void ux_portfolio_add_fill(ux_portfolio_t *portfolio, ux_fill_t *fill, int queue
     if(position->amount == 0.0) // TODO
         new_position_flag = 1;
     ux_position_add_fill(position, fill);
-    ux_account_add_fill(&portfolio->account, fill, 0);
+    ux_account_add_fill(portfolio->account, fill, 0);
     if (new_position_flag) {
         //TODO
         // portfolioStatistics.OnPositionOpened(position);
@@ -93,7 +104,7 @@ void ux_portfolio_add_fill(ux_portfolio_t *portfolio, ux_fill_t *fill, int queue
         if (position->amount != 0.0) {
             //portfolioStatistics.OnPositionChanged(position);
         }
-        e = ux_event_malloc(UXE_POSITION_CHANGED);
+        e = ux_event_zalloc(UXE_POSITION_CHANGED);
         ((uxe_position_changed_t*)e)->portfolio = portfolio;
         ((uxe_position_changed_t*)e)->position = position;
         ux_dispatch_event(portfolio->ctx, e, queued);
@@ -110,7 +121,7 @@ void ux_portfolio_add_fill(ux_portfolio_t *portfolio, ux_fill_t *fill, int queue
 
 static void emit_on_transaction(ux_portfolio_t *portfolio, ux_transaction_t *transaction, int queued)
 {
-    ux_event_t *e = ux_event_malloc(UXE_ON_TRANSACETION);
+    ux_event_t *e = ux_event_zalloc(UXE_ON_TRANSACETION);
     ((uxe_on_transaction_t*)e)->transaction = transaction;
     ((uxe_on_transaction_t*)e)->portfolio = portfolio;
     ux_dispatch_event(portfolio->ctx, e, queued);
@@ -130,7 +141,7 @@ void ux_portfolio_on_execution_report(ux_portfolio_t *portfolio, uxe_execution_r
         transaction = ux_portfolio_get_transaction_by_order_id(portfolio, report->order->id);
         if (transaction) {
             transaction->is_done = TRUE;
-            kv_set(&portfolio->transaction_by_order_id, report->order->id, 0);
+            ida_set(&portfolio->transaction_by_order_id, report->order->id, 0);
         }
         break;
     case UX_EXEC_TRADE:
@@ -144,7 +155,7 @@ void ux_portfolio_on_execution_report(ux_portfolio_t *portfolio, uxe_execution_r
         ux_portfolio_add_fill(portfolio, fill, queued);
         if (report->order_status == UX_ORDER_STATUS_FILLED) {
             transaction->is_done = TRUE;
-            kv_set(&portfolio->transaction_by_order_id, report->order->id, 0);
+            ida_set(&portfolio->transaction_by_order_id, report->order->id, 0);
             emit_on_transaction(portfolio, transaction, queued);
         }
         break;

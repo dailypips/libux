@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-
+void ux_position_add_fill(ux_position_t *position, ux_fill_t *fill);
 
 #ifdef __cplusplus
 }

@@ -9,4 +9,4 @@ set(UX_ADDON_SRC
 )
 
 add_library(uxaddon SHARED  ${UX_ADDON_HEADER} ${UX_ADDON_SRC})
-target_link_libraries(uxaddon uxbus  ${UX_EXTERNAL_LIBRARIES})
+target_link_libraries(uxaddon uxcore  ${UX_EXTERNAL_LIBRARIES})

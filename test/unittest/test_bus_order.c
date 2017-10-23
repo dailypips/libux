@@ -86,13 +86,13 @@ static int test_event_order(ux_bus_mode mode)
 
     /* prepare event */
     for (int i = 0; i < EVENT_SIZE; i++) {
-        event[i] = ux_event_malloc(UXE_ASK);
+        event[i] = ux_event_zalloc(UXE_ASK);
         tick_init(event[i], i, i + 10000, 0, 1.0, i);
         event[i]->timestamp = etime[i];
     }
 
     for (int i = 0; i < TIMER_SIZE; i++) {
-        timer[i] = (uxe_reminder_t*)ux_event_malloc(UXE_REMINDER);
+        timer[i] = (uxe_reminder_t*)ux_event_zalloc(UXE_REMINDER);
         timer_init(timer[i], UX_CLOCK_LOCAL, timer_time[i]);
         bus_add_timer(&ctx, timer[i]);
     }

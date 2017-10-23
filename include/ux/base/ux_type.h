@@ -13,6 +13,7 @@
 #include <ux/base/ux_currency.h>
 #include <ux/base/ux_datetime.h>
 #include <ux/base/ux_idarray.h>
+#include <ux/base/ux_vec.h>
 #include <ux/base/ux_memory.h>
 
 #ifdef __cplusplus
@@ -24,6 +25,8 @@ typedef int16_t  ux_iid_t;   /* instrument */
 typedef int32_t  ux_oid_t;   /* order id */
 typedef int16_t  ux_pid_t;   /* provider id */
 typedef int32_t  ux_id_t;   /* strategy/portfolio/position id*/
+
+#define UX_PID_MAX 1024
 
 /* atomic type */
 typedef intptr_t ux_atomic_t;
@@ -46,6 +49,11 @@ typedef struct ux_account_s ux_account_t;
 typedef struct ux_portfolio_s ux_portfolio_t;
 
 typedef struct ux_provider_s ux_provider_t;
+typedef struct ux_data_provider_s ux_data_provider_t;
+typedef struct ux_fundamental_provider_s ux_fundamental_provider_t;
+typedef struct ux_news_provider_s ux_news_provider_t;
+typedef struct ux_execution_provider_s ux_execution_provider_t;
+typedef struct ux_historical_provider_s ux_historical_provider_t;
 
 typedef struct ux_stop_s ux_stop_t;
 typedef struct ux_strategy_s ux_strategy_t;

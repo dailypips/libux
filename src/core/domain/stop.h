@@ -16,7 +16,8 @@
 extern "C" {
 #endif
 
-
+void ux_stop_init(ux_stop_t *stop);
+void ux_stop_destroy(ux_stop_t *stop);
 
 #ifdef __cplusplus
 }

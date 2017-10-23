@@ -79,7 +79,7 @@ typedef enum {
   ux_execution_command_type ec_type;                                           \
   char *symbol;                                                                \
   int algo;                                                                    \
-  ux_portfolio_t portfolio;                                                    \
+  ux_portfolio_t *portfolio;                                                   \
   int portfolio_id;                                                            \
   int strategy_id;                                                             \
   ux_time_t transact_time;                                                     \

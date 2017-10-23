@@ -23,7 +23,7 @@ typedef struct strategy_context_s {
     void (*on_exchange_reminder)(ux_strategy_t* strategy, ux_time_t dateTime, void* data);
     void (*on_provider_connected)(ux_strategy_t* strategy, ux_provider_t* provider);
     void (*on_provider_disconnected)(ux_strategy_t* strategy, ux_provider_t* provider);
-    void (*on_provider_error)(ux_strategy_t* strategy, ux_provider_error_t* error);
+    void (*on_provider_error)(ux_strategy_t* strategy, uxe_provider_error_t* error);
     void (*on_bid)(ux_strategy_t* strategy, ux_instrument_t* instrument, uxe_bid_t* bid);
     void (*on_ask)(ux_strategy_t* strategy, ux_instrument_t* instrument, uxe_ask_t* ask);
     void (*on_trade)(ux_strategy_t* strategy, ux_instrument_t* instrument, uxe_trade_t* trade);
@@ -33,7 +33,7 @@ typedef struct strategy_context_s {
     void (*on_bar)(ux_strategy_t* strategy, ux_instrument_t* instrument, uxe_bar_t* bar);
     void (*on_bar_slice)(ux_strategy_t* strategy, uxe_bar_slice_t* slice);
     void (*on_news)(ux_strategy_t* strategy, ux_instrument_t* instrument, uxe_news_t* news);
-    void (*on_fundamental)(ux_strategy_t* strategy, ux_instrument_t* instrument, uxe_fundamental* fundamental);
+    void (*on_fundamental)(ux_strategy_t* strategy, ux_instrument_t* instrument, uxe_fundamental_t* fundamental);
     void (*on_execution_report)(ux_strategy_t* strategy, uxe_execution_report_t* report);
     void (*on_account_report)(ux_strategy_t* strategy, uxe_account_report_t* report);
     void (*on_send_order)(ux_strategy_t* strategy, ux_order_t* order);
@@ -60,9 +60,9 @@ typedef struct strategy_context_s {
     void (*on_command)(ux_strategy_t* strategy, uxe_command_t* command);
     void (*on_user_command)(ux_strategy_t* strategy, const char* command);
     void (*on_user_event)(ux_strategy_t* strategy, ux_event_t* e);
-    void (*on_parameter_changed)(ux_strategy_t* strategy, Parameter oldParameter, Parameter newParameter);
-    void (*on_account_data)(ux_strategy_t* strategy, AccountData accountData);
-    void (*on_property_changed)(ux_strategy_t* strategy, OnPropertyChanged onPropertyChanged);
+    //void (*on_parameter_changed)(ux_strategy_t* strategy, Parameter oldParameter, Parameter newParameter);
+    void (*on_account_data)(ux_strategy_t* strategy, uxe_account_data_t *accountData);
+    //void (*on_property_changed)(ux_strategy_t* strategy, OnPropertyChanged onPropertyChanged);
 } strategy_context_t;
 
 void ux_register_market_data_request(ux_ctx_t *ctx, ux_data_provider_t *provider, ux_instrument_t *instrument);

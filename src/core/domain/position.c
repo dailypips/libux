@@ -6,7 +6,13 @@
  * Distributed under the terms and conditions of the MIT License.             *
  ******************************************************************************/
 
-#include "ux_internal.h"
+#include "position.h"
+#include "instrument.h"
+#include "transaction.h"
+#include "fill.h"
+#include "math.h"
+#include "queue.h"
+
 
 double ux_fill_get_value(ux_fill_t *fill)
 {

@@ -16,12 +16,12 @@
 #include "instrument.h"
 #include "data_manager.h"
 
-void ux_bar_factory_init(ux_ctx_t *ctx)
+void bar_factory_init(ux_ctx_t *ctx)
 {
     ctx->list_by_instrument_id = NULL;
 }
 
-void ux_bar_factory_destory(ux_ctx_t *ctx)
+void bar_factory_destroy(ux_ctx_t *ctx)
 {
 }
 

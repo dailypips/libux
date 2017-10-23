@@ -52,6 +52,8 @@ UX_EXTERN ux_event_t *ux_event_ref(ux_event_t *e);
 UX_EXTERN void ux_event_unref(ux_event_t *e);
 UX_EXTERN ux_event_t *ux_event_clone(ux_event_t *e);
 
+#define EVENT_NEW(x) (void*)ux_event_zalloc((x))
+
 #ifdef __cplusplug
 }
 #endif

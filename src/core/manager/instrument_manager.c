@@ -7,13 +7,15 @@
  ******************************************************************************/
 
 #include "instrument_manager.h"
-
+#include "context.h"
+#include "hash.h"
+#include "queue.h"
 
 // TODO: instrument manager init
 /* instrument manager */
 void instrument_manager_init(ux_ctx_t *ctx) {
-  kv_init(&ctx->instrument_by_id);
-  ctx->instrument_by_symbol = khash_init(str);
+  ida_int(&ctx->instrument_by_id);
+  ctx->instrument_by_symbol = kh_init(str);
   ctx->next_instrument_id = 0;
 }
 
@@ -24,7 +26,7 @@ void instrument_manager_destroy(ux_ctx_t *ctx) {
 }
 
 ux_instrument_t *ux_get_instrument_by_id(ux_ctx_t *ctx, int id) {
-  return (ux_instrument_t *)kv_get(&ctx->instrument_by_id, id);
+  return (ux_instrument_t *)ida_get(&ctx->instrument_by_id, id);
 }
 
 ux_instrument_t *ux_get_instrument_by_symbol(ux_ctx_t *ctx,
@@ -41,7 +43,7 @@ int ux_add_instrument(ux_ctx_t *ctx, ux_instrument_t *instrument) {
   if (inst)
     return -1;
   instrument->id = ctx->next_instrument_id++;
-  kv_set(&ctx->instrument_by_id, instrument->id, (uintptr_t)instrument);
+  ida_set(&ctx->instrument_by_id, instrument->id, (uintptr_t)instrument);
   khint_t iter =
       kh_put_str(ctx->instrument_by_symbol, instrument->symbol, &ret);
   assert(ret == 0);

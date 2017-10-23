@@ -9,7 +9,8 @@
 #ifndef __DATA_MANAGER_H__
 #define __DATA_MANAGER_H__
 
-#include "context.h"
+#include <ux/base/ux_type.h>
+#include <ux/event/tick.h>
 
 #ifdef __cplusplus
 extern  "C" {
